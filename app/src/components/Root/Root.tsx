@@ -1,93 +1,206 @@
-import { Flex, Box, Heading } from "@chakra-ui/react";
-import { useState } from "react";
-import ConnectorOptionsModal from "./components/ConnectorOptionsModal";
+import { flowEdgeMapping } from "@app/components/shared/FlowEdges";
+import { flowNodeMapping } from "@app/components/shared/FlowNodes";
+import { Box, Flex, Heading } from "@chakra-ui/react";
+import {
+  addEdge,
+  Edge,
+  FitViewOptions,
+  Node,
+  OnConnect,
+  OnNodeDrag,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+} from "@xyflow/react";
+import { MouseEvent, useCallback, useState } from "react";
 
-type Step = {
-  id: string;
-};
-
-const FORM_BUILDING_NODES = [
-  {
-    name: "Step",
-  },
-  {
-    name: "Connector",
-  },
-  {
-    name: "Experiment",
-  },
-];
-
-type FormFlow = {
-  steps: Step[];
-};
+import AttributeSidebar from "./components/AttributeSidebar";
 
 let idTracker = 0;
 
+const getId = () => `${++idTracker}`;
+
+const initialNodes: Node[] = [
+  {
+    id: getId(),
+    type: "stepNode",
+    data: { name: "Step 1" },
+    position: { x: 5, y: 5 },
+  },
+  {
+    id: getId(),
+    type: "stepNode",
+    data: { name: "Step 2" },
+    position: { x: 5, y: 100 },
+  },
+];
+
+const initialEdges: Edge[] = [
+  {
+    id: "e1-2",
+    source: "1",
+    target: "2",
+    type: "stepConnectorEdge",
+    data: {
+      name: "step1 - step2 connector",
+    },
+  },
+];
+
+const fitViewOptions: FitViewOptions = {
+  padding: 0.2,
+};
+
 const Root = () => {
-  const [formFlow, setFormFlow] = useState<FormFlow>({ steps: [] });
-  const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [interactionType, setInteractionType] = useState<
+    "default" | "createStep"
+  >("default");
+  const { screenToFlowPosition } = useReactFlow();
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const [ghostScreenPos, setGhostScreenPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const onConnect: OnConnect = useCallback(
+    (params) => {
+      setEdges((edgesSnapshot) =>
+        addEdge(
+          { ...params, type: "stepConnectorEdge", data: { name: "connector" } },
+          edgesSnapshot,
+        ),
+      );
+    },
+    [setEdges],
+  );
+
+  const handlePaneCick = useCallback(
+    (event: MouseEvent) => {
+      if (interactionType !== "createStep") return;
+
+      const id = getId();
+      const newNode: Node = {
+        id,
+        type: "stepNode",
+        position: screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        }),
+        data: { name: `Step ${id}` },
+        origin: [0.5, 0.5],
+      };
+
+      setNodes((prevState) => prevState.concat(newNode));
+    },
+    [interactionType, screenToFlowPosition, setNodes],
+  );
+
+  const handlePaneMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (interactionType !== "createStep") {
+        setGhostScreenPos(null);
+        return;
+      }
+      setGhostScreenPos({ x: event.clientX, y: event.clientY });
+    },
+    [interactionType],
+  );
+
+  const onNodeDrag: OnNodeDrag = (_, node) => {
+    console.log("drag event", node.data);
+  };
 
   return (
     <Flex height="100vh" overflow="hidden">
       <Box
-        width="420px"
-        bg="gray.800"
+        bg="gray.950"
+        borderColor="gray.700"
+        borderRight="1px solid"
         color="white"
         p={4}
-        borderRight="1px solid"
-        borderColor="gray.700"
+        width="420px"
       >
-        <Heading size="md" fontWeight="bold" mb="24px">
+        <Heading fontWeight="bold" mb="24px" size="md">
           Create Form Flow
         </Heading>
-        <Flex wrap="wrap" gap="8px">
-          {FORM_BUILDING_NODES.map((node) => (
-            <Flex
-              key={node.name}
-              alignItems="center"
-              bg="whiteAlpha.600"
-              cursor="pointer"
-              height="120px"
-              justifyContent="center"
-              width="120px"
-              onClick={() => {
-                if (node.name === "Step") {
-                  setFormFlow((prevState) => {
-                    return {
-                      ...prevState,
-                      steps: [...prevState.steps, { id: `${++idTracker}` }],
-                    };
-                  });
-                } else if (node.name === "Connector") {
-                  setShowConnectorModal(true);
+        <Flex gap="8px" wrap="wrap">
+          <Flex
+            alignItems="center"
+            bg={
+              interactionType === "default"
+                ? "whiteAlpha.600"
+                : "whiteAlpha.300"
+            }
+            cursor="pointer"
+            height="120px"
+            justifyContent="center"
+            width="120px"
+            onClick={() => {
+              setInteractionType("default");
+            }}
+          >
+            Inspect
+          </Flex>
+          <Flex
+            alignItems="center"
+            bg={
+              interactionType === "createStep"
+                ? "whiteAlpha.600"
+                : "whiteAlpha.300"
+            }
+            cursor="pointer"
+            height="120px"
+            justifyContent="center"
+            width="120px"
+            onClick={() => {
+              setInteractionType((prevState) => {
+                if (prevState === "createStep") {
+                  return "default";
                 }
-              }}
-            >
-              {node.name}
-            </Flex>
-          ))}
+
+                return "createStep";
+              });
+            }}
+          >
+            Add Steps
+          </Flex>
         </Flex>
       </Box>
-      <Flex flex="1" overflowY="auto" p={6} bg="gray.50" gap="24px">
-        {formFlow.steps.map((step) => (
-          <Flex
-            key={step.id}
-            bg="purple.500"
-            alignItems="center"
-            justifyContent="center"
-            width="128px"
-            height="128px"
-          >
-            {step.id}
-          </Flex>
-        ))}
-        <ConnectorOptionsModal
-          isOpen={showConnectorModal}
-          setIsOpen={setShowConnectorModal}
-          steps={formFlow.steps}
+      <Flex bg="gray.50" flex="1" gap="24px" overflowY="auto">
+        <ReactFlow
+          fitView
+          edges={edges}
+          edgeTypes={flowEdgeMapping}
+          fitViewOptions={fitViewOptions}
+          nodes={nodes}
+          nodeTypes={flowNodeMapping}
+          onConnect={onConnect}
+          onEdgesChange={onEdgesChange}
+          onNodeDrag={onNodeDrag}
+          onNodesChange={onNodesChange}
+          onPaneClick={handlePaneCick}
+          onPaneMouseMove={handlePaneMouseMove}
         />
+        {interactionType === "createStep" && ghostScreenPos ? (
+          <Box
+            background="gray.500"
+            height="100px"
+            left={`${ghostScreenPos.x}px`}
+            opacity={0.3}
+            pointerEvents="none"
+            position="fixed"
+            top={`${ghostScreenPos.y}px`}
+            transform="translate(-50%, -50%)"
+            width="200px"
+            zIndex={9}
+          />
+        ) : null}
       </Flex>
+      <AttributeSidebar />
     </Flex>
   );
 };

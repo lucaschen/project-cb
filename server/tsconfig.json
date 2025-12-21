@@ -1,7 +1,11 @@
 {
   "extends": "@packages/tsconfig/tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@root/*": ["./src/*"],
+      "@db/*": ["./src/db/*"]
+    }
   },
   "include": ["src"]
 }

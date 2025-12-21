@@ -1,0 +1,37 @@
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  Sequelize,
+} from "sequelize";
+
+export class User extends Model<
+  InferAttributes<User>,
+  InferCreationAttributes<User>
+> {
+  declare id: string;
+  declare email: string;
+
+  static initModel(sequelize: Sequelize) {
+    User.init(
+      {
+        id: {
+          type: DataTypes.STRING,
+          primaryKey: true,
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: { isEmail: true },
+        },
+      },
+      {
+        sequelize,
+        tableName: "users",
+        indexes: [{ unique: true, fields: ["email"] }],
+      }
+    );
+    return User;
+  }
+}

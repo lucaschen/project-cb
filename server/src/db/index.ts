@@ -8,8 +8,10 @@ export async function connectDB() {
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    // DEV ONLY — remove in prod
-    await sequelize.sync({ alter: true });
+    // Only auto-sync schema in non-production environments
+    if (process.env.NODE_ENV !== "production") {
+      await sequelize.sync({ alter: true });
+    }
   } catch (err) {
     console.error("❌ Database connection failed", err);
     process.exit(1);

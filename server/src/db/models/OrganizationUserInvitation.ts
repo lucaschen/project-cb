@@ -1,3 +1,4 @@
+import { OrgUserPermission } from "@sharedTypes/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -5,7 +6,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { OrgUserPermission } from "@root/sharedTypes/enums";
 
 export class OrganizationUserInvitation extends Model<
   InferAttributes<OrganizationUserInvitation>,
@@ -32,11 +32,11 @@ export class OrganizationUserInvitation extends Model<
       },
       {
         sequelize,
-        tableName: "organizationUserInvitations",
+        tableName: "organization_user_invitations",
         indexes: [
-          { fields: ["organizationId"] },
-          { fields: ["userId"] },
-          { fields: ["expiresAt"] },
+          { fields: ["organization_id"] },
+          { fields: ["user_id"] },
+          { fields: ["expires_at"] },
         ],
       }
     );

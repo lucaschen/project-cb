@@ -1,6 +1,10 @@
 {
   "extends": "@packages/tsconfig/tsconfig.base.json",
   "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDir": "./src",
     "types": ["node"],
     "paths": {
       "@root/*": ["./src/*"],

@@ -1,3 +1,4 @@
+import { ComparisonOperation } from "@sharedTypes/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -5,7 +6,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { ComparisonOperation } from "@root/sharedTypes/enums";
 
 export class DecisionNode extends Model<
   InferAttributes<DecisionNode>,
@@ -37,8 +37,8 @@ export class DecisionNode extends Model<
       },
       {
         sequelize,
-        tableName: "decisionNodes",
-        indexes: [{ fields: ["flowId"] }],
+        tableName: "decision_nodes",
+        indexes: [{ fields: ["flow_id"] }],
       }
     );
     return DecisionNode;

@@ -1,3 +1,4 @@
+import { ComparisonOperation } from "@sharedTypes/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -5,7 +6,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { ComparisonOperation } from "@root/sharedTypes/enums";
 
 export class StepElementCondition extends Model<
   InferAttributes<StepElementCondition>,
@@ -31,8 +31,8 @@ export class StepElementCondition extends Model<
       },
       {
         sequelize,
-        tableName: "stepElementConditions",
-        indexes: [{ fields: ["stepElementId"] }],
+        tableName: "step_element_conditions",
+        indexes: [{ fields: ["step_element_id"] }],
       }
     );
     return StepElementCondition;

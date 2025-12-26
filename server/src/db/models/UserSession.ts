@@ -27,9 +27,9 @@ export class UserSession extends Model<
         sequelize,
         tableName: "userSessions",
         indexes: [
-          { unique: true, fields: ["sessionToken"] },
-          { fields: ["userId"] },
-          { fields: ["expiresAt"] },
+          { unique: true, fields: ["session_token"] },
+          { fields: ["user_id"] },
+          { fields: ["expires_at"] },
         ],
       }
     );

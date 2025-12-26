@@ -1,32 +1,77 @@
 import type { Sequelize } from "sequelize";
 
+import { Connection } from "./Connection";
+import { DecisionNode } from "./DecisionNode";
+import { Element } from "./Element";
+import { ElementProperties } from "./ElementProperties";
+import { Flow } from "./Flow";
 import { Organization } from "./Organization";
-import { User } from "./User";
 import { OrganizationUser } from "./OrganizationUser";
 import { OrganizationUserInvitation } from "./OrganizationUserInvitation";
-import { UserSession } from "./UserSession";
-import { Flow } from "./Flow";
 import { Step } from "./Step";
-import { DecisionNode } from "./DecisionNode";
-import { Connection } from "./Connection";
 import { StepElement } from "./StepElement";
 import { StepElementCondition } from "./StepElementCondition";
+import { StepElementProperties } from "./StepElementProperties";
+import { User } from "./User";
+import { UserSession } from "./UserSession";
 
 export type Models = ReturnType<typeof initModels>;
 
 export function initModels(sequelize: Sequelize) {
   // init
+  Connection.initModel(sequelize);
+  DecisionNode.initModel(sequelize);
+  Element.initModel(sequelize);
+  ElementProperties.initModel(sequelize);
+  Flow.initModel(sequelize);
   Organization.initModel(sequelize);
-  User.initModel(sequelize);
   OrganizationUser.initModel(sequelize);
   OrganizationUserInvitation.initModel(sequelize);
-  UserSession.initModel(sequelize);
-  Flow.initModel(sequelize);
   Step.initModel(sequelize);
-  DecisionNode.initModel(sequelize);
-  Connection.initModel(sequelize);
   StepElement.initModel(sequelize);
   StepElementCondition.initModel(sequelize);
+  StepElementProperties.initModel(sequelize);
+  User.initModel(sequelize);
+  UserSession.initModel(sequelize);
+
+  // Element -> ElementProperties (1:N)
+  Element.hasMany(ElementProperties, {
+    foreignKey: "elementId",
+    as: "properties",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  ElementProperties.belongsTo(Element, {
+    foreignKey: "elementId",
+    as: "element",
+  });
+
+  // StepElement -> StepElementProperties (1:N)
+  StepElement.hasMany(StepElementProperties, {
+    foreignKey: "stepElementId",
+    as: "propertyValues",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  StepElementProperties.belongsTo(StepElement, {
+    foreignKey: "stepElementId",
+    as: "stepElement",
+  });
+
+  // ElementProperties -> StepElementProperties (1:N)
+  ElementProperties.hasMany(StepElementProperties, {
+    foreignKey: "propertyId",
+    as: "values",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  StepElementProperties.belongsTo(ElementProperties, {
+    foreignKey: "propertyId",
+    as: "property",
+  });
 
   // associations that are representable with real FKs
   Organization.hasMany(Flow, { foreignKey: "organizationId", as: "flows" });
@@ -106,16 +151,19 @@ export function initModels(sequelize: Sequelize) {
   // so no belongsTo association here on purpose.
 
   return {
+    Connection,
+    DecisionNode,
+    Element,
+    ElementProperties,
+    Flow,
     Organization,
-    User,
     OrganizationUser,
     OrganizationUserInvitation,
-    UserSession,
-    Flow,
     Step,
-    DecisionNode,
-    Connection,
     StepElement,
     StepElementCondition,
+    StepElementProperties,
+    User,
+    UserSession,
   };
 }

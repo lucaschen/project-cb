@@ -39,7 +39,7 @@ export class Organization extends Model<
         sequelize,
         tableName: "organizations",
         indexes: [
-          { unique: true, fields: ["apiKey"] },
+          { unique: true, fields: ["api_key"] },
           { unique: true, fields: ["slug"] },
         ],
       }

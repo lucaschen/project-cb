@@ -9,6 +9,10 @@ const {
 } = process.env;
 
 export const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  define: {
+    underscored: true,
+    timestamps: true,
+  },
   host: DB_HOST,
   port: Number(DB_PORT),
   dialect: "postgres",

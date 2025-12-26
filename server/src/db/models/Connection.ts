@@ -30,8 +30,8 @@ export class Connection extends Model<
         sequelize,
         tableName: "connections",
         indexes: [
-          { unique: true, fields: ["fromNodeId", "toNodeId"] },
-          { fields: ["toNodeId"] },
+          { unique: true, fields: ["from_node_id", "to_node_id"] },
+          { fields: ["to_node_id"] },
         ],
       }
     );

@@ -22,3 +22,11 @@ export enum StepElementType {
   // SELECT_INPUT = "SELECT_INPUT",
   // TOOLTIP = "TOOLTIP",
 }
+
+export enum ElementPropertyTypes {
+  STRING = "STRING",
+  NUMBER = "NUMBER",
+  BOOLEAN = "BOOLEAN",
+  OBJECT = "OBJECT",
+  ARRAY = "ARRAY",
+}

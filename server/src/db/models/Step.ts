@@ -28,7 +28,7 @@ export class Step extends Model<
       {
         sequelize,
         tableName: "steps",
-        indexes: [{ fields: ["flowId"] }],
+        indexes: [{ fields: ["flow_id"] }],
       }
     );
     return Step;

@@ -1,5 +1,5 @@
 import { Models } from "@db/models";
-import { OrgUserPermission } from "@root/sharedTypes/enums";
+import { OrgUserPermission } from "@sharedTypes/enums";
 
 export async function seedUsers(models: Models) {
   await models.User.bulkCreate([

@@ -5,7 +5,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { StepElementType } from "@root/sharedTypes/enums";
 
 export class StepElement extends Model<
   InferAttributes<StepElement>,
@@ -13,7 +12,8 @@ export class StepElement extends Model<
 > {
   declare id: string;
   declare name: string;
-  declare type: StepElementType;
+  declare elementId: string;
+  declare stepId: string;
   declare order: number;
 
   static initModel(sequelize: Sequelize) {
@@ -21,16 +21,17 @@ export class StepElement extends Model<
       {
         id: { type: DataTypes.STRING, primaryKey: true },
         name: { type: DataTypes.STRING, allowNull: false },
-        type: {
-          type: DataTypes.ENUM(...Object.values(StepElementType)),
-          allowNull: false,
-        },
+        elementId: { type: DataTypes.STRING, allowNull: false },
+        stepId: { type: DataTypes.STRING, allowNull: false },
         order: { type: DataTypes.INTEGER, allowNull: false },
       },
       {
         sequelize,
-        tableName: "stepElements",
-        indexes: [{ fields: ["order"] }],
+        tableName: "step_elements",
+        indexes: [
+          { unique: true, fields: ["step_id", "name"] }, // name should be unique - per step
+          { fields: ["order"] },
+        ],
       }
     );
     return StepElement;

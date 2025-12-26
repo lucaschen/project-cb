@@ -5,25 +5,25 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { OrgUserPermission } from "./enums";
+import { OrgUserPermission } from "@root/sharedTypes/enums";
 
 export class OrganizationUserInvitation extends Model<
   InferAttributes<OrganizationUserInvitation>,
   InferCreationAttributes<OrganizationUserInvitation>
 > {
   declare id: string;
-  declare organization_id: string;
-  declare user_id: string;
-  declare expires_at: Date;
+  declare organizationId: string;
+  declare userId: string;
+  declare expiresAt: Date;
   declare permissions: OrgUserPermission;
 
   static initModel(sequelize: Sequelize) {
     OrganizationUserInvitation.init(
       {
         id: { type: DataTypes.STRING, primaryKey: true },
-        organization_id: { type: DataTypes.STRING, allowNull: false },
-        user_id: { type: DataTypes.STRING, allowNull: false },
-        expires_at: { type: DataTypes.DATE, allowNull: false },
+        organizationId: { type: DataTypes.STRING, allowNull: false },
+        userId: { type: DataTypes.STRING, allowNull: false },
+        expiresAt: { type: DataTypes.DATE, allowNull: false },
         permissions: {
           type: DataTypes.ENUM(...Object.values(OrgUserPermission)),
           allowNull: false,
@@ -32,11 +32,11 @@ export class OrganizationUserInvitation extends Model<
       },
       {
         sequelize,
-        tableName: "organization_user_invitations",
+        tableName: "organizationUserInvitations",
         indexes: [
-          { fields: ["organization_id"] },
-          { fields: ["user_id"] },
-          { fields: ["expires_at"] },
+          { fields: ["organizationId"] },
+          { fields: ["userId"] },
+          { fields: ["expiresAt"] },
         ],
       }
     );

@@ -11,25 +11,25 @@ export class UserSession extends Model<
   InferCreationAttributes<UserSession>
 > {
   declare id: string;
-  declare user_id: string;
-  declare session_token: string;
-  declare expires_at: Date;
+  declare userId: string;
+  declare sessionToken: string;
+  declare expiresAt: Date;
 
   static initModel(sequelize: Sequelize) {
     UserSession.init(
       {
         id: { type: DataTypes.STRING, primaryKey: true },
-        user_id: { type: DataTypes.STRING, allowNull: false },
-        session_token: { type: DataTypes.STRING, allowNull: false },
-        expires_at: { type: DataTypes.DATE, allowNull: false },
+        userId: { type: DataTypes.STRING, allowNull: false },
+        sessionToken: { type: DataTypes.STRING, allowNull: false },
+        expiresAt: { type: DataTypes.DATE, allowNull: false },
       },
       {
         sequelize,
-        tableName: "user_sessions",
+        tableName: "userSessions",
         indexes: [
-          { unique: true, fields: ["session_token"] },
-          { fields: ["user_id"] },
-          { fields: ["expires_at"] },
+          { unique: true, fields: ["sessionToken"] },
+          { fields: ["userId"] },
+          { fields: ["expiresAt"] },
         ],
       }
     );

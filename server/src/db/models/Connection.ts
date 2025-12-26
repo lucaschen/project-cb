@@ -11,17 +11,17 @@ export class Connection extends Model<
   InferCreationAttributes<Connection>
 > {
   declare id: string;
-  declare from_node_id: string;
-  declare to_node_id: string;
-  declare from_node_connection_index: number;
+  declare fromNodeId: string;
+  declare toNodeId: string;
+  declare fromNodeConnectionIndex: number;
 
   static initModel(sequelize: Sequelize) {
     Connection.init(
       {
         id: { type: DataTypes.STRING, primaryKey: true },
-        from_node_id: { type: DataTypes.STRING, allowNull: false },
-        to_node_id: { type: DataTypes.STRING, allowNull: false },
-        from_node_connection_index: {
+        fromNodeId: { type: DataTypes.STRING, allowNull: false },
+        toNodeId: { type: DataTypes.STRING, allowNull: false },
+        fromNodeConnectionIndex: {
           type: DataTypes.INTEGER,
           allowNull: false,
         },
@@ -30,8 +30,8 @@ export class Connection extends Model<
         sequelize,
         tableName: "connections",
         indexes: [
-          { unique: true, fields: ["from_node_id", "to_node_id"] },
-          { fields: ["to_node_id"] },
+          { unique: true, fields: ["fromNodeId", "toNodeId"] },
+          { fields: ["toNodeId"] },
         ],
       }
     );

@@ -11,7 +11,7 @@ export class Flow extends Model<
   InferCreationAttributes<Flow>
 > {
   declare id: string;
-  declare organization_id: string;
+  declare organizationId: string;
   declare name: string;
   declare slug: string;
 
@@ -19,14 +19,14 @@ export class Flow extends Model<
     Flow.init(
       {
         id: { type: DataTypes.STRING, primaryKey: true },
-        organization_id: { type: DataTypes.STRING, allowNull: false },
+        organizationId: { type: DataTypes.STRING, allowNull: false },
         name: { type: DataTypes.STRING, allowNull: false },
         slug: { type: DataTypes.STRING, allowNull: false },
       },
       {
         sequelize,
         tableName: "flows",
-        indexes: [{ unique: true, fields: ["organization_id", "slug"] }],
+        indexes: [{ unique: true, fields: ["organizationId", "slug"] }],
       }
     );
     return Flow;

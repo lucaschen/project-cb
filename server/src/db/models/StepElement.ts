@@ -5,7 +5,7 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { StepElementType } from "./enums";
+import { StepElementType } from "@root/sharedTypes/enums";
 
 export class StepElement extends Model<
   InferAttributes<StepElement>,
@@ -29,7 +29,7 @@ export class StepElement extends Model<
       },
       {
         sequelize,
-        tableName: "step_elements",
+        tableName: "stepElements",
         indexes: [{ fields: ["order"] }],
       }
     );

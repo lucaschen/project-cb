@@ -29,80 +29,80 @@ export function initModels(sequelize: Sequelize) {
   StepElementCondition.initModel(sequelize);
 
   // associations that are representable with real FKs
-  Organization.hasMany(Flow, { foreignKey: "organization_id", as: "flows" });
+  Organization.hasMany(Flow, { foreignKey: "organizationId", as: "flows" });
   Flow.belongsTo(Organization, {
-    foreignKey: "organization_id",
+    foreignKey: "organizationId",
     as: "organization",
   });
 
-  Flow.hasMany(Step, { foreignKey: "flow_id", as: "steps" });
-  Step.belongsTo(Flow, { foreignKey: "flow_id", as: "flow" });
+  Flow.hasMany(Step, { foreignKey: "flowId", as: "steps" });
+  Step.belongsTo(Flow, { foreignKey: "flowId", as: "flow" });
 
-  Flow.hasMany(DecisionNode, { foreignKey: "flow_id", as: "decisionNodes" });
-  DecisionNode.belongsTo(Flow, { foreignKey: "flow_id", as: "flow" });
+  Flow.hasMany(DecisionNode, { foreignKey: "flowId", as: "decisionNodes" });
+  DecisionNode.belongsTo(Flow, { foreignKey: "flowId", as: "flow" });
 
   // org <-> user many-to-many via join table with extra column (permissions)
   Organization.belongsToMany(User, {
     through: OrganizationUser,
-    foreignKey: "organization_id",
-    otherKey: "user_id",
+    foreignKey: "organizationId",
+    otherKey: "userId",
     as: "users",
   });
   User.belongsToMany(Organization, {
     through: OrganizationUser,
-    foreignKey: "user_id",
-    otherKey: "organization_id",
+    foreignKey: "userId",
+    otherKey: "organizationId",
     as: "organizations",
   });
 
   Organization.hasMany(OrganizationUser, {
-    foreignKey: "organization_id",
+    foreignKey: "organizationId",
     as: "organizationUsers",
   });
   OrganizationUser.belongsTo(Organization, {
-    foreignKey: "organization_id",
+    foreignKey: "organizationId",
     as: "organization",
   });
 
   User.hasMany(OrganizationUser, {
-    foreignKey: "user_id",
+    foreignKey: "userId",
     as: "organizationUsers",
   });
-  OrganizationUser.belongsTo(User, { foreignKey: "user_id", as: "user" });
+  OrganizationUser.belongsTo(User, { foreignKey: "userId", as: "user" });
 
   // invitations
   Organization.hasMany(OrganizationUserInvitation, {
-    foreignKey: "organization_id",
+    foreignKey: "organizationId",
     as: "invitations",
   });
   OrganizationUserInvitation.belongsTo(Organization, {
-    foreignKey: "organization_id",
+    foreignKey: "organizationId",
     as: "organization",
   });
   User.hasMany(OrganizationUserInvitation, {
-    foreignKey: "user_id",
+    foreignKey: "userId",
     as: "invitations",
   });
   OrganizationUserInvitation.belongsTo(User, {
-    foreignKey: "user_id",
+    foreignKey: "userId",
     as: "user",
   });
 
   // sessions
-  User.hasMany(UserSession, { foreignKey: "user_id", as: "sessions" });
-  UserSession.belongsTo(User, { foreignKey: "user_id", as: "user" });
+  User.hasMany(UserSession, { foreignKey: "userId", as: "sessions" });
+  UserSession.belongsTo(User, { foreignKey: "userId", as: "user" });
 
   // step elements & conditions (only FK we can express from your schema)
   StepElement.hasMany(StepElementCondition, {
-    foreignKey: "step_element_id",
+    foreignKey: "stepElementId",
     as: "conditions",
   });
   StepElementCondition.belongsTo(StepElement, {
-    foreignKey: "step_element_id",
+    foreignKey: "stepElementId",
     as: "stepElement",
   });
 
-  // connections: cannot FK to steps/decision_nodes cleanly without a shared nodes table
+  // connections: cannot FK to steps/decisionNodes cleanly without a shared nodes table
   // so no belongsTo association here on purpose.
 
   return {

@@ -6,7 +6,7 @@ export async function seedOrganizations(models: Models) {
       id: "seedOrg1",
       name: "Seed Org",
       slug: "seed-org",
-      api_key: "cb_test_key_123",
+      apiKey: "cb_test_key_123",
     },
   ]);
 

@@ -4,7 +4,8 @@
     "types": ["node"],
     "paths": {
       "@root/*": ["./src/*"],
-      "@db/*": ["./src/db/*"]
+      "@db/*": ["./src/db/*"],
+      "@sharedTypes/*": ["./src/sharedTypes/*"]
     }
   },
   "include": ["src"]

@@ -12,7 +12,7 @@ export class Step extends Model<
 > {
   declare id: string;
   declare name: string;
-  declare flow_id: string;
+  declare flowId: string;
   declare x: number;
   declare y: number;
 
@@ -21,14 +21,14 @@ export class Step extends Model<
       {
         id: { type: DataTypes.STRING, primaryKey: true },
         name: { type: DataTypes.STRING, allowNull: false },
-        flow_id: { type: DataTypes.STRING, allowNull: false },
+        flowId: { type: DataTypes.STRING, allowNull: false },
         x: { type: DataTypes.FLOAT, allowNull: false },
         y: { type: DataTypes.FLOAT, allowNull: false },
       },
       {
         sequelize,
         tableName: "steps",
-        indexes: [{ fields: ["flow_id"] }],
+        indexes: [{ fields: ["flowId"] }],
       }
     );
     return Step;

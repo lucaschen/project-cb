@@ -5,7 +5,7 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { ComparisonOperation } from "./enums";
+import { ComparisonOperation } from "@root/sharedTypes/enums";
 
 export class DecisionNode extends Model<
   InferAttributes<DecisionNode>,
@@ -13,10 +13,10 @@ export class DecisionNode extends Model<
 > {
   declare id: string;
   declare name: string;
-  declare flow_id: string;
-  declare target_value: string | null;
+  declare flowId: string;
+  declare targetValue: string | null;
   declare operation: ComparisonOperation;
-  declare comparison_value: string | null;
+  declare comparisonValue: string | null;
   declare x: number;
   declare y: number;
 
@@ -25,20 +25,20 @@ export class DecisionNode extends Model<
       {
         id: { type: DataTypes.STRING, primaryKey: true },
         name: { type: DataTypes.STRING, allowNull: false },
-        flow_id: { type: DataTypes.STRING, allowNull: false },
-        target_value: { type: DataTypes.STRING, allowNull: true },
+        flowId: { type: DataTypes.STRING, allowNull: false },
+        targetValue: { type: DataTypes.STRING, allowNull: true },
         operation: {
           type: DataTypes.ENUM(...Object.values(ComparisonOperation)),
           allowNull: false,
         },
-        comparison_value: { type: DataTypes.STRING, allowNull: true },
+        comparisonValue: { type: DataTypes.STRING, allowNull: true },
         x: { type: DataTypes.FLOAT, allowNull: false },
         y: { type: DataTypes.FLOAT, allowNull: false },
       },
       {
         sequelize,
-        tableName: "decision_nodes",
-        indexes: [{ fields: ["flow_id"] }],
+        tableName: "decisionNodes",
+        indexes: [{ fields: ["flowId"] }],
       }
     );
     return DecisionNode;

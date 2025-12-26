@@ -5,24 +5,24 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-import { OrgUserPermission } from "./enums";
+import { OrgUserPermission } from "@root/sharedTypes/enums";
 
 export class OrganizationUser extends Model<
   InferAttributes<OrganizationUser>,
   InferCreationAttributes<OrganizationUser>
 > {
-  declare organization_id: string;
-  declare user_id: string;
+  declare organizationId: string;
+  declare userId: string;
   declare permissions: OrgUserPermission;
 
   static initModel(sequelize: Sequelize) {
     OrganizationUser.init(
       {
-        organization_id: {
+        organizationId: {
           type: DataTypes.STRING,
           primaryKey: true,
         },
-        user_id: {
+        userId: {
           type: DataTypes.STRING,
           primaryKey: true,
         },
@@ -34,8 +34,8 @@ export class OrganizationUser extends Model<
       },
       {
         sequelize,
-        tableName: "organization_users",
-        indexes: [{ fields: ["user_id"] }, { fields: ["organization_id"] }],
+        tableName: "organizationUsers",
+        indexes: [{ fields: ["userId"] }, { fields: ["organizationId"] }],
       }
     );
     return OrganizationUser;

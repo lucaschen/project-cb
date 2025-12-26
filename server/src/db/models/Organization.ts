@@ -13,7 +13,7 @@ export class Organization extends Model<
   declare id: string;
   declare name: string;
   declare slug: string;
-  declare api_key: string;
+  declare apiKey: string;
 
   static initModel(sequelize: Sequelize) {
     Organization.init(
@@ -30,7 +30,7 @@ export class Organization extends Model<
           type: DataTypes.STRING,
           allowNull: false,
         },
-        api_key: {
+        apiKey: {
           type: DataTypes.STRING,
           allowNull: false,
         },
@@ -39,7 +39,7 @@ export class Organization extends Model<
         sequelize,
         tableName: "organizations",
         indexes: [
-          { unique: true, fields: ["api_key"] },
+          { unique: true, fields: ["apiKey"] },
           { unique: true, fields: ["slug"] },
         ],
       }

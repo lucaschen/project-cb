@@ -2,10 +2,10 @@ import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
 
 export async function seedStep1(models: Models) {
-  const step1 = await models.Step.create({
+  const step2 = await models.Step.create({
     id: uuidV4(),
     flowId: "seedFlow1",
-    name: "Step1",
+    name: "Step2",
     x: 100,
     y: 100,
   });
@@ -15,31 +15,31 @@ export async function seedStep1(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step2.id,
     elementId: "header",
-    name: "Purchase price title",
+    name: "Step 2 title",
     order: 0,
   });
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step2.id,
     elementId: "label",
-    name: "Purchase price label",
+    name: "Step 2 label",
     order: 1,
   });
 
-  const purchasePriceInput = await models.StepElement.create({
+  const depositInput = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step2.id,
     elementId: "number_input",
-    name: "Purchase price input",
+    name: "Step 2 input",
     order: 2,
   });
 
   const tooltip = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step2.id,
     elementId: "tooltip",
     name: "Tooltip",
     order: 2,
@@ -47,7 +47,7 @@ export async function seedStep1(models: Models) {
 
   const nextButton = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step2.id,
     elementId: "button",
     name: "Next button",
     order: 3,
@@ -62,7 +62,7 @@ export async function seedStep1(models: Models) {
       id: uuidV4(),
       stepElementId: header.id,
       propertyId: "header_text",
-      propertyValue: "What is your expected purchase price?",
+      propertyValue: "How much deposit do you have?",
     },
     // Label
     {
@@ -70,30 +70,30 @@ export async function seedStep1(models: Models) {
       stepElementId: label.id,
       propertyId: "label_text",
       propertyValue:
-        "An estimate is fine—this helps us find the most suitable home loan options for you.",
+        "This helps us calculate your Loan-to-Value Ratio (LVR), which may qualify you for better home loan rates and terms.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
       propertyId: "label_for",
-      propertyValue: purchasePriceInput.id,
+      propertyValue: depositInput.id,
     },
     // Purchase Price Input
     {
       id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
+      stepElementId: depositInput.id,
       propertyId: "number_input_format",
       propertyValue: "$0,0",
     },
     {
       id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
+      stepElementId: depositInput.id,
       propertyId: "number_input_name",
       propertyValue: "purchase_price",
     },
     {
       id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
+      stepElementId: depositInput.id,
       propertyId: "number_input_required",
       propertyValue: "true",
     },
@@ -102,14 +102,13 @@ export async function seedStep1(models: Models) {
       id: uuidV4(),
       stepElementId: tooltip.id,
       propertyId: "tooltip_trigger_text",
-      propertyValue: "?",
+      propertyValue: "? Understanding your LVR",
     },
     {
       id: uuidV4(),
       stepElementId: tooltip.id,
       propertyId: "tooltip_hover_text",
-      propertyValue:
-        "Understanding your price range allows us to tailor loan options to your unique situation. Don’t worry if you’re not sure about the exact amount; an estimated figure based on the property type and location you're considering is a great start.",
+      propertyValue: "It is important for unknown reasons",
     },
     // Next button
     {
@@ -132,7 +131,7 @@ export async function seedStep1(models: Models) {
     },
   ]);
 
-  console.log("🌱 Seeded Step1");
+  console.log("🌱 Seeded Step2");
 
-  return step1;
+  return step2;
 }

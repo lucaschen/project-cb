@@ -134,6 +134,15 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
+      id: "number_input_required",
+      elementId: "number_input",
+      propertyName: "required",
+      description: "Whether the field is required",
+      propertyType: ElementPropertyTypes.STRING,
+      required: true,
+      defaultValue: "",
+    },
+    {
       id: "number_input_min",
       elementId: "number_input",
       propertyName: "min",
@@ -165,6 +174,15 @@ export async function seedElementProperties(models: Models) {
     // SELECT
     // ───────────────────
     {
+      id: "select_name",
+      elementId: "select",
+      propertyName: "name",
+      description: "Name of select in the form",
+      propertyType: ElementPropertyTypes.STRING,
+      required: true,
+      defaultValue: "",
+    },
+    {
       id: "select_options",
       elementId: "select",
       propertyName: "options",
@@ -174,12 +192,21 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "[]",
     },
     {
+      id: "select_required",
+      elementId: "select",
+      propertyName: "required",
+      description: "is selection required",
+      propertyType: ElementPropertyTypes.ARRAY,
+      required: true,
+      defaultValue: "true",
+    },
+    {
       id: "select_multiple",
       elementId: "select",
       propertyName: "multiple",
       description: "Allow multiple selection",
       propertyType: ElementPropertyTypes.BOOLEAN,
-      required: true,
+      required: false,
       defaultValue: "false",
     },
 
@@ -205,13 +232,22 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "primary",
     },
     {
-      id: "button_when_incomplete",
+      id: "button_disable_when_incomplete",
       elementId: "button",
       propertyName: "disabledWhenIncomplete",
       description: "Disable button when form is incomplete",
       propertyType: ElementPropertyTypes.BOOLEAN,
       required: true,
       defaultValue: "false",
+    },
+    {
+      id: "button_on_click",
+      elementId: "button",
+      propertyName: "onClick",
+      description: "Funcion to execute on button click",
+      propertyType: ElementPropertyTypes.STRING,
+      required: true,
+      defaultValue: "continue()",
     },
     // ───────────────────
     // TOOLTIP
@@ -233,6 +269,36 @@ export async function seedElementProperties(models: Models) {
       propertyType: ElementPropertyTypes.STRING,
       required: true,
       defaultValue: "tooltip description",
+    },
+    // ───────────────────
+    // DATE PICKER
+    // ───────────────────
+    {
+      id: "date_picker_name",
+      elementId: "date_picker",
+      propertyName: "name",
+      description: "Name of date input",
+      propertyType: ElementPropertyTypes.STRING,
+      required: true,
+      defaultValue: "",
+    },
+    {
+      id: "date_picker_format",
+      elementId: "date_picker",
+      propertyName: "format",
+      description: "Date format, e.g. YYYY-MM-DD",
+      propertyType: ElementPropertyTypes.STRING,
+      required: false,
+      defaultValue: "YYYY-MM-DD",
+    },
+    {
+      id: "date_picker_required",
+      elementId: "date_picker",
+      propertyName: "required",
+      description: "Whether the date is required",
+      propertyType: ElementPropertyTypes.BOOLEAN,
+      required: true,
+      defaultValue: "true",
     },
   ]);
 

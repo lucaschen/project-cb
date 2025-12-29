@@ -43,6 +43,11 @@ export async function seedElements(models: Models) {
       name: "Tooltip",
       description: "Tooltip shows information on hover",
     },
+    {
+      id: "date_picker",
+      name: "Date Picker",
+      description: "Single date picker",
+    },
   ]);
 
   console.log("🌱 Seeded elements");

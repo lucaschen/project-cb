@@ -2,10 +2,10 @@ import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
 
 export async function seedStep1(models: Models) {
-  const step1 = await models.Step.create({
+  const step3 = await models.Step.create({
     id: uuidV4(),
     flowId: "seedFlow1",
-    name: "Step1",
+    name: "Step3",
     x: 100,
     y: 100,
   });
@@ -15,39 +15,31 @@ export async function seedStep1(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step3.id,
     elementId: "header",
-    name: "Purchase price title",
+    name: "Step3 title",
     order: 0,
   });
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step3.id,
     elementId: "label",
-    name: "Purchase price label",
+    name: "Step3 label",
     order: 1,
   });
 
-  const purchasePriceInput = await models.StepElement.create({
+  const situationSelect = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
-    elementId: "number_input",
-    name: "Purchase price input",
-    order: 2,
-  });
-
-  const tooltip = await models.StepElement.create({
-    id: uuidV4(),
-    stepId: step1.id,
-    elementId: "tooltip",
-    name: "Tooltip",
+    stepId: step3.id,
+    elementId: "select",
+    name: "Step3 select",
     order: 2,
   });
 
   const nextButton = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step1.id,
+    stepId: step3.id,
     elementId: "button",
     name: "Next button",
     order: 3,
@@ -62,7 +54,7 @@ export async function seedStep1(models: Models) {
       id: uuidV4(),
       stepElementId: header.id,
       propertyId: "header_text",
-      propertyValue: "What is your expected purchase price?",
+      propertyValue: "What best describes your home buying situation?",
     },
     // Label
     {
@@ -70,46 +62,33 @@ export async function seedStep1(models: Models) {
       stepElementId: label.id,
       propertyId: "label_text",
       propertyValue:
-        "An estimate is fine—this helps us find the most suitable home loan options for you.",
+        "Understanding your position in the home buying journey lets us guide you with the most relevant support.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
       propertyId: "label_for",
-      propertyValue: purchasePriceInput.id,
+      propertyValue: situationSelect.id,
     },
-    // Purchase Price Input
+    // Step3 Input
     {
       id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
-      propertyId: "number_input_format",
-      propertyValue: "$0,0",
-    },
-    {
-      id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
-      propertyId: "number_input_name",
-      propertyValue: "purchase_price",
+      stepElementId: situationSelect.id,
+      propertyId: "select_name",
+      propertyValue: "home_buying_situation",
     },
     {
       id: uuidV4(),
-      stepElementId: purchasePriceInput.id,
-      propertyId: "number_input_required",
-      propertyValue: "true",
-    },
-    // Tooltip
-    {
-      id: uuidV4(),
-      stepElementId: tooltip.id,
-      propertyId: "tooltip_trigger_text",
-      propertyValue: "?",
-    },
-    {
-      id: uuidV4(),
-      stepElementId: tooltip.id,
-      propertyId: "tooltip_hover_text",
+      stepElementId: situationSelect.id,
+      propertyId: "select_options",
       propertyValue:
-        "Understanding your price range allows us to tailor loan options to your unique situation. Don’t worry if you’re not sure about the exact amount; an estimated figure based on the property type and location you're considering is a great start.",
+        "['Just exploring options', 'Planing to buy in 6 months', 'Made an offer', 'Exchanged contracts']",
+    },
+    {
+      id: uuidV4(),
+      stepElementId: situationSelect.id,
+      propertyId: "select_required",
+      propertyValue: "true",
     },
     // Next button
     {
@@ -132,7 +111,7 @@ export async function seedStep1(models: Models) {
     },
   ]);
 
-  console.log("🌱 Seeded Step1");
+  console.log("🌱 Seeded Step3");
 
-  return step1;
+  return step3;
 }

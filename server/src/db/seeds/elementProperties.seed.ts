@@ -196,7 +196,7 @@ export async function seedElementProperties(models: Models) {
       elementId: "select",
       propertyName: "required",
       description: "is selection required",
-      propertyType: ElementPropertyTypes.ARRAY,
+      propertyType: ElementPropertyTypes.BOOLEAN,
       required: true,
       defaultValue: "true",
     },

@@ -2,7 +2,7 @@ import { Models } from "@db/models";
 import { ComparisonOperation } from "@sharedTypes/enums";
 import { v4 as uuidV4 } from "uuid";
 
-export async function seedStep1(models: Models) {
+export default async function seedStep4Point5(models: Models) {
   const step4Point5 = await models.Step.create({
     id: uuidV4(),
     flowId: "seedFlow1",

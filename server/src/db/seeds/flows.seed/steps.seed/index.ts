@@ -1,15 +1,15 @@
 import { Models } from "@db/models";
 
-import { seedStep1 as seedStep1 } from "./step1.seed";
-import { seedStep1 as seedStep2 } from "./step2.seed";
-import { seedStep1 as seedStep3 } from "./step3.seed";
-import { seedStep1 as seedStep4 } from "./step4.seed";
-import { seedStep1 as seedStep4Point5 } from "./step4Point5.seed";
-import { seedStep1 as seedStep5 } from "./step5.seed";
-import { seedStep1 as seedStep6 } from "./step6.seed";
-import { seedStep7 } from "./step7.seed";
-import { seedStep8A } from "./step8A.seed";
-import { seedStep8B } from "./step8B.seed";
+import seedStep1 from "./step1.seed";
+import seedStep2 from "./step2.seed";
+import seedStep3 from "./step3.seed";
+import seedStep4 from "./step4.seed";
+import seedStep4Point5 from "./step4Point5.seed";
+import seedStep5 from "./step5.seed";
+import seedStep6 from "./step6.seed";
+import seedStep7 from "./step7.seed";
+import seedStep8A from "./step8A.seed";
+import seedStep8B from "./step8B.seed";
 
 export async function seedSteps(models: Models) {
   const s1 = await seedStep1(models);

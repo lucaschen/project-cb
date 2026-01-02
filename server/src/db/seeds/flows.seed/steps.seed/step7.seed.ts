@@ -1,7 +1,7 @@
 import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
 
-export async function seedStep7(models: Models) {
+export default async function seedStep7(models: Models) {
   const step7 = await models.Step.create({
     id: uuidV4(),
     flowId: "seedFlow1",

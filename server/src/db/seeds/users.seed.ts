@@ -1,5 +1,5 @@
 import { Models } from "@db/models";
-import { OrgUserPermission } from "@sharedTypes/enums";
+import { OrganizationUserPermission } from "@sharedTypes/enums";
 
 export async function seedUsers(models: Models) {
   await models.User.bulkCreate([
@@ -12,7 +12,7 @@ export async function seedUsers(models: Models) {
   await models.OrganizationUser.create({
     organizationId: "seedOrg1",
     userId: "seedUser1",
-    permissions: OrgUserPermission.ADMIN,
+    permissions: OrganizationUserPermission.ADMIN,
   });
 
   console.log("🌱 Seeded users");

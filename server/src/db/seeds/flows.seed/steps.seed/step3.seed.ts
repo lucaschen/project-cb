@@ -1,7 +1,7 @@
 import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
 
-export async function seedStep1(models: Models) {
+export default async function seedStep3(models: Models) {
   const step3 = await models.Step.create({
     id: uuidV4(),
     flowId: "seedFlow1",
@@ -82,7 +82,7 @@ export async function seedStep1(models: Models) {
       stepElementId: situationSelect.id,
       propertyId: "select_options",
       propertyValue:
-        "['Just exploring options', 'Planing to buy in 6 months', 'Made an offer', 'Exchanged contracts']",
+        "['Just exploring options', 'Planning to buy in 6 months', 'Made an offer', 'Exchanged contracts']",
     },
     {
       id: uuidV4(),

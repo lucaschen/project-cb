@@ -3,7 +3,7 @@ import { sequelize } from "./sequelize";
 
 export const models = initModels(sequelize);
 
-export async function connectDB() {
+export async function connectDb() {
   try {
     await sequelize.authenticate();
     console.log("✅ Database connected");

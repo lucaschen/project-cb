@@ -148,5 +148,5 @@ export async function seedFlows(models: Models) {
     fromNodeConnectionIndex: 1,
   });
 
-  console.log("🌱 Seeded purchase price step");
+  console.log("🌱 Seeded Main Flow");
 }

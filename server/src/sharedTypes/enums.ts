@@ -1,4 +1,4 @@
-export enum OrgUserPermission {
+export enum OrganizationUserPermission {
   ADMIN = "admin",
   EDITOR = "editor",
   VIEWER = "viewer",

@@ -1,4 +1,4 @@
-import { OrgUserPermission } from "@sharedTypes/enums";
+import { OrganizationUserPermission } from "@sharedTypes/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -15,7 +15,7 @@ export class OrganizationUserInvitation extends Model<
   declare organizationId: string;
   declare userId: string;
   declare expiresAt: Date;
-  declare permissions: OrgUserPermission;
+  declare permissions: OrganizationUserPermission;
 
   static initModel(sequelize: Sequelize) {
     OrganizationUserInvitation.init(
@@ -25,9 +25,9 @@ export class OrganizationUserInvitation extends Model<
         userId: { type: DataTypes.STRING, allowNull: false },
         expiresAt: { type: DataTypes.DATE, allowNull: false },
         permissions: {
-          type: DataTypes.ENUM(...Object.values(OrgUserPermission)),
+          type: DataTypes.ENUM(...Object.values(OrganizationUserPermission)),
           allowNull: false,
-          defaultValue: OrgUserPermission.VIEWER,
+          defaultValue: OrganizationUserPermission.VIEWER,
         },
       },
       {

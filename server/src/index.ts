@@ -1,6 +1,6 @@
 import express from "express";
 
-import { connectDB } from "./db";
+import { connectDb } from "./db";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -11,7 +11,7 @@ app.get("/health", (_req, res) => {
 
 app.listen(port, async () => {
   try {
-    await connectDB();
+    await connectDb();
 
     console.log(`Server running on http://localhost:${port}`);
   } catch (err) {

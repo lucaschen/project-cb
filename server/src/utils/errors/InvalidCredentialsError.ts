@@ -7,7 +7,7 @@ export default class InvalidCredentialsError extends Error {
     super(message);
 
     this.name = "InvalidCredentialsError";
-    this.message = message ?? "Invalid request.";
+    this.message = message ?? "Invalid credentials.";
     this.details = details;
 
     const error = new Error(this.message);

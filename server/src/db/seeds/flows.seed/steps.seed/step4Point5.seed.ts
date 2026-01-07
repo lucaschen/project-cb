@@ -88,7 +88,7 @@ export default async function seedStep4Point5(models: Models) {
       id: uuidV4(),
       stepElementId: label.id,
       propertyId: "labelText",
-      propertyValue: "What is the estimated value of your properties",
+      propertyValue: "What is the estimated value of your properties?",
     },
     {
       id: uuidV4(),
@@ -120,7 +120,7 @@ export default async function seedStep4Point5(models: Models) {
       id: uuidV4(),
       stepElementId: ownedLabel.id,
       propertyId: "labelText",
-      propertyValue: "Have you owned your last purchased property for 1 year",
+      propertyValue: "Have you owned your last purchased property for 1 year?",
     },
     {
       id: uuidV4(),
@@ -151,7 +151,7 @@ export default async function seedStep4Point5(models: Models) {
       id: uuidV4(),
       stepElementId: purchasedLabel.id,
       propertyId: "labelText",
-      propertyValue: "When was the property purchased",
+      propertyValue: "When was the property purchased?",
     },
     {
       id: uuidV4(),

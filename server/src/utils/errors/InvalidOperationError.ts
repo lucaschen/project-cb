@@ -7,7 +7,7 @@ export default class InvalidOperationError extends Error {
     super(message);
 
     this.name = "InvalidOperationError";
-    this.message = message ?? "Invalid operationo.";
+    this.message = message ?? "Invalid operation.";
     this.details = details;
 
     const error = new Error(this.message);

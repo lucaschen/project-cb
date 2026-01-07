@@ -1,7 +1,7 @@
 import setupDb from "./db/setup";
 import setupHttpServer from "./http/setup";
 
-console.log("Projec CB!");
+console.log("Project CB!");
 
 (async () => {
   await Promise.all([setupHttpServer(), setupDb()]);

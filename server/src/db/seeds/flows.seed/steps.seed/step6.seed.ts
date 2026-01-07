@@ -105,7 +105,7 @@ export default async function seedStep6(models: Models) {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentLabel.id,
       propertyId: "labelText",
-      propertyValue: "Do you have an existing investment property",
+      propertyValue: "Do you have an existing investment property?",
     },
     {
       id: uuidV4(),

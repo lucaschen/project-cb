@@ -101,7 +101,7 @@ export default async function seedStep8B(models: Models) {
       id: uuidV4(),
       stepElementId: dobLabel.id,
       propertyId: "labelText",
-      propertyValue: "When is your Date of Birth",
+      propertyValue: "When is your Date of Birth?",
     },
     {
       id: uuidV4(),

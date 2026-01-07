@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep7(models: Models) {
   const step7 = await models.Step.create({
@@ -61,7 +62,7 @@ export default async function seedStep7(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue:
         "Are any of the following important to you when choosing a lender?",
     },
@@ -69,65 +70,65 @@ export default async function seedStep7(models: Models) {
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "Pick all the features you value most in a lender. <br> You can select more than one.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: lenderFeaturesSelect.id,
     },
     // Select input
     {
       id: uuidV4(),
       stepElementId: lenderFeaturesSelect.id,
-      propertyId: "select_name",
-      propertyValue: "lender_features",
+      propertyId: "selectName",
+      propertyValue: "lenderFeatures",
     },
     {
       id: uuidV4(),
       stepElementId: lenderFeaturesSelect.id,
-      propertyId: "select_options",
+      propertyId: "selectOptions",
       propertyValue:
-        "['Offset/Redraw', 'Fixed rate', 'Major lender', 'Mobile app']",
+        '["Offset/Redraw", "Fixed rate", "Major lender", "Mobile app"]',
     },
     {
       id: uuidV4(),
       stepElementId: lenderFeaturesSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "false",
     },
     {
       id: uuidV4(),
       stepElementId: lenderFeaturesSelect.id,
-      propertyId: "select_multiple",
+      propertyId: "selectMultiple",
       propertyValue: "true",
     },
     // Buttons
     {
       id: uuidV4(),
       stepElementId: noThanksButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "No Thanks",
     },
     {
       id: uuidV4(),
       stepElementId: noThanksButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "secondary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
   ]);

@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep4(models: Models) {
   const step4 = await models.Step.create({
@@ -30,7 +31,7 @@ export default async function seedStep4(models: Models) {
   });
 
   const firstHomeBuyerSelect = await models.StepElement.create({
-    id: "step4_first_home_buyer_select",
+    id: "step4FirstHomeBuyerSelect",
     stepId: step4.id,
     elementId: "select",
     name: "Step4 select",
@@ -61,53 +62,53 @@ export default async function seedStep4(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "Are you a first home buyer?",
     },
     // Label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "First home buyers may qualify for grants and benefits. Let us know if you're purchasing for the first time.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: firstHomeBuyerSelect.id,
     },
     // Select input
     {
       id: uuidV4(),
       stepElementId: firstHomeBuyerSelect.id,
-      propertyId: "select_name",
-      propertyValue: "first_home_buyer",
+      propertyId: "selectName",
+      propertyValue: "firstHomeBuyer",
     },
     {
       id: uuidV4(),
       stepElementId: firstHomeBuyerSelect.id,
-      propertyId: "select_options",
-      propertyValue: "['Yes', 'No']",
+      propertyId: "selectOptions",
+      propertyValue: '["Yes", "No"]',
     },
     {
       id: uuidV4(),
       stepElementId: firstHomeBuyerSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
     // Tooltip
     {
       id: uuidV4(),
       stepElementId: tooltip.id,
-      propertyId: "tooltip_trigger_text",
+      propertyId: "tooltipTriggerText",
       propertyValue: "?",
     },
     {
       id: uuidV4(),
       stepElementId: tooltip.id,
-      propertyId: "tooltip_hover_text",
+      propertyId: "tooltipHoverText",
       propertyValue:
         "Find out more about grants, stamp duty concessions, and other benefits available to first home buyers.",
     },
@@ -115,19 +116,19 @@ export default async function seedStep4(models: Models) {
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_disable_when_incomplete",
+      propertyId: "buttonDisableWhenIncomplete",
       propertyValue: "true",
     },
   ]);

@@ -1,6 +1,7 @@
-import { Models } from "@db/models";
-import { ComparisonOperation } from "@sharedTypes/enums";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
+import { ComparisonOperation } from "~sharedTypes/enums";
 
 import { seedSteps } from "./steps.seed";
 
@@ -19,16 +20,16 @@ export async function seedFlows(models: Models) {
 
   // ───────────────────
   // Decision nodes & connections
-  // Represent: if Step4.first_home_buyer === 'No' then go to Step4Point5, else continue to Step5
+  // Represent: if Step4.firstHomeBuyer === 'No' then go to Step4Point5, else continue to Step5
   // ───────────────────
 
-  // create a decision node that checks first_home_buyer
+  // create a decision node that checks firstHomeBuyer
   const decision = await models.DecisionNode.create({
     id: uuidV4(),
     flowId: "seedFlow1",
     name: "First home buyer check",
     // the node will evaluate the expression in `targetValue` and compare to `comparisonValue`
-    targetValue: `stepElementValueByName(first_home_buyer)`,
+    targetValue: `stepElementValueByName(firstHomeBuyer)`,
     operation: ComparisonOperation.EQ,
     comparisonValue: "No",
     x: 200,

@@ -12,6 +12,7 @@ export class User extends Model<
 > {
   declare id: string;
   declare email: string;
+  declare passwordHash: string;
 
   static initModel(sequelize: Sequelize) {
     User.init(
@@ -24,6 +25,10 @@ export class User extends Model<
           type: DataTypes.STRING,
           allowNull: false,
           validate: { isEmail: true },
+        },
+        passwordHash: {
+          type: DataTypes.STRING,
+          allowNull: false,
         },
       },
       {

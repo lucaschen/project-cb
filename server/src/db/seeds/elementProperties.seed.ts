@@ -1,5 +1,5 @@
-import { Models } from "@db/models";
-import { ElementPropertyTypes } from "@sharedTypes/enums";
+import { Models } from "~db/models";
+import { ElementPropertyTypes } from "~sharedTypes/enums";
 
 export async function seedElementProperties(models: Models) {
   await models.ElementProperties.bulkCreate([
@@ -7,7 +7,7 @@ export async function seedElementProperties(models: Models) {
     // HEADER
     // ───────────────────
     {
-      id: "header_text",
+      id: "headerText",
       elementId: "header",
       propertyName: "text",
       description: "Main header text",
@@ -16,7 +16,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "Header",
     },
     {
-      id: "header_align",
+      id: "headerAlign",
       elementId: "header",
       propertyName: "align",
       description: "Text alignment",
@@ -29,7 +29,7 @@ export async function seedElementProperties(models: Models) {
     // SUBTITLE
     // ───────────────────
     {
-      id: "subtitle_text",
+      id: "subtitleText",
       elementId: "subtitle",
       propertyName: "text",
       description: "Subtitle text",
@@ -38,7 +38,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "Subtitle",
     },
     {
-      id: "subtitle_align",
+      id: "subtitleAlign",
       elementId: "subtitle",
       propertyName: "align",
       description: "Text alignment",
@@ -51,7 +51,7 @@ export async function seedElementProperties(models: Models) {
     // LABEL
     // ───────────────────
     {
-      id: "label_text",
+      id: "labelText",
       elementId: "label",
       propertyName: "text",
       description: "Label text",
@@ -60,7 +60,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "label_for",
+      id: "labelFor",
       elementId: "label",
       propertyName: "htmlFor",
       description: "The name of the input for the label",
@@ -72,8 +72,8 @@ export async function seedElementProperties(models: Models) {
     // TEXT INPUT
     // ───────────────────
     {
-      id: "text_input_placeholder",
-      elementId: "text_input",
+      id: "textInputPlaceholder",
+      elementId: "textInput",
       propertyName: "placeholder",
       description: "Placeholder text inside the input",
       propertyType: ElementPropertyTypes.STRING,
@@ -81,8 +81,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "text_input_name",
-      elementId: "text_input",
+      id: "textInputName",
+      elementId: "textInput",
       propertyName: "name",
       description: "Name of input in the form",
       propertyType: ElementPropertyTypes.STRING,
@@ -90,8 +90,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "text_input_required",
-      elementId: "text_input",
+      id: "textInputRequired",
+      elementId: "textInput",
       propertyName: "required",
       description: "Whether the field is required",
       propertyType: ElementPropertyTypes.BOOLEAN,
@@ -103,7 +103,7 @@ export async function seedElementProperties(models: Models) {
     // TEXTAREA
     // ───────────────────
     {
-      id: "textarea_label",
+      id: "textareaLabel",
       elementId: "textarea",
       propertyName: "label",
       description: "Label displayed above the textarea",
@@ -116,8 +116,8 @@ export async function seedElementProperties(models: Models) {
     // NUMBER INPUT
     // ───────────────────
     {
-      id: "number_input_label",
-      elementId: "number_input",
+      id: "numberInputLabel",
+      elementId: "numberInput",
       propertyName: "label",
       description: "Label displayed above the input",
       propertyType: ElementPropertyTypes.STRING,
@@ -125,8 +125,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "number_input_name",
-      elementId: "number_input",
+      id: "numberInputName",
+      elementId: "numberInput",
       propertyName: "name",
       description: "Name of input in the form",
       propertyType: ElementPropertyTypes.STRING,
@@ -134,17 +134,17 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "number_input_required",
-      elementId: "number_input",
+      id: "numberInputRequired",
+      elementId: "numberInput",
       propertyName: "required",
       description: "Whether the field is required",
-      propertyType: ElementPropertyTypes.STRING,
+      propertyType: ElementPropertyTypes.BOOLEAN,
       required: true,
-      defaultValue: "",
+      defaultValue: "true",
     },
     {
-      id: "number_input_min",
-      elementId: "number_input",
+      id: "numberInputMin",
+      elementId: "numberInput",
       propertyName: "min",
       description: "Minimum allowed value",
       propertyType: ElementPropertyTypes.NUMBER,
@@ -152,8 +152,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "number_input_max",
-      elementId: "number_input",
+      id: "numberInputMax",
+      elementId: "numberInput",
       propertyName: "max",
       description: "Maximum allowed value",
       propertyType: ElementPropertyTypes.NUMBER,
@@ -161,8 +161,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "number_input_format",
-      elementId: "number_input",
+      id: "numberInputFormat",
+      elementId: "numberInput",
       propertyName: "format",
       description: "numeral format to use e.g. $0[.]00",
       propertyType: ElementPropertyTypes.STRING,
@@ -174,7 +174,7 @@ export async function seedElementProperties(models: Models) {
     // SELECT
     // ───────────────────
     {
-      id: "select_name",
+      id: "selectName",
       elementId: "select",
       propertyName: "name",
       description: "Name of select in the form",
@@ -183,7 +183,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "select_options",
+      id: "selectOptions",
       elementId: "select",
       propertyName: "options",
       description: "Selectable options (JSON array)",
@@ -192,7 +192,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "[]",
     },
     {
-      id: "select_required",
+      id: "selectRequired",
       elementId: "select",
       propertyName: "required",
       description: "is selection required",
@@ -201,7 +201,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "true",
     },
     {
-      id: "select_multiple",
+      id: "selectMultiple",
       elementId: "select",
       propertyName: "multiple",
       description: "Allow multiple selection",
@@ -214,7 +214,7 @@ export async function seedElementProperties(models: Models) {
     // BUTTON
     // ───────────────────
     {
-      id: "button_text",
+      id: "buttonText",
       elementId: "button",
       propertyName: "text",
       description: "Button label text",
@@ -223,7 +223,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "Button",
     },
     {
-      id: "button_variant",
+      id: "buttonVariant",
       elementId: "button",
       propertyName: "variant",
       description: "Button style variant",
@@ -232,7 +232,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "primary",
     },
     {
-      id: "button_disable_when_incomplete",
+      id: "buttonDisableWhenIncomplete",
       elementId: "button",
       propertyName: "disabledWhenIncomplete",
       description: "Disable button when form is incomplete",
@@ -241,7 +241,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "false",
     },
     {
-      id: "button_on_click",
+      id: "buttonOnClick",
       elementId: "button",
       propertyName: "onClick",
       description: "Function to execute on button click",
@@ -253,7 +253,7 @@ export async function seedElementProperties(models: Models) {
     // TOOLTIP
     // ───────────────────
     {
-      id: "tooltip_trigger_text",
+      id: "tooltipTriggerText",
       elementId: "tooltip",
       propertyName: "triggerText",
       description: "Tooltip trigger text",
@@ -262,7 +262,7 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "tooltip",
     },
     {
-      id: "tooltip_hover_text",
+      id: "tooltipHoverText",
       elementId: "tooltip",
       propertyName: "hoverText",
       description: "Tooltip hover text",
@@ -274,8 +274,8 @@ export async function seedElementProperties(models: Models) {
     // DATE PICKER
     // ───────────────────
     {
-      id: "date_picker_name",
-      elementId: "date_picker",
+      id: "datePickerName",
+      elementId: "datePicker",
       propertyName: "name",
       description: "Name of date input",
       propertyType: ElementPropertyTypes.STRING,
@@ -283,8 +283,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "",
     },
     {
-      id: "date_picker_format",
-      elementId: "date_picker",
+      id: "datePickerFormat",
+      elementId: "datePicker",
       propertyName: "format",
       description: "Date format, e.g. YYYY-MM-DD",
       propertyType: ElementPropertyTypes.STRING,
@@ -292,8 +292,8 @@ export async function seedElementProperties(models: Models) {
       defaultValue: "YYYY-MM-DD",
     },
     {
-      id: "date_picker_required",
-      elementId: "date_picker",
+      id: "datePickerRequired",
+      elementId: "datePicker",
       propertyName: "required",
       description: "Whether the date is required",
       propertyType: ElementPropertyTypes.BOOLEAN,

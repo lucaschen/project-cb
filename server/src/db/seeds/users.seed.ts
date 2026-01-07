@@ -1,11 +1,16 @@
-import { Models } from "@db/models";
-import { OrganizationUserPermission } from "@sharedTypes/enums";
+import bcrypt from "bcryptjs";
+
+import { Models } from "~db/models";
+import { OrganizationUserPermission } from "~sharedTypes/enums";
 
 export async function seedUsers(models: Models) {
+  const adminPasswordHash = bcrypt.hashSync("password", 10);
+
   await models.User.bulkCreate([
     {
       id: "seedUser1",
       email: "admin@project-cb.dev",
+      passwordHash: adminPasswordHash,
     },
   ]);
 

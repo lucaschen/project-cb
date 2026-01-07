@@ -1,6 +1,7 @@
-import { Models } from "@db/models";
-import { ComparisonOperation } from "@sharedTypes/enums";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
+import { ComparisonOperation } from "~sharedTypes/enums";
 
 export default async function seedStep4Point5(models: Models) {
   const step4Point5 = await models.Step.create({
@@ -33,7 +34,7 @@ export default async function seedStep4Point5(models: Models) {
   const numberInput = await models.StepElement.create({
     id: uuidV4(),
     stepId: step4Point5.id,
-    elementId: "number_input",
+    elementId: "numberInput",
     name: "Estimated value input",
     order: 1,
   });
@@ -66,7 +67,7 @@ export default async function seedStep4Point5(models: Models) {
   const datePicker = await models.StepElement.create({
     id: uuidV4(),
     stepId: step4Point5.id,
-    elementId: "date_picker",
+    elementId: "datePicker",
     name: "Month picker",
     order: 5,
   });
@@ -79,95 +80,95 @@ export default async function seedStep4Point5(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "Lets get an idea of your financial situation",
     },
     // Estimated value label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "What is the estimated value of your properties",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: numberInput.id,
     },
     // Number input
     {
       id: uuidV4(),
       stepElementId: numberInput.id,
-      propertyId: "number_input_format",
+      propertyId: "numberInputFormat",
       propertyValue: "$0,0",
     },
     {
       id: uuidV4(),
       stepElementId: numberInput.id,
-      propertyId: "number_input_name",
-      propertyValue: "estimated_properties_value",
+      propertyId: "numberInputName",
+      propertyValue: "estimatedPropertiesValue",
     },
     {
       id: uuidV4(),
       stepElementId: numberInput.id,
-      propertyId: "number_input_required",
+      propertyId: "numberInputRequired",
       propertyValue: "true",
     },
     // Owned label + select
     {
       id: uuidV4(),
       stepElementId: ownedLabel.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "Have you owned your last purchased property for 1 year",
     },
     {
       id: uuidV4(),
       stepElementId: ownedLabel.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: ownedSelect.id,
     },
     {
       id: uuidV4(),
       stepElementId: ownedSelect.id,
-      propertyId: "select_name",
-      propertyValue: "owned_last_property_one_year",
+      propertyId: "selectName",
+      propertyValue: "ownedLastPropertyOneYear",
     },
     {
       id: uuidV4(),
       stepElementId: ownedSelect.id,
-      propertyId: "select_options",
-      propertyValue: "['Yes', 'No']",
+      propertyId: "selectOptions",
+      propertyValue: '["Yes", "No"]',
     },
     {
       id: uuidV4(),
       stepElementId: ownedSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
     // Conditional label + month picker (shown when Owned select === 'No')
     {
       id: uuidV4(),
       stepElementId: purchasedLabel.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "When was the property purchased",
     },
     {
       id: uuidV4(),
       stepElementId: datePicker.id,
-      propertyId: "date_picker_name",
-      propertyValue: "last_property_purchase_month",
+      propertyId: "datePickerName",
+      propertyValue: "lastPropertyPurchaseMonth",
     },
     {
       id: uuidV4(),
       stepElementId: datePicker.id,
-      propertyId: "date_picker_format",
+      propertyId: "datePickerFormat",
       propertyValue: "YYYY-MM",
     },
     {
       id: uuidV4(),
       stepElementId: datePicker.id,
-      propertyId: "date_picker_required",
+      propertyId: "datePickerRequired",
       propertyValue: "true",
     },
   ]);
@@ -205,19 +206,19 @@ export default async function seedStep4Point5(models: Models) {
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_disable_when_incomplete",
+      propertyId: "buttonDisableWhenIncomplete",
       propertyValue: "true",
     },
   ]);

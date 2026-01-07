@@ -1,4 +1,4 @@
-import { Models } from "@db/models";
+import { Models } from "~db/models";
 
 export async function seedOrganizations(models: Models) {
   await models.Organization.bulkCreate([

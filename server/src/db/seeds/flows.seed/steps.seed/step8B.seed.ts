@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep8B(models: Models) {
   const step8B = await models.Step.create({
@@ -32,7 +33,7 @@ export default async function seedStep8B(models: Models) {
   const fullNameInput = await models.StepElement.create({
     id: uuidV4(),
     stepId: step8B.id,
-    elementId: "text_input",
+    elementId: "textInput",
     name: "Full name input",
     order: 2,
   });
@@ -48,7 +49,7 @@ export default async function seedStep8B(models: Models) {
   const dobPicker = await models.StepElement.create({
     id: uuidV4(),
     stepId: step8B.id,
-    elementId: "date_picker",
+    elementId: "datePicker",
     name: "DOB picker",
     order: 4,
   });
@@ -68,74 +69,74 @@ export default async function seedStep8B(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "One last thing, what's your full name?",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "We're excited to help you find the perfect home loan!",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: fullNameInput.id,
     },
     {
       id: uuidV4(),
       stepElementId: fullNameInput.id,
-      propertyId: "text_input_name",
-      propertyValue: "full_name",
+      propertyId: "textInputName",
+      propertyValue: "fullName",
     },
     {
       id: uuidV4(),
       stepElementId: fullNameInput.id,
-      propertyId: "text_input_required",
+      propertyId: "textInputRequired",
       propertyValue: "true",
     },
     // DOB label + picker
     {
       id: uuidV4(),
       stepElementId: dobLabel.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "When is your Date of Birth",
     },
     {
       id: uuidV4(),
       stepElementId: dobLabel.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: dobPicker.id,
     },
     {
       id: uuidV4(),
       stepElementId: dobPicker.id,
-      propertyId: "date_picker_name",
-      propertyValue: "date_of_birth",
+      propertyId: "datePickerName",
+      propertyValue: "dateOfBirth",
     },
     {
       id: uuidV4(),
       stepElementId: dobPicker.id,
-      propertyId: "date_picker_format",
+      propertyId: "datePickerFormat",
       propertyValue: "YYYY-MM-DD",
     },
     {
       id: uuidV4(),
       stepElementId: dobPicker.id,
-      propertyId: "date_picker_required",
+      propertyId: "datePickerRequired",
       propertyValue: "true",
     },
     {
       id: uuidV4(),
       stepElementId: submitButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Get my home loan matches",
     },
     {
       id: uuidV4(),
       stepElementId: submitButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
   ]);

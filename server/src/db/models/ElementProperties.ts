@@ -1,4 +1,3 @@
-import { ElementPropertyTypes } from "@sharedTypes/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -6,6 +5,8 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
+
+import { ElementPropertyTypes } from "~sharedTypes/enums";
 
 export class ElementProperties extends Model<
   InferAttributes<ElementProperties>,
@@ -42,11 +43,11 @@ export class ElementProperties extends Model<
       },
       {
         sequelize,
-        tableName: "element_properties",
+        tableName: "elementProperties",
         indexes: [
           {
             unique: true,
-            fields: ["element_id", "property_name"],
+            fields: ["elementId", "propertyName"],
           },
         ],
       }

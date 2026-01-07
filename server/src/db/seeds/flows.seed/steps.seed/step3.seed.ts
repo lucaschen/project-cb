@@ -1,4 +1,4 @@
-import { Models } from "@db/models";
+import { Models } from "~db/models";
 import { v4 as uuidV4 } from "uuid";
 
 export default async function seedStep3(models: Models) {
@@ -53,60 +53,60 @@ export default async function seedStep3(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "What best describes your home buying situation?",
     },
     // Label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "Understanding your position in the home buying journey lets us guide you with the most relevant support.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: situationSelect.id,
     },
     // Step3 Input
     {
       id: uuidV4(),
       stepElementId: situationSelect.id,
-      propertyId: "select_name",
-      propertyValue: "home_buying_situation",
+      propertyId: "selectName",
+      propertyValue: "homeBuyingSituation",
     },
     {
       id: uuidV4(),
       stepElementId: situationSelect.id,
-      propertyId: "select_options",
+      propertyId: "selectOptions",
       propertyValue:
-        "['Just exploring options', 'Planning to buy in 6 months', 'Made an offer', 'Exchanged contracts']",
+        '["Just exploring options", "Planning to buy in 6 months", "Made an offer", "Exchanged contracts"]',
     },
     {
       id: uuidV4(),
       stepElementId: situationSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
     // Next button
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_disable_when_incomplete",
+      propertyId: "buttonDisableWhenIncomplete",
       propertyValue: "true",
     },
   ]);

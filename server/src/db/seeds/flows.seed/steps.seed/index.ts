@@ -1,4 +1,4 @@
-import { Models } from "@db/models";
+import { Models } from "~db/models";
 
 import seedStep1 from "./step1.seed";
 import seedStep2 from "./step2.seed";

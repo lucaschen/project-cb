@@ -10,7 +10,7 @@ const {
 
 export const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   define: {
-    underscored: true,
+    underscored: false,
     timestamps: true,
   },
   host: DB_HOST,

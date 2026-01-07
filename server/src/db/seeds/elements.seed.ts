@@ -1,4 +1,4 @@
-import { Models } from "@db/models";
+import { Models } from "~db/models";
 
 export async function seedElements(models: Models) {
   await models.Element.bulkCreate([
@@ -14,7 +14,7 @@ export async function seedElements(models: Models) {
     },
     { id: "label", name: "Label", description: "Label for an input" },
     {
-      id: "text_input",
+      id: "textInput",
       name: "Text Input",
       description: "Single-line text input field",
     },
@@ -24,7 +24,7 @@ export async function seedElements(models: Models) {
       description: "Multi-line text input field",
     },
     {
-      id: "number_input",
+      id: "numberInput",
       name: "Number Input",
       description: "Numeric input field",
     },
@@ -44,7 +44,7 @@ export async function seedElements(models: Models) {
       description: "Tooltip shows information on hover",
     },
     {
-      id: "date_picker",
+      id: "datePicker",
       name: "Date Picker",
       description: "Single date picker",
     },

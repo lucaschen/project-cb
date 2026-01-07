@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep8A(models: Models) {
   const step8A = await models.Step.create({
@@ -32,7 +33,7 @@ export default async function seedStep8A(models: Models) {
   const firstNameInput = await models.StepElement.create({
     id: uuidV4(),
     stepId: step8A.id,
-    elementId: "text_input",
+    elementId: "textInput",
     name: "First name input",
     order: 2,
   });
@@ -52,43 +53,43 @@ export default async function seedStep8A(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "One last thing, what's your first name?",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "We're excited to help you find the perfect home loan!",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: firstNameInput.id,
     },
     {
       id: uuidV4(),
       stepElementId: firstNameInput.id,
-      propertyId: "text_input_name",
-      propertyValue: "first_name",
+      propertyId: "textInputName",
+      propertyValue: "firstName",
     },
     {
       id: uuidV4(),
       stepElementId: firstNameInput.id,
-      propertyId: "text_input_required",
+      propertyId: "textInputRequired",
       propertyValue: "true",
     },
     {
       id: uuidV4(),
       stepElementId: submitButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Get my home loan matches",
     },
     {
       id: uuidV4(),
       stepElementId: submitButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
   ]);

@@ -1,0 +1,63 @@
+{
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/eslint__js": "^8.42.3",
+    "@types/ramda": "^0.30.2",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import-x": "^4.6.1",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-perfectionist": "^4.6.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "immer": "^10.1.1",
+    "nanoid": "^5.0.9",
+    "ramda": "^0.30.1",
+    "react": "^18.3.1",
+    "redux": "^5.0.1",
+    "ts-essentials": "^10.0.4",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "zod": "^3.24.1"
+  },
+  "engine-strict": true,
+  "engines": {
+    "node": ">=20.0.0 <21.0.0",
+    "npm": "Please use pnpm",
+    "pnpm": ">=9.0.0",
+    "yarn": "Please use pnpm"
+  },
+  "exports": {
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "name": "@packages/shared",
+  "peerDependencies": {
+    "immer": "^10.1.1",
+    "nanoid": "^5.0.9",
+    "ramda": "^0.30.1",
+    "react": "^18.3.1",
+    "redux": "^5.0.1",
+    "ts-essentials": "^10.0.3",
+    "zod": "^3.23.8"
+  },
+  "private": true,
+  "scripts": {
+    "lint": "pnpm typecheck && eslint . --config ./eslint.config.mjs",
+    "lint:fix": "pnpm typecheck && eslint . --fix --config ./eslint.config.mjs",
+    "typecheck": "tsc",
+    "build": "tsc -b tsconfig.build.json"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.0"
+}

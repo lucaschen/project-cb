@@ -25,9 +25,9 @@ export class StepElementProperties extends Model<
       },
       {
         sequelize,
-        tableName: "step_elements_properties",
+        tableName: "stepElementsProperties",
         indexes: [
-          { unique: true, fields: ["step_element_id", "property_id"] }, // name should be unique - per step
+          { unique: true, fields: ["stepElementId", "propertyId"] }, // name should be unique - per step
         ],
       }
     );

@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep5(models: Models) {
   const step5 = await models.Step.create({
@@ -53,41 +54,41 @@ export default async function seedStep5(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "What kind of property are you looking to buy?",
     },
     // Label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "The type of property you're looking to buy helps us determine the most suitable loan products for your needs.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: idealPropertyType.id,
     },
     // Select input
     {
       id: uuidV4(),
       stepElementId: idealPropertyType.id,
-      propertyId: "select_name",
-      propertyValue: "ideal_property_type",
+      propertyId: "selectName",
+      propertyValue: "idealPropertyType",
     },
     {
       id: uuidV4(),
       stepElementId: idealPropertyType.id,
-      propertyId: "select_options",
+      propertyId: "selectOptions",
       propertyValue:
-        "['Newly built/Off the plan', 'Established home', 'Vacant land']",
+        '["Newly built/Off the plan", "Established home", "Vacant land"]',
     },
     {
       id: uuidV4(),
       stepElementId: idealPropertyType.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
   ]);
@@ -97,19 +98,19 @@ export default async function seedStep5(models: Models) {
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_disable_when_incomplete",
+      propertyId: "buttonDisableWhenIncomplete",
       propertyValue: "true",
     },
   ]);

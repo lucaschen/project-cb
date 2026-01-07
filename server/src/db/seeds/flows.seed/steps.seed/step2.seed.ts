@@ -1,5 +1,6 @@
-import { Models } from "@db/models";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
 
 export default async function seedStep2(models: Models) {
   const step2 = await models.Step.create({
@@ -32,7 +33,7 @@ export default async function seedStep2(models: Models) {
   const depositInput = await models.StepElement.create({
     id: uuidV4(),
     stepId: step2.id,
-    elementId: "number_input",
+    elementId: "numberInput",
     name: "Step 2 input",
     order: 2,
   });
@@ -61,72 +62,72 @@ export default async function seedStep2(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "How much deposit do you have?",
     },
     // Label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "This helps us calculate your Loan-to-Value Ratio (LVR), which may qualify you for better home loan rates and terms.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: depositInput.id,
     },
     // Purchase Price Input
     {
       id: uuidV4(),
       stepElementId: depositInput.id,
-      propertyId: "number_input_format",
+      propertyId: "numberInputFormat",
       propertyValue: "$0,0",
     },
     {
       id: uuidV4(),
       stepElementId: depositInput.id,
-      propertyId: "number_input_name",
-      propertyValue: "purchase_price",
+      propertyId: "numberInputName",
+      propertyValue: "purchasePrice",
     },
     {
       id: uuidV4(),
       stepElementId: depositInput.id,
-      propertyId: "number_input_required",
+      propertyId: "numberInputRequired",
       propertyValue: "true",
     },
     // Tooltip
     {
       id: uuidV4(),
       stepElementId: tooltip.id,
-      propertyId: "tooltip_trigger_text",
+      propertyId: "tooltipTriggerText",
       propertyValue: "? Understanding your LVR",
     },
     {
       id: uuidV4(),
       stepElementId: tooltip.id,
-      propertyId: "tooltip_hover_text",
+      propertyId: "tooltipHoverText",
       propertyValue: "It is important for unknown reasons",
     },
     // Next button
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_text",
+      propertyId: "buttonText",
       propertyValue: "Next",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_variant",
+      propertyId: "buttonVariant",
       propertyValue: "primary",
     },
     {
       id: uuidV4(),
       stepElementId: nextButton.id,
-      propertyId: "button_disable_when_incomplete",
+      propertyId: "buttonDisableWhenIncomplete",
       propertyValue: "true",
     },
   ]);

@@ -1,6 +1,7 @@
-import { Models } from "@db/models";
-import { ComparisonOperation } from "@sharedTypes/enums";
 import { v4 as uuidV4 } from "uuid";
+
+import { Models } from "~db/models";
+import { ComparisonOperation } from "~sharedTypes/enums";
 
 export default async function seedStep6(models: Models) {
   const step6 = await models.Step.create({
@@ -63,78 +64,78 @@ export default async function seedStep6(models: Models) {
     {
       id: uuidV4(),
       stepElementId: header.id,
-      propertyId: "header_text",
+      propertyId: "headerText",
       propertyValue: "How will this property be used?",
     },
     // Label
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue:
         "Is this property your home or an investment? Your answer helps us tailor your home loan options.",
     },
     {
       id: uuidV4(),
       stepElementId: label.id,
-      propertyId: "label_for",
+      propertyId: "labelFor",
       propertyValue: propertyUsageSelect.id,
     },
     // Select input
     {
       id: uuidV4(),
       stepElementId: propertyUsageSelect.id,
-      propertyId: "select_name",
-      propertyValue: "property_usage",
+      propertyId: "selectName",
+      propertyValue: "propertyUsage",
     },
     {
       id: uuidV4(),
       stepElementId: propertyUsageSelect.id,
-      propertyId: "select_options",
-      propertyValue: "['I will live there', 'Its an investment']",
+      propertyId: "selectOptions",
+      propertyValue: '["I will live there", "Its an investment"]',
     },
     {
       id: uuidV4(),
       stepElementId: propertyUsageSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
     // Experiment: additional question when selected by experiment
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentLabel.id,
-      propertyId: "label_text",
+      propertyId: "labelText",
       propertyValue: "Do you have an existing investment property",
     },
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      propertyId: "select_name",
-      propertyValue: "has_existing_investment",
+      propertyId: "selectName",
+      propertyValue: "hasExistingInvestment",
     },
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      propertyId: "select_options",
-      propertyValue: "['Yes', 'No']",
+      propertyId: "selectOptions",
+      propertyValue: '["Yes", "No"]',
     },
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      propertyId: "select_required",
+      propertyId: "selectRequired",
       propertyValue: "true",
     },
   ]);
 
   // ───────────────────
-  // Experiment conditions: show when Step4.first_home_buyer === 'No' AND randomNumber(0,100) <= 50
+  // Experiment conditions: show when Step4.firstHomeBuyer === 'No' AND randomNumber(0,100) <= 50
   // ───────────────────
   await models.StepElementCondition.bulkCreate([
     // label conditions
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentLabel.id,
-      value: `stepElementValueById(step4_first_home_buyer_select)`,
+      value: `stepElementValueById(step4FirstHomeBuyerSelect)`,
       operation: ComparisonOperation.EQ,
       comparisonValue: "No",
     },
@@ -149,7 +150,7 @@ export default async function seedStep6(models: Models) {
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      value: `stepElementValueById(step4_first_home_buyer_select)`,
+      value: `stepElementValueById(step4FirstHomeBuyerSelect)`,
       operation: ComparisonOperation.EQ,
       comparisonValue: "No",
     },

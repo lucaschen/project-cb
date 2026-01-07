@@ -27,9 +27,9 @@ export class StepElement extends Model<
       },
       {
         sequelize,
-        tableName: "step_elements",
+        tableName: "stepElements",
         indexes: [
-          { unique: true, fields: ["step_id", "name"] }, // name should be unique - per step
+          { unique: true, fields: ["stepId", "name"] }, // name should be unique - per step
           { fields: ["order"] },
         ],
       }

@@ -4,7 +4,6 @@ import { staticImplements, type StaticMethods } from "../types";
 import validatePassword from "./instanceMethods/validatePassword";
 import create from "./staticMethods/create";
 import findByEmail from "./staticMethods/findByEmail";
-import findById from "./staticMethods/findById";
 
 @staticImplements<StaticMethods<typeof UserEntity, UserEntity>>()
 export default class UserEntity {
@@ -17,7 +16,6 @@ export default class UserEntity {
   // PARTITION: Static methods
   static create = create;
   static findByEmail = findByEmail;
-  static findById = findById;
 
   // PARTITION: Instance methods
   validatePassword = validatePassword;

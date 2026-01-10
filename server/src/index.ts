@@ -1,12 +1,10 @@
-import express from "express";
+import setupDb from "./db/setup";
+import setupHttpServer from "./http/setup";
 
-const app = express();
-const port = process.env.PORT || 4000;
+console.log("Project CB!");
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+(async () => {
+  await Promise.all([setupHttpServer(), setupDb()]);
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+  console.log("HTTP server running on port 9001");
+})();

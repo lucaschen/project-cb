@@ -1,7 +1,16 @@
 {
   "extends": "@packages/tsconfig/tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDir": "./src",
+    "types": ["node"],
+    "paths": {
+      "~src/*": ["./src/*"],
+      "~db/*": ["./src/db/*"],
+      "~sharedTypes/*": ["./src/sharedTypes/*"]
+    }
   },
   "include": ["src"]
 }

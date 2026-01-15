@@ -1,9 +1,11 @@
+import { v4 as uuidV4 } from "uuid";
+
 import { Models } from "~db/models";
 
 export async function seedOrganizations(models: Models) {
-  await models.Organization.bulkCreate([
+  const organization = await models.Organization.bulkCreate([
     {
-      id: "seedOrg1",
+      id: uuidV4(),
       name: "Seed Org",
       slug: "seed-org",
       apiKey: "cb_test_key_123",
@@ -11,4 +13,6 @@ export async function seedOrganizations(models: Models) {
   ]);
 
   console.log("🌱 Seeded organizations");
+
+  return organization;
 }

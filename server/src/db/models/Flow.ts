@@ -18,8 +18,8 @@ export class Flow extends Model<
   static initModel(sequelize: Sequelize) {
     Flow.init(
       {
-        id: { type: DataTypes.STRING, primaryKey: true },
-        organizationId: { type: DataTypes.STRING, allowNull: false },
+        id: { type: DataTypes.UUID, primaryKey: true },
+        organizationId: { type: DataTypes.UUID, allowNull: false },
         name: { type: DataTypes.STRING, allowNull: false },
         slug: { type: DataTypes.STRING, allowNull: false },
       },

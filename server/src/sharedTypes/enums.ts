@@ -30,3 +30,8 @@ export enum ElementPropertyTypes {
   OBJECT = "OBJECT",
   ARRAY = "ARRAY",
 }
+
+export enum NodeType {
+  DECISION = "DECISION",
+  STEP = "STEP",
+}

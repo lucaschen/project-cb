@@ -6,7 +6,7 @@ import {
   Sequelize,
 } from "sequelize";
 
-import { ComparisonOperation } from "~sharedTypes/enums";
+import { ConditionStatement } from "~sharedTypes/conditionStatement";
 
 export class StepElementCondition extends Model<
   InferAttributes<StepElementCondition>,
@@ -14,21 +14,14 @@ export class StepElementCondition extends Model<
 > {
   declare id: string;
   declare stepElementId: string;
-  declare value: string | null;
-  declare operation: ComparisonOperation;
-  declare comparisonValue: string | null;
+  declare statement: ConditionStatement;
 
   static initModel(sequelize: Sequelize) {
     StepElementCondition.init(
       {
-        id: { type: DataTypes.STRING, primaryKey: true },
+        id: { type: DataTypes.UUID, primaryKey: true },
         stepElementId: { type: DataTypes.STRING, allowNull: false },
-        value: { type: DataTypes.STRING, allowNull: true },
-        operation: {
-          type: DataTypes.ENUM(...Object.values(ComparisonOperation)),
-          allowNull: false,
-        },
-        comparisonValue: { type: DataTypes.STRING, allowNull: true },
+        statement: { type: DataTypes.JSONB, allowNull: false },
       },
       {
         sequelize,

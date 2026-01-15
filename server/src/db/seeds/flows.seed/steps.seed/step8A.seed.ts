@@ -1,14 +1,33 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
+import { NodeType } from "~sharedTypes/enums";
 
 export default async function seedStep8A(models: Models) {
-  const step8A = await models.Step.create({
+  const flow = await models.Flow.findOne({
+    where: { slug: "main-flow" },
+  });
+
+  if (!flow) {
+    throw new Error("Flow not found for seeding step");
+  }
+
+  const baseNode = await models.Node.create({
     id: uuidV4(),
-    flowId: "seedFlow1",
+    flowId: flow.id,
     name: "Step8A",
+    type: NodeType.STEP,
+  });
+
+  await models.NodeCoordinates.create({
+    nodeId: baseNode.id,
     x: 100,
     y: 100,
+  });
+
+  const step8A = await models.Step.create({
+    nodeId: baseNode.id,
+    nextNodeId: null,
   });
 
   // ───────────────────
@@ -16,7 +35,7 @@ export default async function seedStep8A(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step8A.id,
+    stepId: baseNode.id,
     elementId: "header",
     name: "Step8A title",
     order: 0,
@@ -24,7 +43,7 @@ export default async function seedStep8A(models: Models) {
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step8A.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Step8A label",
     order: 1,
@@ -32,7 +51,7 @@ export default async function seedStep8A(models: Models) {
 
   const firstNameInput = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step8A.id,
+    stepId: baseNode.id,
     elementId: "textInput",
     name: "First name input",
     order: 2,
@@ -40,7 +59,7 @@ export default async function seedStep8A(models: Models) {
 
   const submitButton = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step8A.id,
+    stepId: baseNode.id,
     elementId: "button",
     name: "Submit button",
     order: 3,

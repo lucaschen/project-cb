@@ -21,9 +21,9 @@ export class OrganizationUserInvitation extends Model<
   static initModel(sequelize: Sequelize) {
     OrganizationUserInvitation.init(
       {
-        id: { type: DataTypes.STRING, primaryKey: true },
-        organizationId: { type: DataTypes.STRING, allowNull: false },
-        userId: { type: DataTypes.STRING, allowNull: false },
+        id: { type: DataTypes.UUID, primaryKey: true },
+        organizationId: { type: DataTypes.UUID, allowNull: false },
+        userId: { type: DataTypes.UUID, allowNull: false },
         expiresAt: { type: DataTypes.DATE, allowNull: false },
         permissions: {
           type: DataTypes.ENUM(...Object.values(OrganizationUserPermission)),

@@ -18,8 +18,8 @@ export class UserSession extends Model<
   static initModel(sequelize: Sequelize) {
     UserSession.init(
       {
-        id: { type: DataTypes.STRING, primaryKey: true },
-        userId: { type: DataTypes.STRING, allowNull: false },
+        id: { type: DataTypes.UUID, primaryKey: true },
+        userId: { type: DataTypes.UUID, allowNull: false },
         sessionToken: { type: DataTypes.STRING, allowNull: false },
         expiresAt: { type: DataTypes.DATE, allowNull: false },
       },

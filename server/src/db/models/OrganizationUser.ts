@@ -20,11 +20,11 @@ export class OrganizationUser extends Model<
     OrganizationUser.init(
       {
         organizationId: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           primaryKey: true,
         },
         userId: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           primaryKey: true,
         },
         permissions: {

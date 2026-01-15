@@ -7,9 +7,9 @@
     "rootDir": "./src",
     "types": ["node"],
     "paths": {
-      "~src/*": ["./src/*"],
       "~db/*": ["./src/db/*"],
-      "~sharedTypes/*": ["./src/sharedTypes/*"]
+      "~sharedTypes/*": ["./src/sharedTypes/*"],
+      "~src/*": ["./src/*"]
     }
   },
   "include": ["src"]

@@ -1,10 +1,12 @@
 import type { Sequelize } from "sequelize";
 
-import { Connection } from "./Connection";
 import { DecisionNode } from "./DecisionNode";
+import { DecisionNodeConditions } from "./DecisionNodeConditions";
 import { Element } from "./Element";
 import { ElementProperties } from "./ElementProperties";
 import { Flow } from "./Flow";
+import { Node } from "./Node";
+import { NodeCoordinates } from "./NodeCoordinates";
 import { Organization } from "./Organization";
 import { OrganizationUser } from "./OrganizationUser";
 import { OrganizationUserInvitation } from "./OrganizationUserInvitation";
@@ -19,11 +21,13 @@ export type Models = ReturnType<typeof initModels>;
 
 export function initModels(sequelize: Sequelize) {
   // init
-  Connection.initModel(sequelize);
   DecisionNode.initModel(sequelize);
+  DecisionNodeConditions.initModel(sequelize);
   Element.initModel(sequelize);
   ElementProperties.initModel(sequelize);
   Flow.initModel(sequelize);
+  Node.initModel(sequelize);
+  NodeCoordinates.initModel(sequelize);
   Organization.initModel(sequelize);
   OrganizationUser.initModel(sequelize);
   OrganizationUserInvitation.initModel(sequelize);
@@ -33,6 +37,24 @@ export function initModels(sequelize: Sequelize) {
   StepElementProperties.initModel(sequelize);
   User.initModel(sequelize);
   UserSession.initModel(sequelize);
+
+  Node.hasOne(NodeCoordinates, { foreignKey: "nodeId", as: "coordinates" });
+  NodeCoordinates.belongsTo(Node, { foreignKey: "nodeId", as: "node" });
+
+  Node.hasOne(Step, { foreignKey: "nodeId", as: "stepData" });
+  Step.belongsTo(Node, { foreignKey: "nodeId", as: "node" });
+
+  Node.hasOne(DecisionNode, { foreignKey: "nodeId", as: "decisionData" });
+  DecisionNode.belongsTo(Node, { foreignKey: "nodeId", as: "node" });
+
+  DecisionNode.hasMany(DecisionNodeConditions, {
+    foreignKey: "nodeId",
+    as: "decisionNodeConditions",
+  });
+  DecisionNodeConditions.belongsTo(DecisionNode, {
+    foreignKey: "nodeId",
+    as: "decisionNode",
+  });
 
   // Element -> ElementProperties (1:N)
   Element.hasMany(ElementProperties, {
@@ -147,12 +169,11 @@ export function initModels(sequelize: Sequelize) {
     as: "stepElement",
   });
 
-  // connections: cannot FK to steps/decisionNodes cleanly without a shared nodes table
-  // so no belongsTo association here on purpose.
-
   return {
-    Connection,
+    Node,
+    NodeCoordinates,
     DecisionNode,
+    DecisionNodeConditions,
     Element,
     ElementProperties,
     Flow,

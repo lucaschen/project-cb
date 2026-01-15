@@ -1,14 +1,33 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
+import { NodeType } from "~sharedTypes/enums";
 
 export default async function seedStep4(models: Models) {
-  const step4 = await models.Step.create({
+  const flow = await models.Flow.findOne({
+    where: { slug: "main-flow" },
+  });
+
+  if (!flow) {
+    throw new Error("Flow not found for seeding step");
+  }
+
+  const baseNode = await models.Node.create({
     id: uuidV4(),
-    flowId: "seedFlow1",
+    flowId: flow.id,
     name: "Step4",
+    type: NodeType.STEP,
+  });
+
+  await models.NodeCoordinates.create({
+    nodeId: baseNode.id,
     x: 100,
     y: 100,
+  });
+
+  const step4 = await models.Step.create({
+    nodeId: baseNode.id,
+    nextNodeId: null,
   });
 
   // ───────────────────
@@ -16,7 +35,7 @@ export default async function seedStep4(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4.id,
+    stepId: baseNode.id,
     elementId: "header",
     name: "Step4 title",
     order: 0,
@@ -24,7 +43,7 @@ export default async function seedStep4(models: Models) {
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Step4 label",
     order: 1,
@@ -32,7 +51,7 @@ export default async function seedStep4(models: Models) {
 
   const firstHomeBuyerSelect = await models.StepElement.create({
     id: "step4FirstHomeBuyerSelect",
-    stepId: step4.id,
+    stepId: baseNode.id,
     elementId: "select",
     name: "Step4 select",
     order: 2,
@@ -40,7 +59,7 @@ export default async function seedStep4(models: Models) {
 
   const tooltip = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4.id,
+    stepId: baseNode.id,
     elementId: "tooltip",
     name: "Tooltip",
     order: 3,
@@ -48,7 +67,7 @@ export default async function seedStep4(models: Models) {
 
   const nextButton = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4.id,
+    stepId: baseNode.id,
     elementId: "button",
     name: "Next button",
     order: 4,

@@ -17,7 +17,7 @@ export class DecisionNode extends Model<
     DecisionNode.init(
       {
         nodeId: { type: DataTypes.UUID, primaryKey: true },
-        fallbackNextNodeId: { type: DataTypes.STRING, allowNull: false },
+        fallbackNextNodeId: { type: DataTypes.UUID, allowNull: false },
       },
       {
         sequelize,

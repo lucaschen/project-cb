@@ -23,7 +23,11 @@ export async function clearDatabase(models: Models) {
     cascade: true,
   });
   await models.Element.destroy({ where: {}, truncate: true, cascade: true });
-
+  await models.StepElementCondition.destroy({
+    where: {},
+    truncate: true,
+    cascade: true,
+  });
   await models.Step.destroy({ where: {}, truncate: true, cascade: true });
   await models.DecisionNode.destroy({
     where: {},

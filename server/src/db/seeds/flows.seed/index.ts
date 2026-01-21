@@ -34,7 +34,6 @@ export async function seedFlows(models: Models) {
   await steps.step1.update({ nextNodeId: steps.step2.nodeId });
   await steps.step2.update({ nextNodeId: steps.step3.nodeId });
   await steps.step3.update({ nextNodeId: steps.step4.nodeId });
-  await steps.step4.update({ nextNodeId: steps.step5.nodeId });
 
   const step4DecisionBaseNode = await models.Node.create({
     id: uuidV4(),
@@ -42,6 +41,9 @@ export async function seedFlows(models: Models) {
     name: "Step4Decision",
     type: NodeType.DECISION,
   });
+
+  await steps.step4.update({ nextNodeId: step4DecisionBaseNode.id });
+
   await models.NodeCoordinates.create({
     nodeId: step4DecisionBaseNode.id,
     x: 100,
@@ -67,6 +69,7 @@ export async function seedFlows(models: Models) {
     order: 0,
   });
 
+  await steps.step4Point5.update({ nextNodeId: steps.step5.nodeId });
   await steps.step5.update({ nextNodeId: steps.step6.nodeId });
   await steps.step6.update({ nextNodeId: steps.step7.nodeId });
 
@@ -76,6 +79,9 @@ export async function seedFlows(models: Models) {
     name: "Step7Decision",
     type: NodeType.DECISION,
   });
+
+  await steps.step7.update({ nextNodeId: step7DecisionBaseNode.id });
+
   await models.NodeCoordinates.create({
     nodeId: step7DecisionBaseNode.id,
     x: 100,

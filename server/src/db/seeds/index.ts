@@ -34,12 +34,12 @@ export async function clearDatabase(models: Models) {
     truncate: true,
     cascade: true,
   });
-  await models.DecisionNodeConditions.destroy({
+  await models.DecisionNodeCondition.destroy({
     where: {},
     truncate: true,
     cascade: true,
   });
-  await models.NodeCoordinates.destroy({
+  await models.NodeCoordinate.destroy({
     where: {},
     truncate: true,
     cascade: true,

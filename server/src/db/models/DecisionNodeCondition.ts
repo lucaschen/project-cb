@@ -8,9 +8,9 @@ import {
 
 import { ConditionStatement } from "~sharedTypes/conditionStatement";
 
-export class DecisionNodeConditions extends Model<
-  InferAttributes<DecisionNodeConditions>,
-  InferCreationAttributes<DecisionNodeConditions>
+export class DecisionNodeCondition extends Model<
+  InferAttributes<DecisionNodeCondition>,
+  InferCreationAttributes<DecisionNodeCondition>
 > {
   declare id: string;
   declare nodeId: string;
@@ -19,7 +19,7 @@ export class DecisionNodeConditions extends Model<
   declare order: number;
 
   static initModel(sequelize: Sequelize) {
-    DecisionNodeConditions.init(
+    DecisionNodeCondition.init(
       {
         id: { type: DataTypes.UUID, primaryKey: true },
         nodeId: { type: DataTypes.UUID, allowNull: false },
@@ -33,6 +33,6 @@ export class DecisionNodeConditions extends Model<
         indexes: [{ fields: ["nodeId"] }, { fields: ["toNodeId"] }],
       }
     );
-    return DecisionNodeConditions;
+    return DecisionNodeCondition;
   }
 }

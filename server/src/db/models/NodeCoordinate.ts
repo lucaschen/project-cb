@@ -6,16 +6,16 @@ import {
   Sequelize,
 } from "sequelize";
 
-export class NodeCoordinates extends Model<
-  InferAttributes<NodeCoordinates>,
-  InferCreationAttributes<NodeCoordinates>
+export class NodeCoordinate extends Model<
+  InferAttributes<NodeCoordinate>,
+  InferCreationAttributes<NodeCoordinate>
 > {
   declare nodeId: string;
   declare x: number;
   declare y: number;
 
   static initModel(sequelize: Sequelize) {
-    NodeCoordinates.init(
+    NodeCoordinate.init(
       {
         nodeId: { type: DataTypes.UUID, primaryKey: true },
         x: { type: DataTypes.FLOAT, allowNull: false },
@@ -26,6 +26,6 @@ export class NodeCoordinates extends Model<
         tableName: "nodeCoordinates",
       }
     );
-    return NodeCoordinates;
+    return NodeCoordinate;
   }
 }

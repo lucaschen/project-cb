@@ -19,7 +19,7 @@ export default async function seedStep4Point5(models: Models) {
     type: NodeType.STEP,
   });
 
-  await models.NodeCoordinates.create({
+  await models.NodeCoordinate.create({
     nodeId: baseNode.id,
     x: 100,
     y: 100,

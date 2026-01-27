@@ -44,7 +44,7 @@ export async function seedFlows(models: Models) {
 
   await steps.step4.update({ nextNodeId: step4DecisionBaseNode.id });
 
-  await models.NodeCoordinates.create({
+  await models.NodeCoordinate.create({
     nodeId: step4DecisionBaseNode.id,
     x: 100,
     y: 100,
@@ -53,7 +53,7 @@ export async function seedFlows(models: Models) {
     nodeId: step4DecisionBaseNode.id,
     fallbackNextNodeId: steps.step5.nodeId,
   });
-  await models.DecisionNodeConditions.create({
+  await models.DecisionNodeCondition.create({
     id: uuidV4(),
     nodeId: step4DecisionNode.nodeId,
     toNodeId: steps.step4Point5.nodeId,
@@ -82,7 +82,7 @@ export async function seedFlows(models: Models) {
 
   await steps.step7.update({ nextNodeId: step7DecisionBaseNode.id });
 
-  await models.NodeCoordinates.create({
+  await models.NodeCoordinate.create({
     nodeId: step7DecisionBaseNode.id,
     x: 100,
     y: 100,
@@ -91,7 +91,7 @@ export async function seedFlows(models: Models) {
     nodeId: step7DecisionBaseNode.id,
     fallbackNextNodeId: steps.step8B.nodeId,
   });
-  await models.DecisionNodeConditions.create({
+  await models.DecisionNodeCondition.create({
     id: uuidV4(),
     nodeId: step7DecisionNode.nodeId,
     toNodeId: steps.step8A.nodeId,

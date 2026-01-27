@@ -1,4 +1,4 @@
-import type ExpressContextEntity from "~src/entities/ExpressContextEntity/ExpressContextEntity";
+import type ExpressContextEntity from "~entities/ExpressContextEntity/ExpressContextEntity";
 
 declare global {
   namespace Express {

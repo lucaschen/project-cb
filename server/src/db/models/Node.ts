@@ -6,7 +6,7 @@ import {
   Sequelize,
 } from "sequelize";
 
-import { NodeType } from "~sharedTypes/enums";
+import { NodeType } from "../../../../packages/shared/src/types/enums";
 
 export class Node extends Model<
   InferAttributes<Node>,
@@ -32,7 +32,7 @@ export class Node extends Model<
         sequelize,
         tableName: "nodes",
         indexes: [{ fields: ["flowId"] }],
-      }
+      },
     );
     return Node;
   }

@@ -27,7 +27,7 @@ export class Flow extends Model<
         sequelize,
         tableName: "flows",
         indexes: [{ unique: true, fields: ["organizationId", "slug"] }],
-      }
+      },
     );
     return Flow;
   }

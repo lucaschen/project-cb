@@ -1,4 +1,4 @@
-import checkExists from "@packages/shared/utils/types/checkExists";
+import checkExists from "@packages/shared/utils/checkExists";
 import bcrypt from "bcryptjs";
 
 import { User } from "~src/db/models/User";
@@ -7,7 +7,7 @@ import type UserEntity from "../UserEntity";
 
 export default async function validatePassword(
   this: UserEntity,
-  comparePassword: string
+  comparePassword: string,
 ) {
   const user = checkExists(await User.findByPk(this.dbModel.get("id")));
 

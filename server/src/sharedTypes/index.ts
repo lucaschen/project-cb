@@ -1,1 +1,1 @@
-export * from "./enums";
+export * from "../../../packages/shared/src/types/enums";

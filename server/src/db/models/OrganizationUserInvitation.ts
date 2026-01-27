@@ -6,7 +6,7 @@ import {
   Sequelize,
 } from "sequelize";
 
-import { OrganizationUserPermission } from "~sharedTypes/enums";
+import { OrganizationUserPermission } from "../../../../packages/shared/src/types/enums";
 
 export class OrganizationUserInvitation extends Model<
   InferAttributes<OrganizationUserInvitation>,
@@ -39,7 +39,7 @@ export class OrganizationUserInvitation extends Model<
           { fields: ["userId"] },
           { fields: ["expiresAt"] },
         ],
-      }
+      },
     );
     return OrganizationUserInvitation;
   }

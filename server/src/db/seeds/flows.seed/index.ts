@@ -1,7 +1,10 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { ComparisonOperation, NodeType } from "~sharedTypes/enums";
+import {
+  ComparisonOperation,
+  NodeType,
+} from "../../../../../packages/shared/src/types/enums";
 
 import { seedSteps } from "./steps.seed";
 

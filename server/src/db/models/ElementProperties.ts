@@ -6,7 +6,7 @@ import {
   Sequelize,
 } from "sequelize";
 
-import { ElementPropertyTypes } from "~sharedTypes/enums";
+import { ElementPropertyTypes } from "../../../../packages/shared/src/types/enums";
 
 export class ElementProperties extends Model<
   InferAttributes<ElementProperties>,
@@ -50,7 +50,7 @@ export class ElementProperties extends Model<
             fields: ["elementId", "propertyName"],
           },
         ],
-      }
+      },
     );
     return ElementProperties;
   }

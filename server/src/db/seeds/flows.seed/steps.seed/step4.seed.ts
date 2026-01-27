@@ -1,7 +1,7 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { NodeType } from "~sharedTypes/enums";
+import { NodeType } from "../../../../../../packages/shared/src/types/enums";
 
 export default async function seedStep4(models: Models) {
   const flow = await models.Flow.findOne({

@@ -7,9 +7,14 @@ import type DecisionNodeEntity from "../DecisionNodeEntity";
 
 export default async function create(
   this: typeof DecisionNodeEntity,
-  params: Omit<InferCreationAttributes<DecisionNode>, "id"> & { id?: string }
+  {
+    nodeId,
+    ...params
+  }: Omit<InferCreationAttributes<DecisionNode>, "nodeId"> & {
+    nodeId?: string;
+  },
 ): Promise<DecisionNodeEntity> {
-  const payload = { id: params.id ?? uuidV4(), ...params };
+  const payload = { nodeId: nodeId ?? uuidV4(), ...params };
 
   const model = await DecisionNode.create(payload);
 

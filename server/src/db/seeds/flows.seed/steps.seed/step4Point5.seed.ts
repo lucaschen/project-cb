@@ -1,15 +1,33 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { ComparisonOperation } from "~sharedTypes/enums";
+import { ComparisonOperation, NodeType } from "~sharedTypes/enums";
 
 export default async function seedStep4Point5(models: Models) {
-  const step4Point5 = await models.Step.create({
+  const flow = await models.Flow.findOne({
+    where: { slug: "main-flow" },
+  });
+
+  if (!flow) {
+    throw new Error("Flow not found for seeding step");
+  }
+
+  const baseNode = await models.Node.create({
     id: uuidV4(),
-    flowId: "seedFlow1",
+    flowId: flow.id,
     name: "Step4Point5",
+    type: NodeType.STEP,
+  });
+
+  await models.NodeCoordinate.create({
+    nodeId: baseNode.id,
     x: 100,
     y: 100,
+  });
+
+  const step4Point5 = await models.Step.create({
+    nodeId: baseNode.id,
+    nextNodeId: null,
   });
 
   // ───────────────────
@@ -17,7 +35,7 @@ export default async function seedStep4Point5(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "header",
     name: "Step4Point5 title",
     order: 0,
@@ -25,7 +43,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Step4Point5 label",
     order: 1,
@@ -33,7 +51,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const numberInput = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "numberInput",
     name: "Estimated value input",
     order: 1,
@@ -41,7 +59,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const ownedLabel = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Owned label",
     order: 2,
@@ -49,7 +67,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const ownedSelect = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "select",
     name: "Owned select",
     order: 3,
@@ -58,7 +76,7 @@ export default async function seedStep4Point5(models: Models) {
   // conditional elements (shown when Owned select === 'No')
   const purchasedLabel = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "When purchased label",
     order: 4,
@@ -66,7 +84,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const datePicker = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "datePicker",
     name: "Month picker",
     order: 5,
@@ -175,7 +193,7 @@ export default async function seedStep4Point5(models: Models) {
 
   const nextButton = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step4Point5.id,
+    stepId: baseNode.id,
     elementId: "button",
     name: "Next button",
     order: 6,
@@ -188,16 +206,28 @@ export default async function seedStep4Point5(models: Models) {
     {
       id: uuidV4(),
       stepElementId: purchasedLabel.id,
-      value: `stepElementValueById(${ownedSelect.id})`,
-      operation: ComparisonOperation.EQ,
-      comparisonValue: "No",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "stepElementValue",
+          stepElementId: ownedSelect.id,
+        },
+        operator: ComparisonOperation.EQ,
+        rightValue: "No",
+      },
     },
     {
       id: uuidV4(),
       stepElementId: datePicker.id,
-      value: `stepElementValueById(${ownedSelect.id})`,
-      operation: ComparisonOperation.EQ,
-      comparisonValue: "No",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "stepElementValue",
+          stepElementId: ownedSelect.id,
+        },
+        operator: ComparisonOperation.EQ,
+        rightValue: "No",
+      },
     },
   ]);
 

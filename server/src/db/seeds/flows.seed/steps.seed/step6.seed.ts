@@ -1,15 +1,33 @@
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { ComparisonOperation } from "~sharedTypes/enums";
+import { ComparisonOperation, NodeType } from "~sharedTypes/enums";
 
 export default async function seedStep6(models: Models) {
-  const step6 = await models.Step.create({
+  const flow = await models.Flow.findOne({
+    where: { slug: "main-flow" },
+  });
+
+  if (!flow) {
+    throw new Error("Flow not found for seeding step");
+  }
+
+  const baseNode = await models.Node.create({
     id: uuidV4(),
-    flowId: "seedFlow1",
+    flowId: flow.id,
     name: "Step6",
+    type: NodeType.STEP,
+  });
+
+  await models.NodeCoordinate.create({
+    nodeId: baseNode.id,
     x: 100,
     y: 100,
+  });
+
+  const step6 = await models.Step.create({
+    nodeId: baseNode.id,
+    nextNodeId: null,
   });
 
   // ───────────────────
@@ -17,7 +35,7 @@ export default async function seedStep6(models: Models) {
   // ───────────────────
   const header = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step6.id,
+    stepId: baseNode.id,
     elementId: "header",
     name: "Step6 title",
     order: 0,
@@ -25,7 +43,7 @@ export default async function seedStep6(models: Models) {
 
   const label = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step6.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Step6 label",
     order: 1,
@@ -33,7 +51,7 @@ export default async function seedStep6(models: Models) {
 
   const propertyUsageSelect = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step6.id,
+    stepId: baseNode.id,
     elementId: "select",
     name: "Property usage select",
     order: 2,
@@ -42,7 +60,7 @@ export default async function seedStep6(models: Models) {
   // conditional experiment elements (may be shown randomly when Step4.isFirstHome === false)
   const hasExistingInvestmentLabel = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step6.id,
+    stepId: baseNode.id,
     elementId: "label",
     name: "Existing investment label",
     order: 3,
@@ -50,7 +68,7 @@ export default async function seedStep6(models: Models) {
 
   const hasExistingInvestmentSelect = await models.StepElement.create({
     id: uuidV4(),
-    stepId: step6.id,
+    stepId: baseNode.id,
     elementId: "select",
     name: "Existing investment select",
     order: 4,
@@ -135,31 +153,57 @@ export default async function seedStep6(models: Models) {
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentLabel.id,
-      value: `stepElementValueById(step4FirstHomeBuyerSelect)`,
-      operation: ComparisonOperation.EQ,
-      comparisonValue: "No",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "stepElementValue",
+          stepElementId: "step4FirstHomeBuyerSelect",
+        },
+        rightValue: "No",
+        operator: ComparisonOperation.EQ,
+      },
     },
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentLabel.id,
-      value: `randomNumber(0, 100)`,
-      operation: ComparisonOperation.LTE,
-      comparisonValue: "50",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "randomNumber",
+          min: 0,
+          max: 100,
+        },
+        operator: ComparisonOperation.LTE,
+        rightValue: "50",
+      },
     },
     // select conditions
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      value: `stepElementValueById(step4FirstHomeBuyerSelect)`,
-      operation: ComparisonOperation.EQ,
-      comparisonValue: "No",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "stepElementValue",
+          stepElementId: "step4FirstHomeBuyerSelect",
+        },
+        rightValue: "No",
+        operator: ComparisonOperation.EQ,
+      },
     },
     {
       id: uuidV4(),
       stepElementId: hasExistingInvestmentSelect.id,
-      value: `randomNumber(0, 100)`,
-      operation: ComparisonOperation.LTE,
-      comparisonValue: "50",
+      statement: {
+        type: "comparison",
+        leftValue: {
+          type: "randomNumber",
+          min: 0,
+          max: 100,
+        },
+        operator: ComparisonOperation.LTE,
+        rightValue: "50",
+      },
     },
   ]);
 

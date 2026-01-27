@@ -18,7 +18,7 @@ export class User extends Model<
     User.init(
       {
         id: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           primaryKey: true,
         },
         email: {

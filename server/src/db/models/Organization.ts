@@ -19,7 +19,7 @@ export class Organization extends Model<
     Organization.init(
       {
         id: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           primaryKey: true,
         },
         name: {

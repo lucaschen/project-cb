@@ -18,7 +18,7 @@ export class StepElementProperties extends Model<
   static initModel(sequelize: Sequelize) {
     StepElementProperties.init(
       {
-        id: { type: DataTypes.STRING, primaryKey: true },
+        id: { type: DataTypes.UUID, primaryKey: true },
         stepElementId: { type: DataTypes.STRING, allowNull: false },
         propertyId: { type: DataTypes.STRING, allowNull: false },
         propertyValue: { type: DataTypes.STRING, allowNull: false },

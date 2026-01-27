@@ -56,6 +56,16 @@ export function initModels(sequelize: Sequelize) {
     as: "decisionNode",
   });
 
+  // Flow -> Node (1:N)
+  Flow.hasMany(Node, {
+    foreignKey: "flowId",
+    as: "nodes",
+  });
+
+  Node.belongsTo(Flow, {
+    foreignKey: "flowId",
+    as: "flow",
+  });
   // Element -> ElementProperties (1:N)
   Element.hasMany(ElementProperties, {
     foreignKey: "elementId",

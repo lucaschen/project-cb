@@ -17,6 +17,24 @@ export default async function create(
     apiKey?: string;
   },
 ): Promise<OrganizationEntity> {
+  // Check if id already exists
+  if (id) {
+    const existingOrgById = await Organization.findByPk(id);
+    if (existingOrgById) {
+      throw new Error(`Organization with ID ${id} already exists`);
+    }
+  }
+
+  // Check if apiKey already exists  
+  if (apiKey) {
+    const existingOrgByApiKey = await Organization.findOne({
+      where: { apiKey }
+    });
+    if (existingOrgByApiKey) {
+      throw new Error(`Organization with API key ${apiKey} already exists`);
+    }
+  }
+
   const payload = {
     id: id ?? uuidV4(),
     apiKey: apiKey ?? generateApiKey(),

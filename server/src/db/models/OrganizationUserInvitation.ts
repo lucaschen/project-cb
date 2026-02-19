@@ -1,3 +1,4 @@
+import { OrganizationUserPermission } from "@packages/shared/types/enums";
 import {
   DataTypes,
   InferAttributes,
@@ -5,8 +6,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-
-import { OrganizationUserPermission } from "../../../../packages/shared/src/types/enums";
 
 export class OrganizationUserInvitation extends Model<
   InferAttributes<OrganizationUserInvitation>,

@@ -13,19 +13,17 @@ const createFlow = enforceSchema({
   handler: async (req, res) => {
     const { name, organizationId, slug } = req.body;
 
-    if (organizationId) {
-      const userId = (
-        await checkExists(req.context.sessionEntity).fetchUserEntity()
-      ).dbModel.id;
+    const userId = (
+      await checkExists(req.context.sessionEntity).fetchUserEntity()
+    ).dbModel.id;
 
-      const createFlowError = await canUserCreateFlowInOrganization({
-        userId,
-        organizationId,
-      });
+    const createFlowError = await canUserCreateFlowInOrganization({
+      userId,
+      organizationId,
+    });
 
-      if (createFlowError instanceof Error) {
-        throw createFlowError;
-      }
+    if (createFlowError instanceof Error) {
+      throw createFlowError;
     }
 
     // Question: do flows require an organizationId? can a user directly own a flow?

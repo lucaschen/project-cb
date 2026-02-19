@@ -1,7 +1,9 @@
+import checkExists from "@packages/shared/utils/checkExists";
+
 import UserEntity from "~src/entities/UserEntity/UserEntity";
 
 import type SessionEntity from "../SessionEntity";
 
-export default function fetchUserEntity(this: SessionEntity) {
-  return UserEntity.findByEmail(this.payload.email);
+export default async function fetchUserEntity(this: SessionEntity) {
+  return checkExists(await UserEntity.findByEmail(this.payload.email));
 }

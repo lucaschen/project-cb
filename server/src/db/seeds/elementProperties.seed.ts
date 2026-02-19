@@ -1,5 +1,6 @@
+import { ElementPropertyTypes } from "@packages/shared/types/enums";
+
 import { Models } from "~db/models";
-import { ElementPropertyTypes } from "~sharedTypes/enums";
 
 export async function seedElementProperties(models: Models) {
   await models.ElementProperties.bulkCreate([

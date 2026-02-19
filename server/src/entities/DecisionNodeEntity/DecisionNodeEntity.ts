@@ -1,6 +1,9 @@
 import { DecisionNode } from "~db/models/DecisionNode";
 
 import { staticImplements, type StaticMethods } from "../types";
+import createDecisionNodeConditionEntity from "./instanceMethods/createDecisionNodeConditionEntity";
+import fetchDecisionNodeConditionEntities from "./instanceMethods/fetchDecisionNodeConditionEntities";
+import getPayload from "./instanceMethods/getPayload";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
 
@@ -9,7 +12,6 @@ import findById from "./staticMethods/findById";
 >()
 export default class DecisionNodeEntity {
   dbModel: DecisionNode;
-
   constructor(decisionNode: DecisionNode) {
     this.dbModel = decisionNode;
   }
@@ -17,4 +19,9 @@ export default class DecisionNodeEntity {
   // PARTITION: Static methods
   static create = create;
   static findById = findById;
+
+  // PARTITION: Instance methods
+  createDecisionNodeConditionEntity = createDecisionNodeConditionEntity;
+  fetchDecisionNodeConditionEntities = fetchDecisionNodeConditionEntities;
+  getPayload = getPayload;
 }

@@ -1,8 +1,8 @@
+import { OrganizationUserPermission } from "@packages/shared/types/enums";
 import bcrypt from "bcryptjs";
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { OrganizationUserPermission } from "~sharedTypes/enums";
 
 export async function seedUsers(models: Models) {
   const adminPasswordHash = bcrypt.hashSync("password", 10);

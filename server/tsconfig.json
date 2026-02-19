@@ -9,8 +9,9 @@
     "paths": {
       "~db/*": ["./src/db/*"],
       "~sharedTypes/*": ["./src/sharedTypes/*"],
+      "~entities/*": ["./src/entities/*"],
       "~src/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../packages/shared/src/types/enums.ts"]
 }

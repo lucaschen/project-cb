@@ -22,7 +22,7 @@ export class DecisionNode extends Model<
       {
         sequelize,
         tableName: "decisionNodes",
-      }
+      },
     );
     return DecisionNode;
   }

@@ -9,7 +9,7 @@ export default async function create(
   this: typeof FlowEntity,
   params: Omit<InferCreationAttributes<Flow>, "id"> & {
     id?: string;
-  }
+  },
 ): Promise<FlowEntity> {
   const payload = { id: params.id ?? uuidV4(), ...params };
 

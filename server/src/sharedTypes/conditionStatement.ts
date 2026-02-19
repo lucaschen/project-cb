@@ -1,6 +1,5 @@
+import { ComparisonOperation } from "@packages/shared/types/enums";
 import { z } from "zod";
-
-import { ComparisonOperation } from "./enums";
 
 export type ConditionStatement = ComparisonStatement; // Define the structure of a condition as needed
 

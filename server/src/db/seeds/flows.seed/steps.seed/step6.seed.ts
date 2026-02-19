@@ -1,7 +1,10 @@
+import {
+  ComparisonOperation,
+  NodeType,
+} from "@packages/shared/types/enums";
 import { v4 as uuidV4 } from "uuid";
 
 import { Models } from "~db/models";
-import { ComparisonOperation, NodeType } from "~sharedTypes/enums";
 
 export default async function seedStep6(models: Models) {
   const flow = await models.Flow.findOne({

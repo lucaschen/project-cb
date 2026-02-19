@@ -1,6 +1,7 @@
 # Node.js modules
 node_modules/
 .turbo/
+.agentlens/
 
 # TypeScript compiled output
 

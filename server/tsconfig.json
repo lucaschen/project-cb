@@ -13,5 +13,5 @@
       "~src/*": ["./src/*"]
     }
   },
-  "include": ["src", "../packages/shared/src/types/enums.ts"]
+  "include": ["src"]
 }

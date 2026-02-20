@@ -5,9 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "concurrently \"npx @agentlens/cli watch\" \"tsx watch src/index.ts\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "db:seed": "ts-node -r tsconfig-paths/register src/db/seeds"
+    "db:seed": "ts-node -r tsconfig-paths/register src/db/seeds",
+    "generate:element-schemas": "ts-node -r tsconfig-paths/register scripts/generate-element-zod-schemas.ts"
   },
   "dependencies": {
     "@packages/shared": "workspace:*",

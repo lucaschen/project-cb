@@ -2,9 +2,8 @@
   "extends": "@packages/tsconfig/tsconfig.base.json",
   "compilerOptions": {
     "target": "esnext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "rootDir": "./src",
+    "module": "commonjs",
+    "rootDir": ".",
     "types": ["node"],
     "paths": {
       "~db/*": ["./src/db/*"],
@@ -13,5 +12,5 @@
       "~src/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "scripts"]
 }

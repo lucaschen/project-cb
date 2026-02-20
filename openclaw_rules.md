@@ -48,6 +48,12 @@ project-cb/
 
 ## Development Workflow
 
+### Coding Tasks (CRITICAL)
+- **Always use Opencode** for coding tasks — do not rawdog edits directly to files
+- When given a coding task, first plan with Opencode then execute the approved changes
+- Rawdogging file edits bypasses proper review and leads to broken builds (as seen in element schema generation)
+- Use `/opencode plan` → get approval → `/opencode build` pattern for all implementation
+
 ### Build Process
 - All code must pass TypeScript compilation without errors
 - Run `npm run build` to verify implementation works in context

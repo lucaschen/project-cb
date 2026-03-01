@@ -1,166 +1,350 @@
-# Step Element Creation Implementation
+# Implementation Guide - Form Builder System
 
-## Overview
+## Getting Started
 
-This document describes the implementation of step element creation with automatic property handling, which was implemented in `/server/src/http/routes/flows/steps/elements/createStepElement.ts`.
+### Prerequisites
+- Familiarity with TypeScript and RESTful API development
+- Understanding of Sequelize ORM and Zod validation
+- Experience with monorepo structures (pnpm workspaces)
 
-## Requirements
+---
 
-The system needs to:
-1. Create step elements with associated properties
-2. Automatically create property records when elements are created
-3. Validate step and element existence
-4. Handle property data properly (serialize to JSON strings)
-5. Maintain consistency with existing architecture patterns
+## Core Implementation Patterns
 
-## Implementation Details
+### 1. Adding a New API Endpoint (Step-by-Step)
 
-### File: `server/src/http/routes/flows/steps/elements/createStepElement.ts`
+#### Step 1: Define Shared Schema
+```bash
+# Create in packages/shared/src/http/schemas/flows/steps/
+# File: getSteps.ts
 
-#### Key Features Implemented:
+import { z } from "zod";
 
-1. **Property Handling**: Automatic creation of `StepElementProperties` records when properties are provided
-2. **Data Serialization**: Properties are serialized to JSON strings before storage
-3. **Error Handling**: Proper error handling with descriptive messages
-4. **Consistent Pattern**: Follows existing architecture patterns
+export const getStepsSchema = z.object({
+  flowId: z.string().uuid(),
+  includeProperties: z.boolean().default(true),
+});
+```
 
-#### Code Structure:
+**Why:** Shared schemas ensure frontend and backend validation consistency.
 
-```typescript
-// Import required modules
-import { StepElementProperties } from "~db/models/StepElementProperties";
-import ElementEntity from "~entities/ElementEntity";
-import StepElementEntity from "~entities/StepElementEntity";
-import StepEntity from "~entities/StepEntity";
+#### Step 2: Implement Route Layer
+```bash
+# File: server/src/http/routes/flows/steps/getSteps.ts
 
-// Main handler function
-const createStepElement = enforceSchema({
-  handler: async (req, res) => {
-    // Extract properties from request body
-    const { name, elementId, order, properties } = req.body;
+import { Router } from "express";
+import { getStepsSchema, getStepsResponseSchema } from "@shared/schemas/flows/steps";
+import { handleRouteError } from "@server/utils/errorHandling";
+import { StepEntity } from "@server/entities/StepEntity";
 
-    // Validate step exists
-    const step = await StepEntity.findById(stepId);
+const router = Router();
 
-    // Validate element exists
-    const element = await ElementEntity.findById(elementId);
+router.get(":flowId/elements", async (req, res) => {
+  try {
+    // Validate input
+    const validated = enforceSchema(req.params, getStepsSchema);
 
-    // Create StepElement
-    const stepElement = await StepElementEntity.create({
-      id: uuidv4(),
-      name: name,
-      elementId: element.dbModel.id,
-      stepId,
-      order,
-    });
+    // Business logic via entity layer
+    const steps = await StepEntity.getSteps(validated.flowId);
 
-    // Handle properties if provided
-    if (properties && typeof properties === "object") {
-      const propertyPromises = Object.entries(properties).map(
-        async ([propertyId, propertyValue]) => {
-          return await StepElementProperties.create({
-            id: uuidv4(),
-            stepElementId: stepElement.dbModel.id,
-            propertyId,
-            propertyValue: JSON.stringify(propertyValue),
-          });
+    // Transform response
+    const response = transformResponse(steps, validated.includeProperties);
+    res.json(response);
+  } catch (error) {
+    await handleRouteError(error, req, res, getStepsResponseSchema);
+  }
+});
+
+export default router;
+```
+
+**Key Points:**
+- Use `enforceSchema()` for input validation
+- Delegate business logic to entity layer
+- Transform data before sending response
+- Use error handler for consistency
+
+#### Step 3: Create Entity Methods
+```bash
+// File: server/src/entities/StepEntity/instanceMethods/getSteps.ts
+
+import { Step } from "@server/db/models";
+import { StepElementCondition } from "@server/db/models/StepElementCondition";
+
+export const getSteps = async (flowId: string) => {
+  const transactions = await StepEntity.db.sequelize.transaction();
+  try {
+    // Get steps with related elements
+    const steps = await Step.findAll({
+      where: { flowId },
+      include: [
+        {
+          model: StepElementCondition,
+          as: "conditions",
+          through: true
         }
-      );
-      await Promise.all(propertyPromises);
-    }
-
-    // Return created element
-    res.status(201).json({
-      id: stepElement.dbModel.id,
-      name: stepElement.dbModel.name,
-      elementId: stepElement.dbModel.elementId,
-      stepId: stepElement.dbModel.stepId,
-      order: stepElement.dbModel.order,
+      ],
+      transaction: transactions
     });
-  },
-  // Schema validation
-  inputSchema: createStepElementInput,
-  outputSchema: createStepElementOutput,
-});
+
+    // Transform for API response
+    return steps.map(step => ({
+      id: step.id,
+      name: step.name,
+      elements: step.Elements.map(element => ({
+        id: element.id,
+        type: element.type,
+        label: element.label,
+        conditions: element.StepElementConditions?.map(c => c.condition)
+      }))
+    }));
+  } finally {
+    await transactions?.commit();
+  }
+};
 ```
 
-## Database Schema Requirements
+**Why Entity Layer:** Contains business logic, handles relationships, transforms data for API consistency.
 
-### StepElementProperties Table
-```sql
-CREATE TABLE stepElementsProperties (
-  id UUID PRIMARY KEY,
-  stepElementId UUID NOT NULL,
-  propertyId VARCHAR(255) NOT NULL,
-  propertyValue TEXT NOT NULL,
-  FOREIGN KEY (stepElementId) REFERENCES stepElements(id)
-);
-```
+#### Step 4: Define Database Model (if new)
+```bash
+// File: server/src/db/models/StepElementCondition.ts
 
-## API Contract
+import { Model } from "sequelize";
 
-### Input Schema
-```typescript
-// Uses shared schema from @packages/shared
-export const createStepElementInput = elementZodSchemas;
-```
+export default class StepElementCondition extends Model {
+  // Fields defined in migration files
 
-### Output Schema
-```typescript
-export const createStepElementOutput = z.object({
-  id: z.string(),
-  name: z.string(),
-  elementId: z.string(),
-  stepId: z.string(),
-  order: z.number(),
-});
-```
-
-## Usage Example
-
-### Request
-```json
-POST /flows/{flowId}/steps/{stepId}/elements
-{
-  "name": "My Element",
-  "elementId": "some-element-id",
-  "order": 1,
-  "properties": {
-    "color": "red",
-    "size": "large",
-    "enabled": true
+  static associate = (model) => {
+    model.hasMany(StepElementCondition, { as: "conditions", foreignKey: "stepElementId" });
   }
 }
 ```
 
-### Response
-```json
-{
-  "id": "generated-uuid",
-  "name": "My Element",
-  "elementId": "some-element-id",
-  "stepId": "step-uuid",
-  "order": 1
+---
+
+### 2. Creating New Element Types
+
+#### Pattern for New Element Type (e.g., "Matrix")
+
+**Step A: Define Type and Schema**
+```bash
+// packages/shared/src/types/elementTypes.ts
+export enum ElementType {
+  INPUT = "input",
+  BUTTON = "button",
+  LABEL = "label",
+  MATRIX = "matrix", // New type
+  // ... existing types
 }
 ```
 
-## Architecture Integration
+```bash
+// packages/shared/src/http/schemas/elements/matrix.ts
+groupMatrixSchema = z.object({
+  type: z.literal(ElementType.Matrix),
+  label: z.string().min(1),
+  rows: z.number().int().positive().default(3),
+  columns: z.number().int().positive().default(3),
+  choices: z.array(z.string()).optional(),
+});
+```
 
-This implementation follows the established patterns:
-1. **Entity Pattern**: Uses `StepElementEntity` and `ElementEntity` for business logic
-2. **Schema Validation**: Leverages shared Zod schemas for input/output validation
-3. **Error Handling**: Consistent error handling with `handleRouteError` wrapper
-4. **Database Access**: Direct model interaction for data persistence
+**Step B: Implement Element Entity Methods**
+```bash
+// server/src/entities/ElementEntity/staticMethods/create.ts
+groupMatrix = async (data: CreateElementInput) => {
+  // Validate using enforceSchema
+  const validated = enforceSchema(data, groupMatrixSchema);
 
-## Testing Considerations
+  const t = await sequelize.transaction();
+  try {
+    const [element] = await Element.create({
+      type: ElementType.Matrix,
+      ...validated,
+      stepId: data.stepId
+    }, { transaction: t });
 
-### Unit Tests Needed
-- Test property creation with various data types
-- Test error handling for invalid properties
-- Test validation of step and element existence
-- Test successful creation flow
+    return element;
+  } finally {
+    await t?.commit();
+  }
+};
+```
 
-### Integration Tests Needed
-- Test complete API endpoint with property handling
-- Test database records creation for properties
-- Test relationship integrity between entities
+**Step C: Conditional Logic Support**
+```bash
+// server/src/db/models/StepElementCondition.ts
+// Already supports any condition type via JSONB storage
+// No changes needed - conditions work with all element types
+```
+
+---
+
+### 3. Implementing Conditional Logic
+
+#### Pattern: Add Condition to Existing Element
+
+```bash
+// In entity method for updating an element
+export const addElementCondition = async (
+  stepId: string,
+  elementId: string,
+  conditionData: ConditionData
+) => {
+  try {
+    // Validate condition data
+    const validated = enforceSchema(conditionData, elementConditionSchema);
+
+    // Create condition record
+    await StepElementCondition.create({
+      stepId,
+      elementId,
+      condition: validated.condition
+    });
+
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to add condition: ${error.message}`);
+  }
+};
+```
+
+#### Pattern: Evaluate Conditions at Runtime
+```bash
+// server/src/entities/StepEntity/instanceMethods/evaluateConditions.ts
+export const evaluateConditions = async (
+  stepId: string,
+  stepContext: StepContext
+) => {
+  try {
+    const conditions = await StepElementCondition.findAll({
+      where: { stepId },
+      include: [
+        Model.Element
+      ]
+    });
+
+    // Evaluate each condition based on context
+    return conditions.map(condition => ({
+      elementId: condition.elementId,
+      shouldShow: evaluateCondition(
+        condition.condition,
+        stepContext.values
+      )
+    }));
+  } catch (error) {
+    throw error;
+  }
+};
+```
+
+---
+
+## Common Operations Cheat Sheet
+
+### 1. Transaction Pattern (Essential!)
+```typescript
+// Always use transactions for multi-step operations
+const transaction = await sequelize.transaction();
+try {
+  // Multiple database operations
+  const [step] = await Step.create(..., { transaction });
+  const [element1] = await Element.create(..., { transaction });
+
+  await transaction.commit();
+} catch (error) {
+  await transaction.rollback();
+  throw error;
+}
+```
+
+### 2. Error Handling Pattern
+```typescript
+try {
+  // Business logic
+} catch (error) {
+  await handleRouteError(error, req, res, responseSchema);
+}
+```
+
+### 3. Entity Method Structure
+```typescript
+// Static methods: create, update, delete, query
+static create(data) { ... }
+static getSteps(flowId) { ... }
+
+// Instance methods: operations on a specific entity
+getStepElements(elementId) { ... }
+evaluateConditions(context) { ... }
+```
+
+### 4. Response Transformation Pattern
+```typescript
+const raw = await StepEntity.getSteps(flowId);
+return raw.map(step => transformStepForAPI(step, includeProperties));
+```
+
+---
+
+## Best Practices Checklist
+
+### Before Implementation
+- [ ] Have shared Zod schema defined in `packages/shared`?
+- [ ] Document the business requirement (what problem does this solve?)
+- [ ] Identify if new entity types/models are needed
+- [ ] Consider conditional logic requirements
+
+### During Implementation
+- [ ] Use `enforceSchema()` for all input validation
+- [ ] Keep business logic in entity layer, not routes
+- [ ] Always use transactions for related operations
+- [ ] Implement proper error handling with `handleRouteError()`
+- [ ] Transform data consistently before sending responses
+- [ ] Follow existing code patterns and naming conventions
+
+### After Implementation
+- [ ] Add unit tests (if project has testing)
+- [ ] Update documentation (this guide!)
+- [ ] Verify all error cases are handled
+- [ ] Check performance at scale (especially conditions evaluation)
+
+---
+
+## Troubleshooting Common Issues
+
+### Issue: Data not persisting after transaction
+**Check:** Are you committing the transaction? Forgetting `await transaction.commit()` is a common mistake.
+
+### Issue: Conditions not working
+**Check:**
+- Is condition data properly validated with Zod?
+- Are conditions being stored in the database?
+- Is the evaluation logic using correct context values?
+
+### Issue: Validation errors not matching user input
+**Check:** Are you using `enforceSchema()` consistently? Make sure you're passing the right parameters.
+
+### Issue: Performance degradation with many conditions
+**Check:** Consider optimizing condition evaluation - cache evaluated conditions when possible, avoid re-evaluating on every request if the condition logic hasn't changed.
+
+---
+
+## Migration Examples
+
+### Adding a New Field to Existing Element
+1. **Update Type Definitions**: Add optional field to enum/type
+2. **Update Schemas**: Make field optional in create/update schemas
+3. **Update Database Model**: Add column to migration (or use JSONB for flexibility)
+4. **Update Entity Methods**: Handle new field in create and transformation methods
+5. **Backward Compatibility**: Keep field optional - existing data won't break
+
+### Changing Condition Logic Format
+1. **Add New Condition Type**: Extend condition schema with new operator/field options
+2. **Update Evaluation Logic**: Modify the condition evaluation function to handle new formats
+3. **Keep Old Logic**: Support old condition format during transition period
+4. **Data Migration Script**: Write a script to transform old conditions to new format (if needed)
+
+---
+
+*Remember: Focus on "Why" in commit messages. The patterns above ensure maintainability and consistency across the codebase.*

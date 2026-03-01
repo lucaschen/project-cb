@@ -1,27 +1,27 @@
 import type { RequestHandler } from "express";
 import type { ParamsDictionary } from "express-serve-static-core";
-import type { ZodSchema } from "zod";
+import type { ZodType } from "zod";
 
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 
 const enforceSchema = <
   Params extends ParamsDictionary,
   RequestBody,
-  ResponseBody
+  ResponseBody,
 >({
   handler,
   inputSchema,
   paramsSchema,
 }: {
   handler: RequestHandler<Params, ResponseBody, RequestBody>;
-  inputSchema?: ZodSchema<RequestBody>;
-  outputSchema: ZodSchema<ResponseBody>;
-  paramsSchema?: ZodSchema<Params>;
+  inputSchema?: ZodType<RequestBody>;
+  outputSchema: ZodType<ResponseBody>;
+  paramsSchema?: ZodType<Params>;
 }) => {
   const schemaHandler: RequestHandler<Params, unknown, RequestBody> = async (
     req,
     res,
-    next
+    next,
   ) => {
     if (inputSchema) {
       const validationResult = inputSchema.safeParse(req.body);
@@ -29,7 +29,7 @@ const enforceSchema = <
       if (!validationResult.success) {
         throw new InvalidRequestError(
           "Body validation error.",
-          validationResult
+          validationResult,
         );
       }
     }
@@ -40,7 +40,7 @@ const enforceSchema = <
       if (!validationResult.success) {
         throw new InvalidRequestError(
           "Params validation error.",
-          validationResult
+          validationResult,
         );
       }
     }

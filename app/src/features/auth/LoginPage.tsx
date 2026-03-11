@@ -1,49 +1,123 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@app/components/ui/Button";
+import { FormField } from "@app/components/ui/FormField";
+import { queryKeys } from "@app/lib/api/queryKeys";
+import { ApiError } from "@app/lib/api/client";
+import { useAppStore } from "@app/stores/appStore";
 
 import { AuthShell } from "./AuthShell";
+import { createSession } from "./api";
+
+const validate = (email: string, password: string) => {
+  return {
+    email: email.trim() ? "" : "Email is required.",
+    password: password.trim() ? "" : "Password is required.",
+  };
+};
 
 export const LoginPage = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { setCurrentSession } = useAppStore();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({
+    email: "",
+    password: "",
+  });
+  const [formError, setFormError] = useState("");
+
+  const loginMutation = useMutation({
+    mutationFn: createSession,
+    onSuccess: (session) => {
+      setCurrentSession(session);
+      queryClient.setQueryData(queryKeys.session, session);
+      navigate("/flows", { replace: true });
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 401) {
+        setFormError("Login unsuccessful. Check your email and password and try again.");
+        return;
+      }
+
+      setFormError("Unable to sign in right now. Try again.");
+    },
+  });
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextErrors = validate(email, password);
+    setFieldErrors(nextErrors);
+    setFormError("");
+
+    if (nextErrors.email || nextErrors.password) {
+      return;
+    }
+
+    await loginMutation.mutateAsync({
+      email: email.trim(),
+      password,
+    });
+  };
+
   return (
     <AuthShell
       cta={
         <div className="space-y-3">
-          <p className="font-medium text-white">Foundation checkpoint</p>
+          <p className="font-medium text-white">Current scope</p>
           <p>
-            The route exists now so FE 02 can drop real auth onto a stable router, provider,
-            and styling foundation instead of rebuilding the app shell later.
+            FE 02 wires the real auth flow onto the foundation branch, including public routes,
+            session bootstrap, protected flows access, and logout.
           </p>
         </div>
       }
-      description="This login route is scaffolded in FE 01. Real authentication wiring lands in the next branch."
-      eyebrow="FE 01 Foundation"
+      description="Use your internal account to establish a real session before entering the protected shell."
+      eyebrow="Internal Access"
       footerLabel="Need an account?"
       footerText="Create one"
       footerTo="/signup"
-      title="The frontend foundation is ready for authentication."
+      title="Sign in to continue building Project CB flows."
     >
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Login route placeholder</h2>
+        <h2 className="text-2xl font-semibold text-white">Welcome back</h2>
         <p className="text-sm leading-6 text-slate-300">
-          FE 02 will replace this placeholder with email/password sign-in, session bootstrap,
-          and route guard behavior.
+          Email/password auth is live. Organization onboarding lands in the next branch.
         </p>
       </div>
-      <div className="mt-8 space-y-4 rounded-[24px] border border-dashed border-slate-700 bg-slate-900/40 p-6 text-sm leading-6 text-slate-300">
-        <p>Planned next in FE 02:</p>
-        <ul className="list-disc space-y-2 pl-5 marker:text-sky-300">
-          <li>Login form and inline validation</li>
-          <li>Session bootstrap on app load</li>
-          <li>Protected route gating</li>
-        </ul>
-      </div>
-      <div className="mt-8 flex items-center justify-between gap-4">
-        <Button className="flex-1" disabled>
-          Sign in coming next
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <FormField
+          autoComplete="email"
+          error={fieldErrors.email}
+          id="login-email"
+          label="Email"
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="name@company.com"
+          type="email"
+          value={email}
+        />
+        <FormField
+          autoComplete="current-password"
+          error={fieldErrors.password}
+          id="login-password"
+          label="Password"
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="Enter your password"
+          type="password"
+          value={password}
+        />
+        {formError ? <p className="text-sm text-rose-300">{formError}</p> : null}
+        <Button className="w-full" isBusy={loginMutation.isPending} type="submit">
+          Sign in
         </Button>
-        <Link className="text-sm font-medium text-sky-200 transition hover:text-sky-100" to="/signup">
-          Go to sign up
+      </form>
+      <div className="mt-6 text-sm text-slate-400">
+        <Link className="text-sky-200 transition hover:text-sky-100" to="/signup">
+          New internal user? Create an account here.
         </Link>
       </div>
     </AuthShell>

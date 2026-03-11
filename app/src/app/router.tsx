@@ -1,6 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 import { LoginPage } from "@app/features/auth/LoginPage";
+import { ProtectedRoute } from "@app/features/auth/ProtectedRoute";
+import { PublicOnlyRoute } from "@app/features/auth/PublicOnlyRoute";
 import { SignupPage } from "@app/features/auth/SignupPage";
 import { FlowsPage } from "@app/features/flows/FlowsPage";
 import { OrganizationOnboardingPage } from "@app/features/organizations/OrganizationOnboardingPage";
@@ -13,20 +15,30 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/signup",
-        element: <SignupPage />,
+        element: <PublicOnlyRoute />,
+        children: [
+          {
+            path: "/login",
+            element: <LoginPage />,
+          },
+          {
+            path: "/signup",
+            element: <SignupPage />,
+          },
+        ],
       },
       {
         path: "/onboarding/organization",
         element: <OrganizationOnboardingPage />,
       },
       {
-        path: "/flows",
-        element: <FlowsPage />,
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/flows",
+            element: <FlowsPage />,
+          },
+        ],
       },
       {
         path: "*",

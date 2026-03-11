@@ -2,20 +2,16 @@ import { OrganizationUserPermission } from "@packages/shared/types/enums";
 
 import { OrganizationUser } from "~db/models/OrganizationUser";
 
-import type OrganizationEntity from "../OrganizationEntity";
+import type UserEntity from "../UserEntity";
 
-export default async function canUserCreateFlow(
-  this: OrganizationEntity,
-  {
-    userId,
-  }: {
-    userId: string;
-  },
+export default async function canCreateFlowsInOrganization(
+  this: UserEntity,
+  organizationId: string,
 ): Promise<boolean> {
   const organizationUserRecord = await OrganizationUser.findOne({
     where: {
-      organizationId: this.dbModel.id,
-      userId,
+      organizationId,
+      userId: this.dbModel.id,
     },
   });
 
@@ -23,11 +19,8 @@ export default async function canUserCreateFlow(
     return false;
   }
 
-  const permissions = organizationUserRecord.permissions;
-  const canCreateFlow = [
+  return [
     OrganizationUserPermission.ADMIN,
     OrganizationUserPermission.EDITOR,
-  ].includes(permissions);
-
-  return canCreateFlow;
+  ].includes(organizationUserRecord.permissions);
 }

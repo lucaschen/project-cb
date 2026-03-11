@@ -8,13 +8,24 @@ import { v4 as uuidv4 } from "uuid";
 import StepElementEntity from "~entities/StepElementEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
+import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
 
 const createStepElement = enforceSchema({
   handler: async (req, res) => {
-    // TODO: ensure user has permissions to flow
-    const { name, elementId, properties, order } = createStepElementInput.parse(
-      req.body,
-    );
+    const { name, elementId, properties, order } = req.body;
+
+    const flowId = checkExists(req.params.flowId);
+
+    const userEntity = await checkExists(
+      req.context.sessionEntity,
+    ).fetchUserEntity();
+    const canEditFlow = await userEntity.canEditFlow(flowId);
+
+    if (!canEditFlow) {
+      throw new InvalidCredentialsError(
+        "Insufficient permissions to create flow in this organization.",
+      );
+    }
 
     const stepId = checkExists(req.params.stepId);
 

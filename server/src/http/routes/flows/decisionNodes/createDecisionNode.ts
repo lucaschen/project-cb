@@ -7,33 +7,31 @@ import checkExists from "@packages/shared/utils/checkExists";
 import { v4 as uuidv4 } from "uuid";
 
 import DecisionNodeEntity from "~entities/DecisionNodeEntity";
-import FlowEntity from "~entities/FlowEntity";
 import NodeEntity from "~entities/NodeEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
 import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
-import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createDecisionNode = enforceSchema({
   handler: async (req, res) => {
     const { fallbackNextNodeId, name } = req.body;
 
     const flowId = checkExists(req.params.flowId);
+    const userEntity = await checkExists(
+      req.context.sessionEntity,
+    ).fetchUserEntity();
+    const canEditFlow = await userEntity.canEditFlow(flowId);
 
-    const userEntity = await req.context.sessionEntity?.fetchUserEntity();
-    const flowEntity = await FlowEntity.findById(flowId);
-
-    if (!userEntity) {
-      throw new InvalidCredentialsError("Login required.");
-    }
-    if (!flowEntity) {
-      throw new NotFoundError(`Flow id: ${flowId} not found.`);
+    if (!canEditFlow) {
+      throw new InvalidCredentialsError(
+        "Insufficient permissions to create flow in this organization.",
+      );
     }
 
     const nodeEntity = await NodeEntity.create({
       id: uuidv4(),
       type: NodeType.DECISION,
-      flowId: flowEntity.dbModel.id,
+      flowId,
       name,
     });
 

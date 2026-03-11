@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "dev": "concurrently \"npx @agentlens/cli watch\" \"tsx watch src/index.ts\"",
+    "dev": "tsx watch src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "build": "tsc -p tsconfig.json",

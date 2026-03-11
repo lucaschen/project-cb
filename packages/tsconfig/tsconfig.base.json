@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "strict": true,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   }

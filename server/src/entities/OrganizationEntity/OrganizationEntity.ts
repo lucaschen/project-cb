@@ -2,7 +2,6 @@ import { Organization } from "~db/models/Organization";
 
 import { staticImplements, type StaticMethods } from "../types";
 import addUser from "./instanceMethods/addUser";
-import canUserCreateFlow from "./instanceMethods/canUserCreateFlow";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
 
@@ -22,5 +21,4 @@ export default class OrganizationEntity {
 
   // PARTITION: Instance methods
   addUser = addUser;
-  canUserCreateFlow = canUserCreateFlow;
 }

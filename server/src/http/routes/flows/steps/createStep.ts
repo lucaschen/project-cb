@@ -6,29 +6,34 @@ import { NodeType } from "@packages/shared/types/enums";
 import checkExists from "@packages/shared/utils/checkExists";
 import { v4 as uuidv4 } from "uuid";
 
-import FlowEntity from "~entities/FlowEntity";
 import NodeEntity from "~entities/NodeEntity";
 import StepEntity from "~entities/StepEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
-import NotFoundError from "~src/utils/errors/NotFoundError";
+import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
 
 const createStepNode = enforceSchema({
   handler: async (req, res) => {
+    // TODO: ensure user has permissions to flow
     const { nextNodeId, name } = req.body;
 
     const flowId = checkExists(req.params.flowId);
 
-    const flow = await FlowEntity.findById(flowId);
+    const userEntity = await checkExists(
+      req.context.sessionEntity,
+    ).fetchUserEntity();
+    const canEditFlow = await userEntity.canEditFlow(flowId);
 
-    if (!flow) {
-      throw new NotFoundError(`Flow id: ${flowId} not found.`);
+    if (!canEditFlow) {
+      throw new InvalidCredentialsError(
+        "Insufficient permissions to create flow in this organization.",
+      );
     }
 
     const nodeEntity = await NodeEntity.create({
       id: uuidv4(),
       type: NodeType.STEP,
-      flowId: flow.dbModel.id,
+      flowId,
       name,
     });
     const stepEntity = await StepEntity.create({

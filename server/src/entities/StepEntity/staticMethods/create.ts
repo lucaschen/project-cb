@@ -9,7 +9,7 @@ export default async function create(
   this: typeof StepEntity,
   params: Omit<InferCreationAttributes<Step>, "id"> & {
     id?: string;
-  }
+  },
 ): Promise<StepEntity> {
   const payload = { id: params.id ?? uuidV4(), ...params };
 

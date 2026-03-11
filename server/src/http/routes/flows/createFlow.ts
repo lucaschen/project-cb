@@ -5,25 +5,30 @@ import {
 import checkExists from "@packages/shared/utils/checkExists";
 
 import FlowEntity from "~entities/FlowEntity";
+import OrganizationEntity from "~entities/OrganizationEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
-import { canUserCreateFlowInOrganization } from "~src/utils/permissions/organizationPermissions";
+import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
+import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createFlow = enforceSchema({
   handler: async (req, res) => {
     const { name, organizationId, slug } = req.body;
 
-    const userId = (
-      await checkExists(req.context.sessionEntity).fetchUserEntity()
-    ).dbModel.id;
+    const userEntity = await checkExists(req.context.sessionEntity).fetchUserEntity();
 
-    const createFlowError = await canUserCreateFlowInOrganization({
-      userId,
+    const organizationEntity = await OrganizationEntity.findById(organizationId);
+    if (!organizationEntity) {
+      throw new NotFoundError(`Organization id: ${organizationId} not found.`);
+    }
+
+    const canCreateFlow = await userEntity.canCreateFlowsInOrganization(
       organizationId,
-    });
-
-    if (createFlowError instanceof Error) {
-      throw createFlowError;
+    );
+    if (!canCreateFlow) {
+      throw new InvalidCredentialsError(
+        "Insufficient permissions to create flow in this organization.",
+      );
     }
 
     // Question: do flows require an organizationId? can a user directly own a flow?

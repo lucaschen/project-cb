@@ -1,6 +1,8 @@
 import { User } from "~db/models/User";
 
 import { staticImplements, type StaticMethods } from "../types";
+import canCreateFlowsInOrganization from "./instanceMethods/canCreateFlowsInOrganization";
+import canEditFlow from "./instanceMethods/canEditFlow";
 import findOrganizations from "./instanceMethods/findOrganizations";
 import validatePassword from "./instanceMethods/validatePassword";
 import create from "./staticMethods/create";
@@ -21,6 +23,8 @@ export default class UserEntity {
   static findById = findById;
 
   // PARTITION: Instance methods
+  canCreateFlowsInOrganization = canCreateFlowsInOrganization;
+  canEditFlow = canEditFlow;
   findOrganizations = findOrganizations;
   validatePassword = validatePassword;
 }

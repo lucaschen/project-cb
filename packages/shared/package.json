@@ -25,7 +25,7 @@
   },
   "engine-strict": true,
   "engines": {
-    "node": ">=20.0.0 <21.0.0",
+    "node": ">=24.0.0",
     "npm": "Please use pnpm",
     "pnpm": ">=9.0.0",
     "yarn": "Please use pnpm"

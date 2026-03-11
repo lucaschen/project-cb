@@ -1,4 +1,5 @@
 import {
+  CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
@@ -10,7 +11,7 @@ export class StepElementProperties extends Model<
   InferAttributes<StepElementProperties>,
   InferCreationAttributes<StepElementProperties>
 > {
-  declare id: string;
+  declare id: CreationOptional<string>;
   declare stepElementId: string;
   declare propertyId: string;
   declare propertyValue: string;
@@ -18,7 +19,12 @@ export class StepElementProperties extends Model<
   static initModel(sequelize: Sequelize) {
     StepElementProperties.init(
       {
-        id: { type: DataTypes.UUID, primaryKey: true },
+        id: {
+          type: DataTypes.UUID,
+          primaryKey: true,
+          defaultValue: DataTypes.UUIDV4,
+          allowNull: false,
+        },
         stepElementId: { type: DataTypes.STRING, allowNull: false },
         propertyId: { type: DataTypes.STRING, allowNull: false },
         propertyValue: { type: DataTypes.STRING, allowNull: false },
@@ -26,11 +32,10 @@ export class StepElementProperties extends Model<
       {
         sequelize,
         tableName: "stepElementsProperties",
-        indexes: [
-          { unique: true, fields: ["stepElementId", "propertyId"] }, // name should be unique - per step
-        ],
-      }
+        indexes: [{ unique: true, fields: ["stepElementId", "propertyId"] }],
+      },
     );
+
     return StepElementProperties;
   }
 }

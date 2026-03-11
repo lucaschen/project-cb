@@ -11,6 +11,7 @@ import FlowEntity from "~entities/FlowEntity";
 import NodeEntity from "~entities/NodeEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
+import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createDecisionNode = enforceSchema({
@@ -19,16 +20,20 @@ const createDecisionNode = enforceSchema({
 
     const flowId = checkExists(req.params.flowId);
 
-    const flow = await FlowEntity.findById(flowId);
+    const userEntity = await req.context.sessionEntity?.fetchUserEntity();
+    const flowEntity = await FlowEntity.findById(flowId);
 
-    if (!flow) {
+    if (!userEntity) {
+      throw new InvalidCredentialsError("Login required.");
+    }
+    if (!flowEntity) {
       throw new NotFoundError(`Flow id: ${flowId} not found.`);
     }
 
     const nodeEntity = await NodeEntity.create({
       id: uuidv4(),
       type: NodeType.DECISION,
-      flowId: flow.dbModel.id,
+      flowId: flowEntity.dbModel.id,
       name,
     });
 

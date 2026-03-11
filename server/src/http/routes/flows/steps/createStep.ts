@@ -15,6 +15,7 @@ import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createStepNode = enforceSchema({
   handler: async (req, res) => {
+    // TODO: ensure user has permissions to flow
     const { nextNodeId, name } = req.body;
 
     const flowId = checkExists(req.params.flowId);

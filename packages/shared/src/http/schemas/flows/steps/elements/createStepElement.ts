@@ -1,17 +1,24 @@
 import { z } from "zod";
 
 // Import generated Zod schemas
-import { elementSchema } from "~shared/generated/elements";
+import {
+  elementSchema,
+  elementWithOptionalPropertiesSchema,
+} from "~shared/generated/elements";
 
-export const createStepElementInput = elementSchema;
+export const createStepElementInput = elementWithOptionalPropertiesSchema.and(
+  z.object({
+    order: z.number().optional(),
+  }),
+);
 
 export type CreateStepElementInput = z.infer<typeof createStepElementInput>;
 
-export const createStepElementOutput = z
-  .object({
-    elementId: z.string(),
+export const createStepElementOutput = elementSchema.and(
+  z.object({
+    id: z.string(),
     order: z.number(),
-  })
-  .extend(elementSchema);
+  }),
+);
 
 export type CreateStepElementOutput = z.infer<typeof createStepElementOutput>;

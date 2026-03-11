@@ -115,18 +115,18 @@ async function generateAllSchemas() {
 import { z } from "zod";
 
 // Schema for the properties of the ${element.name} element
-export const ${propertiesName} = ${propertiesSchema};
+export const ${propertiesName}Schema = ${propertiesSchema};
 
 // Schema for the ${element.name} element
 const ${elementName}Schema = z.object({
-  id: z.literal("${element.id}"),
+  elementId: z.literal("${element.id}"),
   name: z.string(),
   description: z.string(),
-  properties: ${propertiesName},
+  properties: ${propertiesName}Schema,
 });
 
 // Infer TypeScript types from schemas
-export type ${propertiesName}Type = z.infer<typeof ${propertiesName}>;
+export type ${propertiesName}Type = z.infer<typeof ${propertiesName}Schema>;
 export type ${elementName}Type = z.infer<typeof ${elementName}Schema>;
 
 // Default export for the ${element.name} element schema
@@ -144,16 +144,26 @@ export default ${elementName}Schema;
     const elementsList = elements.map((element) => `${element.id}Element`);
     const indexContent = `// Bundled exports from generated element Zod schemas
 
-${elementsList.map((elementName) => `export { ${elementName}Type, ${elementName}Properties, ${elementName}PropertiesType } from "./${elementName}";`).join("\n")}
+${elementsList.map((elementName) => `export { ${elementName}Type, ${elementName}PropertiesSchema, ${elementName}PropertiesType } from "./${elementName}";`).join("\n")}
 
 // Discriminated union schema for all element types
 import { z } from "zod";
 
-${elementsList.map((elementName) => `import ${elementName}Schema from "./${elementName}";`).join("\n")}
+${elementsList.map((elementName) => `import ${elementName}Schema, { ${elementName}PropertiesSchema } from "./${elementName}";`).join("\n")}
 
-export const elementSchema = z.discriminatedUnion("id", [
+export const elementSchema = z.discriminatedUnion("elementId", [
   ${elementsList.map((elementName) => `${elementName}Schema`).join(",\n  ")}
 ]);
+
+export const elementWithOptionalPropertiesSchema = z.discriminatedUnion("elementId", [
+  ${elementsList.map((elementName) => `${elementName}Schema.partial({ properties: true })`).join(",\n  ")}
+]);
+
+export const elementPropertiesSchema = z.discriminatedUnion("elementId", [
+  ${elementsList.map((elementName) => `${elementName}PropertiesSchema`).join(",\n  ")}
+]);
+
+export type ElementPropertiesType = z.infer<typeof elementPropertiesSchema>;
 
 export type ElementType = z.infer<typeof elementSchema>;
 
@@ -169,6 +179,9 @@ export {
   } catch (error) {
     console.error("Error generating schemas:", error);
     process.exit(1);
+  } finally {
+    await sequelize.close();
+    console.log("Database connection closed.");
   }
 }
 

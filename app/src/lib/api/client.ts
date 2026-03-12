@@ -4,7 +4,7 @@ import { env } from "@app/lib/env";
 
 type ApiRequestOptions<TSchema> = {
   body?: unknown;
-  method: "DELETE" | "GET" | "POST";
+  method: "DELETE" | "GET" | "POST" | "PUT" | "PATCH";
   path: string;
   schema?: ZodType<TSchema>;
   signal?: AbortSignal;

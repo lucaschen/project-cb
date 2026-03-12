@@ -32,9 +32,7 @@ const fetchFlow = enforceSchema({
       );
     }
 
-    const response = fetchFlowOutput.parse(
-      await flowEntity.fetchBuilderPayload(),
-    );
+    const response = await flowEntity.fetchBuilderPayload();
 
     res.status(200).json(response);
   },

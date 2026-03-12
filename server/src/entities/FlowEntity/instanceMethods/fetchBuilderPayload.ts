@@ -28,27 +28,21 @@ export default async function fetchBuilderPayload(
   const nodeIds = nodeModels.map((node) => node.id);
 
   const [coordinateModels, stepModels, decisionNodeModels] = await Promise.all([
-    nodeIds.length
-      ? NodeCoordinate.findAll({
-          where: {
-            nodeId: { [Op.in]: nodeIds },
-          },
-        })
-      : Promise.resolve([]),
-    nodeIds.length
-      ? Step.findAll({
-          where: {
-            nodeId: { [Op.in]: nodeIds },
-          },
-        })
-      : Promise.resolve([]),
-    nodeIds.length
-      ? DecisionNode.findAll({
-          where: {
-            nodeId: { [Op.in]: nodeIds },
-          },
-        })
-      : Promise.resolve([]),
+    NodeCoordinate.findAll({
+      where: {
+        nodeId: { [Op.in]: nodeIds },
+      },
+    }),
+    Step.findAll({
+      where: {
+        nodeId: { [Op.in]: nodeIds },
+      },
+    }),
+    DecisionNode.findAll({
+      where: {
+        nodeId: { [Op.in]: nodeIds },
+      },
+    }),
   ]);
 
   const stepNodeIds = stepModels.map((step) => step.nodeId);
@@ -57,31 +51,25 @@ export default async function fetchBuilderPayload(
   );
 
   const [stepElementModels, decisionConditionModels] = await Promise.all([
-    stepNodeIds.length
-      ? StepElement.findAll({
-          where: {
-            stepId: { [Op.in]: stepNodeIds },
-          },
-        })
-      : Promise.resolve([]),
-    decisionNodeIds.length
-      ? DecisionNodeCondition.findAll({
-          where: {
-            nodeId: { [Op.in]: decisionNodeIds },
-          },
-        })
-      : Promise.resolve([]),
+    StepElement.findAll({
+      where: {
+        stepId: { [Op.in]: stepNodeIds },
+      },
+    }),
+    DecisionNodeCondition.findAll({
+      where: {
+        nodeId: { [Op.in]: decisionNodeIds },
+      },
+    }),
   ]);
 
   const stepElementIds = stepElementModels.map((stepElement) => stepElement.id);
 
-  const hydratedStepElementPropertyModels = stepElementIds.length
-    ? await StepElementProperties.findAll({
-        where: {
-          stepElementId: { [Op.in]: stepElementIds },
-        },
-      })
-    : [];
+  const hydratedStepElementPropertyModels = await StepElementProperties.findAll({
+    where: {
+      stepElementId: { [Op.in]: stepElementIds },
+    },
+  });
 
   const propertyIds = Array.from(
     new Set(
@@ -91,13 +79,11 @@ export default async function fetchBuilderPayload(
     ),
   );
 
-  const elementPropertyModels = propertyIds.length
-    ? await ElementProperties.findAll({
-        where: {
-          id: { [Op.in]: propertyIds },
-        },
-      })
-    : [];
+  const elementPropertyModels = await ElementProperties.findAll({
+    where: {
+      id: { [Op.in]: propertyIds },
+    },
+  });
 
   const coordinatesByNodeId = new Map(
     coordinateModels.map((coordinate) => [coordinate.nodeId, coordinate]),

@@ -13,6 +13,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
+        parserOptions: {
+          project: ["./tsconfig.json"],
+        },
       },
     },
     plugins: {

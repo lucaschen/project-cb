@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom";
 
+import TopNavigation from "./components/TopNavigation";
 import { PageMessage } from "./components/ui/PageMessage";
 import useSession from "./hooks/useSession";
-import TopNavigation from "./components/TopNavigation";
 
 const Root = () => {
   const { isPending } = useSession();

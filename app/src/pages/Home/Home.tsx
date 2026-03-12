@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
-
 import { Button } from "@app/components/ui/Button";
 import { Card } from "@app/components/ui/Card";
+import { Link } from "react-router-dom";
 
 const routeCards = [
   {
@@ -26,7 +25,7 @@ const routeCards = [
   },
 ];
 
-export const HomePage = () => {
+const Home = () => {
   return (
     <main className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-6xl flex-col justify-center px-6 py-12">
       <section className="rounded-[32px] border border-white/10 bg-slate-950/60 p-8 shadow-panel backdrop-blur">
@@ -37,8 +36,9 @@ export const HomePage = () => {
           Project CB frontend scaffold
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
-          This branch is the foundation layer. Use the navigator above or the quick links below
-          to move through the deliverable routes and verify the initial structure.
+          This branch is the foundation layer. Use the navigator above or the
+          quick links below to move through the deliverable routes and verify
+          the initial structure.
         </p>
         <div className="mt-8">
           <Link to="/login">
@@ -52,8 +52,12 @@ export const HomePage = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               Route
             </p>
-            <h2 className="mt-3 text-xl font-semibold text-white">{routeCard.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{routeCard.description}</p>
+            <h2 className="mt-3 text-xl font-semibold text-white">
+              {routeCard.title}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {routeCard.description}
+            </p>
             <div className="mt-6">
               <Link to={routeCard.to}>
                 <Button className="w-full" variant="secondary">
@@ -67,3 +71,5 @@ export const HomePage = () => {
     </main>
   );
 };
+
+export default Home;

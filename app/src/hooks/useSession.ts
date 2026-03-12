@@ -1,16 +1,27 @@
 import { queryKeys } from "@app/api/queryKeys";
-import { getCurrentSession } from "@app/api/session";
-import { useQuery } from "@tanstack/react-query";
+import { deleteCurrentSession, getCurrentSession } from "@app/api/session";
+import { queryClient } from "@app/utils/queryClient";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const useSession = () => {
   const { data: sessionData, ...rest } = useQuery({
     queryFn: getCurrentSession,
     queryKey: queryKeys.session,
-    staleTime: 60_000,
+    staleTime: Infinity,
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: deleteCurrentSession,
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.session,
+      });
+    },
   });
 
   return {
     sessionData: sessionData ?? null,
+    logoutMutation,
     ...rest,
   };
 };

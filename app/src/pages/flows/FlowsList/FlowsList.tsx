@@ -1,25 +1,12 @@
-import { queryKeys } from "@app/api/queryKeys";
-import { deleteCurrentSession } from "@app/api/session";
 import { Button } from "@app/components/ui/Button";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
 import useSession from "@app/hooks/useSession";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 const FlowsList = () => {
-  const { sessionData } = useSession();
+  const { sessionData, logoutMutation } = useSession();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const logoutMutation = useMutation({
-    mutationFn: deleteCurrentSession,
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.session,
-      });
-    },
-  });
 
   if (!sessionData) {
     navigate("/");

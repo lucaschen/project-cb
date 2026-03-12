@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import FlowsList, { path as flowsListPath } from "./pages/flows/FlowsList";
+import Home, { path as homePath } from "./pages/Home";
 import Login, { path as loginPath } from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import OrganizationOnboarding, {
@@ -25,6 +26,11 @@ const router = createBrowserRouter([
       {
         element: <PublicOnlyRoute />,
         children: [
+          {
+            index: true,
+            path: homePath,
+            element: <Home />,
+          },
           {
             path: loginPath,
             element: <Login />,

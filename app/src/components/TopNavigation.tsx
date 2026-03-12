@@ -1,10 +1,9 @@
-import { NavLink } from "react-router-dom";
-
 import { AppLogo } from "@app/components/ui/AppLogo";
-import { path as loginPath } from "@app/pages/Login";
-import { path as signupPath } from "@app/pages/Signup";
-import { path as organizationOnboardingPath } from "@app/pages/organizations/OrganizationOnboarding";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
+import { path as loginPath } from "@app/pages/Login";
+import { path as organizationOnboardingPath } from "@app/pages/organizations/OrganizationOnboarding";
+import { path as signupPath } from "@app/pages/Signup";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
   {

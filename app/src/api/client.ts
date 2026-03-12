@@ -1,7 +1,7 @@
 import { envs } from "@app/config/envs";
 import type { ZodType } from "zod";
 
-const { API_BASE_URL } = envs;
+const { VITE_API_BASE_URL } = envs;
 
 type ApiRequestOptions<TSchema> = {
   body?: unknown;
@@ -14,18 +14,6 @@ type ApiRequestOptions<TSchema> = {
 type ErrorBody = {
   message?: string;
 };
-
-export class ApiError extends Error {
-  body?: ErrorBody | null;
-  status: number;
-
-  constructor(message: string, status: number, body?: ErrorBody | null) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.body = body;
-  }
-}
 
 const tryParseJson = (value: string) => {
   try {
@@ -42,7 +30,7 @@ export const apiRequest = async <TSchema = null>({
   schema,
   signal,
 }: ApiRequestOptions<TSchema>) => {
-  const response = await fetch(new URL(path, API_BASE_URL).toString(), {
+  const response = await fetch(new URL(path, VITE_API_BASE_URL), {
     body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
     headers: {
@@ -56,11 +44,7 @@ export const apiRequest = async <TSchema = null>({
   const parsedBody = rawBody ? tryParseJson(rawBody) : null;
 
   if (!response.ok) {
-    throw new ApiError(
-      parsedBody?.message || `Request failed with status ${response.status}.`,
-      response.status,
-      parsedBody,
-    );
+    return null;
   }
 
   if (!schema) {

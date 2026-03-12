@@ -13,7 +13,7 @@ const setupMiddleware = (app: Express) => {
     cors({
       credentials: true,
       origin: envs.CORS_ALLOWED_ORIGINS,
-    })
+    }),
   );
   app.use(cookieParser());
   app.use(injectExpressContextEntity);

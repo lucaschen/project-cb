@@ -1,4 +1,3 @@
-import { ApiError } from "@app/api/client";
 import { queryKeys } from "@app/api/queryKeys";
 import { createSession } from "@app/api/session";
 import { AuthShell } from "@app/components/AuthShell";
@@ -32,15 +31,10 @@ const Login = () => {
       queryClient.setQueryData(queryKeys.session, session);
       navigate("/flows", { replace: true });
     },
-    onError: (error) => {
-      if (error instanceof ApiError && error.status === 401) {
-        setFormError(
-          "Login unsuccessful. Check your email and password and try again.",
-        );
-        return;
-      }
-
-      setFormError("Unable to sign in right now. Try again.");
+    onError: () => {
+      setFormError(
+        "Login unsuccessful. Check your email and password and try again.",
+      );
     },
   });
 

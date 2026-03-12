@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const envSchema = z.object({
-  API_BASE_URL: z.string(),
+  VITE_API_BASE_URL: z.string(),
 });
 
 let parsedEnvs;

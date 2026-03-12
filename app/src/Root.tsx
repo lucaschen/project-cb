@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 
 import { PageMessage } from "./components/ui/PageMessage";
 import useSession from "./hooks/useSession";
+import TopNavigation from "./components/TopNavigation";
 
 const Root = () => {
   const { isPending } = useSession();
@@ -16,7 +17,12 @@ const Root = () => {
     );
   }
 
-  return <Outlet />;
+  return (
+    <div className="min-h-screen">
+      <TopNavigation />
+      <Outlet />
+    </div>
+  );
 };
 
 export default Root;

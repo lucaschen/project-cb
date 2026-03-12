@@ -1,12 +1,11 @@
-import { ApiError } from "@app/api/client";
 import { queryKeys } from "@app/api/queryKeys";
-import { createUser } from "@app/api/session";
+import { createSession, createUser } from "@app/api/session";
 import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { createSession, Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const validate = (email: string, password: string, confirmPassword: string) => {
   return {
@@ -51,15 +50,10 @@ const Signup = () => {
       queryClient.setQueryData(queryKeys.session, session);
       navigate("/flows", { replace: true });
     },
-    onError: (error) => {
-      if (error instanceof ApiError && error.status === 400) {
-        setFormError(
-          "Unable to create account with those details. Try another email.",
-        );
-        return;
-      }
-
-      setFormError("Unable to create your account right now. Try again.");
+    onError: () => {
+      setFormError(
+        "Unable to create account with those details. Try another email.",
+      );
     },
   });
 

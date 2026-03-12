@@ -18,9 +18,6 @@ export default defineConfig([
         },
       },
     },
-    settings: {
-      react: { version: "detect" },
-    },
     plugins: {
       "simple-import-sort": simpleImportSort,
     },

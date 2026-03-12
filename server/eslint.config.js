@@ -15,9 +15,6 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    settings: {
-      react: { version: "detect" },
-    },
     plugins: {
       "simple-import-sort": simpleImportSort,
     },

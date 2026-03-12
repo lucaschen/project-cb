@@ -69,6 +69,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.24
         version: 0.4.24(eslint@9.39.1(jiti@1.21.7))
+      eslint-plugin-simple-import-sort:
+        specifier: ^12.1.1
+        version: 12.1.1(eslint@9.39.1(jiti@1.21.7))
       globals:
         specifier: ^16.5.0
         version: 16.5.0
@@ -82,7 +85,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.46.4
+        specifier: ^8.48.0
         version: 8.48.0(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
       vite:
         specifier: ^7.2.4

@@ -42,15 +42,15 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: organizationOnboardingPath,
-        element: <OrganizationOnboarding />,
-      },
-      {
         element: <ProtectedRoute />,
         children: [
           {
             path: flowsListPath,
             element: <FlowsList />,
+          },
+          {
+            path: organizationOnboardingPath,
+            element: <OrganizationOnboarding />,
           },
         ],
       },

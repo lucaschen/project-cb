@@ -1,5 +1,6 @@
 import { queryKeys } from "@app/api/queryKeys";
 import { deleteCurrentSession, getCurrentSession } from "@app/api/session";
+import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";
 import { queryClient } from "@app/utils/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -14,6 +15,10 @@ const useSession = () => {
     mutationFn: deleteCurrentSession,
     onSettled: async () => {
       queryClient.setQueryData(queryKeys.session, null);
+      queryClient.removeQueries({
+        queryKey: queryKeys.currentUserOrganizations,
+      });
+      clearStoredActiveOrganizationId();
       await queryClient.invalidateQueries({
         queryKey: queryKeys.session,
       });

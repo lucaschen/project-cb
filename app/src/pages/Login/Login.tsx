@@ -1,9 +1,14 @@
+import { getCurrentUserOrganizations } from "@app/api/organizations";
 import { queryKeys } from "@app/api/queryKeys";
 import { createSession } from "@app/api/session";
 import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
+import { path as homePath } from "@app/pages/Home";
+import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";
+import { syncActiveOrganizationId } from "@app/utils/organizations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -27,14 +32,31 @@ const Login = () => {
 
   const { mutateAsync: login, isPending: isLoginPending } = useMutation({
     mutationFn: createSession,
-    onSuccess: (session) => {
+    onSuccess: async (session) => {
       queryClient.setQueryData(queryKeys.session, session);
-      navigate("/flows", { replace: true });
+      const organizations = await queryClient.fetchQuery({
+        queryFn: getCurrentUserOrganizations,
+        queryKey: queryKeys.currentUserOrganizations,
+      });
+
+      const activeOrganizationId = syncActiveOrganizationId(organizations);
+
+      if (!activeOrganizationId) {
+        clearStoredActiveOrganizationId();
+      }
+
+      // TODO: handle url saved redirects
+      navigate(homePath, { replace: true });
     },
-    onError: () => {
-      setFormError(
-        "Login unsuccessful. Check your email and password and try again.",
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError && error.response?.status === 401) {
+        setFormError(
+          "Login unsuccessful. Check your email and password and try again.",
+        );
+        return;
+      }
+
+      setFormError("Unable to sign in right now. Try again.");
     },
   });
 
@@ -61,13 +83,13 @@ const Login = () => {
         <div className="space-y-3">
           <p className="font-medium text-white">Current scope</p>
           <p>
-            FE 02 wires the real auth flow onto the foundation branch, including
-            public routes, session bootstrap, protected flows access, and
-            logout.
+            Auth and onboarding are both live now. Sign in, resolve org context,
+            and continue directly into the protected shell with an active
+            organization.
           </p>
         </div>
       }
-      description="Use your internal account to establish a real session before entering the protected shell."
+      description="Use your internal account to establish a real session before entering the organization-aware workspace."
       eyebrow="Internal Access"
       footerLabel="Need an account?"
       footerText="Create one"
@@ -77,8 +99,8 @@ const Login = () => {
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold text-white">Welcome back</h2>
         <p className="text-sm leading-6 text-slate-300">
-          Email/password auth is live. Organization onboarding lands in the next
-          branch.
+          Sign in will restore your active organization when possible, or
+          continue into onboarding if you do not belong to one yet.
         </p>
       </div>
       <form className="mt-8 space-y-5" onSubmit={handleSubmit}>

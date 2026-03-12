@@ -4,10 +4,6 @@ import {
 } from "@app/utils/localStorage";
 import type { OrganizationPayload } from "@packages/shared/http/schemas/organizations/common";
 
-export const determinePostAuthPath = (organizations: OrganizationPayload[]) => {
-  return organizations.length === 0 ? "/onboarding/organization" : "/flows";
-};
-
 export const resolveActiveOrganizationId = (
   organizations: OrganizationPayload[],
   storedActiveOrganizationId = getStoredActiveOrganizationId(),

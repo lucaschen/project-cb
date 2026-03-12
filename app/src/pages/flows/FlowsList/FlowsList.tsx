@@ -1,16 +1,14 @@
 import { Button } from "@app/components/ui/Button";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
-import useSession from "@app/hooks/useSession";
-import { useNavigate } from "react-router-dom";
+import useRootContext from "@app/hooks/useRootContext";
+import { Navigate } from "react-router-dom";
 
 const FlowsList = () => {
-  const { sessionData, logoutMutation } = useSession();
-  const navigate = useNavigate();
+  const { activeOrganization, logoutMutation, sessionData } = useRootContext();
 
   if (!sessionData) {
-    navigate("/");
-    return null;
+    return <Navigate replace to="/" />;
   }
 
   return (
@@ -20,9 +18,9 @@ const FlowsList = () => {
           <SectionLabel>Protected Area</SectionLabel>
           <h1 className="text-3xl font-semibold text-white">Flows workspace</h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-300">
-            The auth flow is now real. This route is protected and confirms
-            session bootstrap, public-route redirects, and logout behavior
-            before org onboarding is added.
+            Auth, org-aware redirects, and active-org persistence are in place.
+            Flow list and metadata editing remain deferred until the missing
+            backend APIs exist.
           </p>
         </div>
         <div className="flex flex-col items-start gap-3 text-sm text-slate-300 md:items-end">
@@ -32,6 +30,14 @@ const FlowsList = () => {
               {sessionData.email ?? "unknown user"}
             </span>
           </div>
+          {activeOrganization ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
+              Active org:{" "}
+              <span className="font-medium text-white">
+                {activeOrganization.name}
+              </span>
+            </div>
+          ) : null}
           <Button
             isBusy={logoutMutation.isPending}
             onClick={() => logoutMutation.mutate()}
@@ -43,8 +49,8 @@ const FlowsList = () => {
       </header>
       <div className="mt-10">
         <EmptyState
-          description="This branch stops at the protected shell. Organization-aware redirects and the onboarding form are added in FE 03."
-          title="Protected route is live"
+          description="The route, auth gating, and organization context are ready. The actual flow list UI is the next ticket once list APIs are available."
+          title="Flow list coming next"
         />
       </div>
     </main>

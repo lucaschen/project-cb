@@ -1,9 +1,14 @@
+import { getCurrentUserOrganizations } from "@app/api/organizations";
 import { queryKeys } from "@app/api/queryKeys";
 import { createSession, createUser } from "@app/api/session";
 import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
+import { path as homePath } from "@app/pages/Home";
+import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";
+import { syncActiveOrganizationId } from "@app/utils/organizations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -46,14 +51,31 @@ const Signup = () => {
         password,
       });
     },
-    onSuccess: (session) => {
+    onSuccess: async (session) => {
       queryClient.setQueryData(queryKeys.session, session);
-      navigate("/flows", { replace: true });
+      const organizations = await queryClient.fetchQuery({
+        queryFn: getCurrentUserOrganizations,
+        queryKey: queryKeys.currentUserOrganizations,
+      });
+
+      const activeOrganizationId = syncActiveOrganizationId(organizations);
+
+      if (!activeOrganizationId) {
+        clearStoredActiveOrganizationId();
+      }
+
+      // TODO: handle url saved redirects
+      navigate(homePath, { replace: true });
     },
-    onError: () => {
-      setFormError(
-        "Unable to create account with those details. Try another email.",
-      );
+    onError: (error) => {
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        setFormError(
+          "Unable to create account with those details. Try another email.",
+        );
+        return;
+      }
+
+      setFormError("Unable to create your account right now. Try again.");
     },
   });
 
@@ -87,11 +109,12 @@ const Signup = () => {
           <p className="font-medium text-white">MVP signup</p>
           <p>
             Account creation is live in-app for internal users, and successful
-            signup creates a session immediately.
+            signup creates a session immediately before org onboarding is
+            resolved.
           </p>
         </div>
       }
-      description="Create your internal account, establish a real session automatically, and continue into the protected app shell."
+      description="Create your internal account, establish a real session automatically, and continue directly into organization setup if needed."
       eyebrow="MVP Signup"
       footerLabel="Already have an account?"
       footerText="Sign in"
@@ -103,8 +126,8 @@ const Signup = () => {
           Set up your account
         </h2>
         <p className="text-sm leading-6 text-slate-300">
-          This branch stops after authentication. Organization onboarding
-          follows in FE 03.
+          Successful signup continues into onboarding when no organization
+          exists yet.
         </p>
       </div>
       <form className="mt-8 space-y-5" onSubmit={handleSubmit}>

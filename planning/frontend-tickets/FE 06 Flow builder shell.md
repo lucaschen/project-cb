@@ -24,6 +24,10 @@ Create the main flow-builder shell that hosts step management, step editing, and
 ## Dependencies
 - [FE 05 Flow creation and metadata](./FE%2005%20Flow%20creation%20and%20metadata.md)
 
+## Backend Dependencies
+- Blocked by [BE 01 Flow listing and builder read APIs](../backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)
+- Requires a builder-ready flow detail payload that can load existing steps, decision nodes, and elements
+
 ## Open Questions
 - Whether builder uses nested routes or a single-page state machine
 - Whether unsaved-change guards are needed immediately

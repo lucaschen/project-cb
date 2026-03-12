@@ -23,6 +23,10 @@ Provide the primary editing surface for common step properties.
 ## Dependencies
 - [FE 07 Step list management](./FE%2007%20Step%20list%20management.md)
 
+## Backend Dependencies
+- Blocked by [BE 04 Step element and property editing APIs](../backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
+- Requires read/update persistence for existing step element properties, not only create-time element payloads
+
 ## Open Questions
 - Exact validation types required for MVP
 - Whether all step types share one sidebar schema or require per-type panels

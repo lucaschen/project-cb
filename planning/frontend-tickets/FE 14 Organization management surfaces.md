@@ -24,6 +24,10 @@ Add the remaining internal organization management pages after the core builder 
 - [FE 03 Organization creation and onboarding](./FE%2003%20Organization%20creation%20and%20onboarding.md)
 - Core app navigation from earlier tickets
 
+## Backend Dependencies
+- Mostly blocked by [BE 06 Organization management APIs](../backend-tickets/BE%2006%20Organization%20management%20APIs.md)
+- Requires backend support for member management, invites, settings updates, and guarded organization deletion
+
 ## Open Questions
 - Exact roles and permissions model
 - Whether invites are email-based, link-based, or both

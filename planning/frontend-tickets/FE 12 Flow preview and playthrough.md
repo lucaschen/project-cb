@@ -26,6 +26,10 @@ Provide a full internal-only respondent-style preview experience for a flow.
 - [FE 10 Flow branching and logic](./FE%2010%20Flow%20branching%20and%20logic.md)
 - [FE 11 Step preview in editor](./FE%2011%20Step%20preview%20in%20editor.md)
 
+## Backend Dependencies
+- No concrete backend blocker ticket is defined yet
+- This ticket still needs product and API clarification on whether preview should run from local draft state, saved backend state, or both
+
 ## Open Questions
 - Whether preview opens inline, in a drawer, or on a dedicated route
 - Whether preview starts from draft data or only saved data

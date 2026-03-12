@@ -24,6 +24,10 @@ Allow flows to express meaningful conditional behavior between steps.
 - [FE 07 Step list management](./FE%2007%20Step%20list%20management.md)
 - [FE 08 Step properties sidebar](./FE%2008%20Step%20properties%20sidebar.md)
 
+## Backend Dependencies
+- Blocked by [BE 05 Branching and decision condition APIs](../backend-tickets/BE%2005%20Branching%20and%20decision%20condition%20APIs.md)
+- Requires decision-condition persistence, validation, and reload support beyond the current decision-node create endpoint
+
 ## Open Questions
 - Exact condition operators supported in MVP
 - Whether branching is step-level only or field-level as well

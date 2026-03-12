@@ -48,6 +48,18 @@ Deliver a stakeholder-ready MVP frontend for Project CB using `React + Vite`, `T
 - Organization switching and management surfaces
   - [FE 14 Organization management surfaces](./frontend-tickets/FE%2014%20Organization%20management%20surfaces.md)
 
+## Backend Blockers
+- [FE 04 Flow list page](./frontend-tickets/FE%2004%20Flow%20list%20page.md) is blocked by [BE 01 Flow listing and builder read APIs](./backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)
+- [FE 05 Flow creation and metadata](./frontend-tickets/FE%2005%20Flow%20creation%20and%20metadata.md) is partially blocked by [BE 02 Flow metadata read and update APIs](./backend-tickets/BE%2002%20Flow%20metadata%20read%20and%20update%20APIs.md)
+- [FE 06 Flow builder shell](./frontend-tickets/FE%2006%20Flow%20builder%20shell.md) is blocked by [BE 01 Flow listing and builder read APIs](./backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)
+- [FE 07 Step list management](./frontend-tickets/FE%2007%20Step%20list%20management.md) is blocked by [BE 03 Step CRUD and ordering APIs](./backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md)
+- [FE 08 Step properties sidebar](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md) is blocked by [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
+- [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md) is partially blocked by [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md); modal scope still needs FE and product clarification
+- [FE 10 Flow branching and logic](./frontend-tickets/FE%2010%20Flow%20branching%20and%20logic.md) is blocked by [BE 05 Branching and decision condition APIs](./backend-tickets/BE%2005%20Branching%20and%20decision%20condition%20APIs.md)
+- [FE 12 Flow preview and playthrough](./frontend-tickets/FE%2012%20Flow%20preview%20and%20playthrough.md) has no concrete backend blocker ticket yet and still needs product/API clarification
+- [FE 13 Preview submission flow](./frontend-tickets/FE%2013%20Preview%20submission%20flow.md) has no concrete backend blocker ticket yet and still needs product/API clarification
+- [FE 14 Organization management surfaces](./frontend-tickets/FE%2014%20Organization%20management%20surfaces.md) is mostly blocked by [BE 06 Organization management APIs](./backend-tickets/BE%2006%20Organization%20management%20APIs.md)
+
 ## Deliverable Areas
 ### 1. App foundation
 Set up the frontend application structure, routing, environment handling, API client conventions, query providers, state boundaries, and shared UI primitives required by all later tickets.
@@ -78,3 +90,4 @@ After the core builder and preview flows are stable, add the remaining org-manag
 - Whether registration is exposed in the frontend or handled out-of-band for internal users
 - Exact member/invite permissions model for org management
 - Whether autosave is required in the builder or manual save is sufficient for the first pass
+- Whether preview/playthrough should run from local draft state, saved backend state, or both for MVP

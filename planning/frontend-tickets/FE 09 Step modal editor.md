@@ -23,6 +23,10 @@ Support richer editing flows for complex step configuration that should not be f
 ## Dependencies
 - [FE 08 Step properties sidebar](./FE%2008%20Step%20properties%20sidebar.md)
 
+## Backend Dependencies
+- Partially blocked by [BE 04 Step element and property editing APIs](../backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
+- Persistence for advanced step edits depends on backend update support, but the FE and product teams still need to decide which step types require modal editing in MVP
+
 ## Open Questions
 - Which step types definitely require advanced modal editing in MVP
 - Whether modal editing writes directly or stages a draft until confirmation

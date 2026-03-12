@@ -23,5 +23,9 @@ Complete the preview/playthrough experience with final submission handling and c
 ## Dependencies
 - [FE 12 Flow preview and playthrough](./FE%2012%20Flow%20preview%20and%20playthrough.md)
 
+## Backend Dependencies
+- No concrete backend blocker ticket is defined yet
+- This ticket still needs product and API clarification on whether preview submissions are local-only demo actions or persisted backend records
+
 ## Open Questions
 - Whether preview submissions persist as real records or demo-only records in MVP

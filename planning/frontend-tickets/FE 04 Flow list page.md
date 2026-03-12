@@ -24,6 +24,10 @@ Provide the main internal page for viewing and entering flows within the active 
 ## Dependencies
 - [FE 03 Organization creation and onboarding](./FE%2003%20Organization%20creation%20and%20onboarding.md)
 
+## Backend Dependencies
+- Blocked by [BE 01 Flow listing and builder read APIs](../backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)
+- Requires an org-scoped flow list endpoint plus the agreed list payload shape
+
 ## Open Questions
 - Required metadata to display in the list
 - Whether archived/draft separation exists in MVP

@@ -23,6 +23,10 @@ Allow internal users to create a new flow and manage its top-level metadata.
 ## Dependencies
 - [FE 04 Flow list page](./FE%2004%20Flow%20list%20page.md)
 
+## Backend Dependencies
+- Partially blocked by [BE 02 Flow metadata read and update APIs](../backend-tickets/BE%2002%20Flow%20metadata%20read%20and%20update%20APIs.md)
+- Initial flow creation exists, but metadata reads and updates for fields beyond the current create payload still need backend support
+
 ## Open Questions
 - Exact metadata fields supported by backend
 - Whether status transitions exist in MVP

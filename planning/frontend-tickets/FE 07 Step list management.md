@@ -24,6 +24,10 @@ Enable users to manage the ordered set of steps within a flow.
 ## Dependencies
 - [FE 06 Flow builder shell](./FE%2006%20Flow%20builder%20shell.md)
 
+## Backend Dependencies
+- Blocked by [BE 03 Step CRUD and ordering APIs](../backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md)
+- Requires step list, update, delete, and reorder APIs in addition to the current create-step support
+
 ## Open Questions
 - Whether a default step template is created when adding a step
 - Whether duplicate-step behavior is needed in MVP

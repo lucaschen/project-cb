@@ -1,3 +1,4 @@
+import type { ConditionStatement } from "@packages/shared/db/schemas/conditionStatement";
 import {
   DataTypes,
   InferAttributes,
@@ -5,8 +6,6 @@ import {
   Model,
   Sequelize,
 } from "sequelize";
-
-import { ConditionStatement } from "~sharedTypes/conditionStatement";
 
 export class StepElementCondition extends Model<
   InferAttributes<StepElementCondition>,

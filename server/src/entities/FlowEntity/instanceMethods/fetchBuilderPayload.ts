@@ -1,0 +1,251 @@
+import type { FetchFlowOutput } from "@packages/shared/http/schemas/flows/fetchFlow";
+import { NodeType } from "@packages/shared/types/enums";
+import { Op } from "sequelize";
+
+import { DecisionNode } from "~db/models/DecisionNode";
+import { DecisionNodeCondition } from "~db/models/DecisionNodeCondition";
+import { ElementProperties } from "~db/models/ElementProperties";
+import { Node } from "~db/models/Node";
+import { NodeCoordinate } from "~db/models/NodeCoordinate";
+import { Step } from "~db/models/Step";
+import { StepElement } from "~db/models/StepElement";
+import { StepElementProperties } from "~db/models/StepElementProperties";
+import UnexpectedError from "~src/utils/errors/UnexpectedError";
+
+import type FlowEntity from "../FlowEntity";
+
+export default async function fetchBuilderPayload(
+  this: FlowEntity,
+): Promise<FetchFlowOutput> {
+  const nodeModels = await Node.findAll({
+    order: [
+      ["name", "ASC"],
+      ["id", "ASC"],
+    ],
+    where: { flowId: this.dbModel.id },
+  });
+
+  const nodeIds = nodeModels.map((node) => node.id);
+
+  const [coordinateModels, stepModels, decisionNodeModels] = await Promise.all([
+    nodeIds.length
+      ? NodeCoordinate.findAll({
+          where: {
+            nodeId: { [Op.in]: nodeIds },
+          },
+        })
+      : Promise.resolve([]),
+    nodeIds.length
+      ? Step.findAll({
+          where: {
+            nodeId: { [Op.in]: nodeIds },
+          },
+        })
+      : Promise.resolve([]),
+    nodeIds.length
+      ? DecisionNode.findAll({
+          where: {
+            nodeId: { [Op.in]: nodeIds },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const stepNodeIds = stepModels.map((step) => step.nodeId);
+  const decisionNodeIds = decisionNodeModels.map(
+    (decisionNode) => decisionNode.nodeId,
+  );
+
+  const [stepElementModels, decisionConditionModels] = await Promise.all([
+    stepNodeIds.length
+      ? StepElement.findAll({
+          where: {
+            stepId: { [Op.in]: stepNodeIds },
+          },
+        })
+      : Promise.resolve([]),
+    decisionNodeIds.length
+      ? DecisionNodeCondition.findAll({
+          where: {
+            nodeId: { [Op.in]: decisionNodeIds },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const stepElementIds = stepElementModels.map((stepElement) => stepElement.id);
+
+  const hydratedStepElementPropertyModels = stepElementIds.length
+    ? await StepElementProperties.findAll({
+        where: {
+          stepElementId: { [Op.in]: stepElementIds },
+        },
+      })
+    : [];
+
+  const propertyIds = Array.from(
+    new Set(
+      hydratedStepElementPropertyModels.map(
+        (stepElementProperty) => stepElementProperty.propertyId,
+      ),
+    ),
+  );
+
+  const elementPropertyModels = propertyIds.length
+    ? await ElementProperties.findAll({
+        where: {
+          id: { [Op.in]: propertyIds },
+        },
+      })
+    : [];
+
+  const coordinatesByNodeId = new Map(
+    coordinateModels.map((coordinate) => [coordinate.nodeId, coordinate]),
+  );
+  const stepsByNodeId = new Map(stepModels.map((step) => [step.nodeId, step]));
+  const decisionNodesByNodeId = new Map(
+    decisionNodeModels.map((decisionNode) => [decisionNode.nodeId, decisionNode]),
+  );
+  const elementPropertiesById = new Map(
+    elementPropertyModels.map((elementProperty) => [elementProperty.id, elementProperty]),
+  );
+
+  const stepElementsByStepId = new Map<string, StepElement[]>();
+  for (const stepElement of stepElementModels) {
+    const existing = stepElementsByStepId.get(stepElement.stepId) ?? [];
+    existing.push(stepElement);
+    stepElementsByStepId.set(stepElement.stepId, existing);
+  }
+
+  const stepElementPropertiesByStepElementId = new Map<
+    string,
+    StepElementProperties[]
+  >();
+  for (const stepElementProperty of hydratedStepElementPropertyModels) {
+    const existing =
+      stepElementPropertiesByStepElementId.get(stepElementProperty.stepElementId) ??
+      [];
+    existing.push(stepElementProperty);
+    stepElementPropertiesByStepElementId.set(
+      stepElementProperty.stepElementId,
+      existing,
+    );
+  }
+
+  const decisionConditionsByNodeId = new Map<string, DecisionNodeCondition[]>();
+  for (const condition of decisionConditionModels) {
+    const existing = decisionConditionsByNodeId.get(condition.nodeId) ?? [];
+    existing.push(condition);
+    decisionConditionsByNodeId.set(condition.nodeId, existing);
+  }
+
+  return {
+    flow: {
+      id: this.dbModel.id,
+      name: this.dbModel.name,
+      organizationId: this.dbModel.organizationId,
+      slug: this.dbModel.slug,
+      nodes: nodeModels.map((node) => {
+        const coordinates = coordinatesByNodeId.get(node.id);
+        const nodeCoordinates = coordinates
+          ? {
+              x: coordinates.x,
+              y: coordinates.y,
+            }
+          : null;
+
+        if (node.type === NodeType.STEP) {
+          const step = stepsByNodeId.get(node.id);
+
+          if (!step) {
+            throw new UnexpectedError(
+              `Step node id: ${node.id} has no step record.`,
+            );
+          }
+
+          const elements = (stepElementsByStepId.get(step.nodeId) ?? [])
+            .sort(
+              (left, right) =>
+                left.order - right.order || left.id.localeCompare(right.id),
+            )
+            .map((stepElement) => {
+              const properties = (
+                stepElementPropertiesByStepElementId.get(stepElement.id) ?? []
+              )
+                .map((stepElementProperty) => {
+                  const elementProperty = elementPropertiesById.get(
+                    stepElementProperty.propertyId,
+                  );
+
+                  if (!elementProperty) {
+                    throw new UnexpectedError(
+                      `Element property id: ${stepElementProperty.propertyId} not found.`,
+                    );
+                  }
+
+                  return {
+                    defaultValue: elementProperty.defaultValue,
+                    propertyId: elementProperty.id,
+                    propertyName: elementProperty.propertyName,
+                    propertyType: elementProperty.propertyType,
+                    required: elementProperty.required,
+                    value: stepElementProperty.propertyValue,
+                  };
+                })
+                .sort(
+                  (left, right) =>
+                    left.propertyName.localeCompare(right.propertyName) ||
+                    left.propertyId.localeCompare(right.propertyId),
+                );
+
+              return {
+                elementId: stepElement.elementId,
+                id: stepElement.id,
+                name: stepElement.name,
+                order: stepElement.order,
+                properties,
+              };
+            });
+
+          return {
+            coordinates: nodeCoordinates,
+            elements,
+            name: node.name,
+            nextNodeId: step.nextNodeId,
+            nodeId: node.id,
+            type: node.type,
+          };
+        }
+
+        const decisionNode = decisionNodesByNodeId.get(node.id);
+
+        if (!decisionNode) {
+          throw new UnexpectedError(
+            `Decision node id: ${node.id} has no decision record.`,
+          );
+        }
+
+        const conditions = (decisionConditionsByNodeId.get(node.id) ?? [])
+          .sort(
+            (left, right) =>
+              left.order - right.order || left.id.localeCompare(right.id),
+          )
+          .map((condition) => ({
+            id: condition.id,
+            order: condition.order,
+            statement: condition.statement,
+            toNodeId: condition.toNodeId,
+          }));
+
+        return {
+          conditions,
+          coordinates: nodeCoordinates,
+          fallbackNextNodeId: decisionNode.fallbackNextNodeId,
+          name: node.name,
+          nodeId: node.id,
+          type: node.type,
+        };
+      }),
+    },
+  };
+}

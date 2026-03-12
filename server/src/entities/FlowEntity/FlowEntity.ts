@@ -1,8 +1,10 @@
 import { Flow } from "~db/models/Flow";
 
 import { staticImplements, type StaticMethods } from "../types";
+import fetchBuilderPayload from "./instanceMethods/fetchBuilderPayload";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
+import findByOrganizationId from "./staticMethods/findByOrganizationId";
 
 @staticImplements<StaticMethods<typeof FlowEntity, FlowEntity>>()
 export default class FlowEntity {
@@ -15,4 +17,8 @@ export default class FlowEntity {
   // PARTITION: Static methods
   static create = create;
   static findById = findById;
+  static findByOrganizationId = findByOrganizationId;
+
+  // PARTITION: Instance methods
+  fetchBuilderPayload = fetchBuilderPayload;
 }

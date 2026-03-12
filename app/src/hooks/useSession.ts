@@ -13,6 +13,7 @@ const useSession = () => {
   const logoutMutation = useMutation({
     mutationFn: deleteCurrentSession,
     onSettled: async () => {
+      queryClient.setQueryData(queryKeys.session, null);
       await queryClient.invalidateQueries({
         queryKey: queryKeys.session,
       });

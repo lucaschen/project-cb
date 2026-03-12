@@ -1,27 +1,31 @@
 import { Button } from "@app/components/ui/Button";
 import { Card } from "@app/components/ui/Card";
 import { Link } from "react-router-dom";
+import { path as loginPath } from "@app/pages/Login";
+import { path as signupPath } from "@app/pages/Signup";
+import { path as organizationOnboardingPath } from "@app/pages/organizations/OrganizationOnboarding";
+import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 
 const routeCards = [
   {
     description: "Foundation auth entry point",
     title: "Login",
-    to: "/login",
+    to: loginPath,
   },
   {
     description: "Internal account registration path",
     title: "Signup",
-    to: "/signup",
+    to: signupPath,
   },
   {
     description: "Organization setup scaffold",
     title: "Org onboarding",
-    to: "/onboarding/organization",
+    to: organizationOnboardingPath,
   },
   {
     description: "Protected flows placeholder",
     title: "Flows",
-    to: "/flows",
+    to: flowsListPath,
   },
 ];
 

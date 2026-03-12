@@ -1,12 +1,16 @@
-import useSession from "@app/hooks/useSession";
+import useRootContext from "@app/hooks/useRootContext";
 import { Navigate, Outlet } from "react-router-dom";
 
+import { path as homePath } from "./Home";
+
 export const PublicOnlyRoute = () => {
-  const { sessionData } = useSession();
+  const rootContext = useRootContext();
+  const { sessionData } = rootContext;
 
   if (sessionData) {
-    return <Navigate replace to="/flows" />;
+    // TODO: handle saved redirects in url
+    return <Navigate replace to={homePath} />;
   }
 
-  return <Outlet />;
+  return <Outlet context={rootContext} />;
 };

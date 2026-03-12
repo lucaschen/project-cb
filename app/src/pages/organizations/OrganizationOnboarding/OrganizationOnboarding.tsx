@@ -33,11 +33,11 @@ const OrganizationOnboarding = () => {
 
   const createOrganizationMutation = useMutation({
     mutationFn: createOrganization,
-    onSuccess: (organization) => {
+    onSuccess: async (organization) => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.currentUserOrganizations,
+      });
       syncActiveOrganizationId([organization]);
-      queryClient.setQueryData(queryKeys.currentUserOrganizations, [
-        organization,
-      ]);
       navigate(flowsListPath, { replace: true });
     },
     onError: (error) => {

@@ -5,6 +5,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+import FlowDetails, { path as flowDetailsPath } from "./pages/flows/FlowDetails";
 import FlowsList, { path as flowsListPath } from "./pages/flows/FlowsList";
 import Home, { path as homePath } from "./pages/Home";
 import Login, { path as loginPath } from "./pages/Login";
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
           {
             path: flowsListPath,
             element: <FlowsList />,
+          },
+          {
+            path: flowDetailsPath,
+            element: <FlowDetails />,
           },
           {
             path: organizationOnboardingPath,

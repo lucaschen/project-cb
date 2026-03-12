@@ -14,6 +14,7 @@ export class Flow extends Model<
   declare organizationId: string;
   declare name: string;
   declare slug: string;
+  declare description: string | null;
 
   static initModel(sequelize: Sequelize) {
     Flow.init(
@@ -22,6 +23,7 @@ export class Flow extends Model<
         organizationId: { type: DataTypes.UUID, allowNull: false },
         name: { type: DataTypes.STRING, allowNull: false },
         slug: { type: DataTypes.STRING, allowNull: false },
+        description: { type: DataTypes.TEXT, allowNull: true },
       },
       {
         sequelize,

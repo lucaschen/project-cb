@@ -34,7 +34,7 @@ const tryParseJson = (value: string) => {
   }
 };
 
-export const apiRequest = async <TSchema>({
+export const apiRequest = async <TSchema = null>({
   body,
   method,
   path,
@@ -62,8 +62,8 @@ export const apiRequest = async <TSchema>({
     );
   }
 
-  if (!schema || !rawBody) {
-    return undefined as TSchema;
+  if (!schema) {
+    return null;
   }
 
   return schema.parse(parsedBody);

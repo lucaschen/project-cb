@@ -31,7 +31,8 @@ Add the first real builder logic on top of the FE 06 shell so users can create, 
 
 ## Backend Dependencies
 - Blocked by [BE 03 Step CRUD and ordering APIs](../backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md)
-- Requires create, update, delete, and reorder APIs that support the first real builder graph mutations
+- Depends on [BE 05 Unified builder graph save and decision logic APIs](../backend-tickets/BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md) for the canonical write path for direct flow-child graph mutations
+- Requires ordered step reads plus a flow-graph save API that can persist step membership and ordering without splitting direct `Flow` child edits across multiple endpoints
 
 ## Open Questions
 - Whether decision-node creation lands in the same ticket or follows immediately after the first step-node flow

@@ -22,8 +22,8 @@ Deliver the backend APIs required to unblock the Project CB MVP frontend, keepin
   - [BE 03 Step CRUD and ordering APIs](./backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md)
 - Step element and property editing APIs
   - [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
-- Branching and decision condition APIs
-  - [BE 05 Branching and decision condition APIs](./backend-tickets/BE%2005%20Branching%20and%20decision%20condition%20APIs.md)
+- Unified builder graph save and decision logic APIs
+  - [BE 05 Unified builder graph save and decision logic APIs](./backend-tickets/BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md)
 
 ### Organization administration
 - Organization management APIs
@@ -37,7 +37,7 @@ Provide org-scoped flow listing and a builder-ready flow read payload so the fro
 Expand the flow API surface from create-only into read/update behavior for the top-level metadata supported in MVP.
 
 ### 3. Builder persistence
-Provide the missing CRUD, ordering, and persistence surfaces for steps, step elements, editable properties, and branching rules.
+Provide the missing persistence surfaces for ordered steps, step-internal content, and unified flow-graph editing so direct `Flow` children save together while step content remains isolated.
 
 ### 4. Organization management
 Add the member, invite, settings, and delete-org surfaces required after the core builder path is stable.
@@ -52,4 +52,5 @@ Add the member, invite, settings, and delete-org surfaces required after the cor
 - Exact flow metadata fields beyond `name` and `slug` for MVP
 - Canonical builder read payload shape for flows, nodes, steps, and editable properties
 - Whether decision logic should support step-level routing only or also field-level visibility in MVP
+- Whether the transitional BE 03 step-only write path should remain available after BE 05 lands
 - Whether organization invites should remain user-based, become email-based, or support both

@@ -15,6 +15,7 @@ Add the missing read and persistence surfaces for editable step elements and the
 - The current backend supports creating a step element with optional properties, but not editing existing ones; FE 08 depends on this ticket
 - BE 04 is the persistence layer for FE 08 only; FE 09 advanced modal payloads remain out of scope for now
 - Persist one selected step at a time using a full replacement payload instead of granular element CRUD routes
+- This remains intentionally separate from unified flow-graph saving because step elements are step-internal content, not direct `Flow` children
 - Keep property validation compatible with the existing `ElementProperties` and `StepElementProperties` model
 - Run saves transactionally so reorder, create, update, and delete all succeed or fail together
 

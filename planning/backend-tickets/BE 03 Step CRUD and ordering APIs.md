@@ -15,6 +15,7 @@ Provide the CRUD and ordering APIs required for reliable step management inside 
 - Ordering must be explicit and stable so branching logic does not depend on transient UI order alone
 - Step deletion must define how linked `nextNodeId` and branching references are validated or rejected
 - Reuse flow edit permissions for all step mutations
+- This ticket establishes ordered step reads and step-management primitives, but the long-term canonical write surface for direct `Flow` children is consolidated in [BE 05 Unified builder graph save and decision logic APIs](./BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md)
 
 ## Acceptance Criteria
 - FE 07 can load the current ordered steps for a flow
@@ -22,6 +23,7 @@ Provide the CRUD and ordering APIs required for reliable step management inside 
 - The persisted order is returned consistently after reorder operations
 - Invalid delete or reorder requests that would leave the flow in a broken state are rejected clearly
 - Re-fetching the flow reflects the saved step order and membership accurately
+- Any step-only write surface introduced here is explicitly transitional once BE 05 becomes the canonical builder-graph write path
 
 ## Dependencies
 - [BE 01 Flow listing and builder read APIs](./BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)

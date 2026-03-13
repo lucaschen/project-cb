@@ -1,10 +1,10 @@
 import type { ConditionStatement } from "@packages/shared/db/schemas/conditionStatement";
 
-import getReferencedStepElementIds from "~entities/StepEntity/utils/getReferencedStepElementIds";
+import getReferencedStepElementIds from "./getReferencedStepElementIds";
 
 /**
- * Return the first referenced step element id that is not present in the
- * provided surviving-id set, or `null` when all references are valid.
+ * Return the first referenced step element id missing from the provided valid
+ * set, or `null` when the statement only references surviving elements.
  */
 export default function findMissingReferencedStepElementId({
   statement,

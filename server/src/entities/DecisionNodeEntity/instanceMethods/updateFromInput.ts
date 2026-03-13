@@ -12,9 +12,7 @@ export default async function updateFromInput(
 ): Promise<DecisionNodeEntity> {
   this.dbModel.fallbackNextNodeId = input.fallbackNextNodeId;
 
-  if (transaction) {
-    await this.dbModel.save({ transaction });
-  }
+  await this.dbModel.save({ transaction });
 
   for (const [index, condition] of input.conditions.entries()) {
     await DecisionNodeCondition.upsert(
@@ -48,9 +46,7 @@ export default async function updateFromInput(
     });
   }
 
-  if (transaction) {
-    await this.dbModel.reload({ transaction });
-  }
+  await this.dbModel.reload({ transaction });
 
   return this;
 }

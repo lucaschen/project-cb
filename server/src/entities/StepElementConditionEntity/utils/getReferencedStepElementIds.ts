@@ -32,7 +32,7 @@ const isStepElementValueSelector = (
 
 /**
  * Walk a persisted condition statement and collect every referenced
- * `stepElementValue.stepElementId`, regardless of how deeply nested it is.
+ * `stepElementValue.stepElementId`, regardless of nesting depth.
  */
 export default function getReferencedStepElementIds(
   value: StepElementReferenceSearchValue,

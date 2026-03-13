@@ -28,7 +28,6 @@ export default async function fetchBuilderPayload(
   const stepSummariesByNodeId = new Map(
     stepSummaries.map((stepSummary) => [stepSummary.nodeId, stepSummary]),
   );
-  const stepNodeIds = stepSummaries.map((stepSummary) => stepSummary.nodeId);
   const decisionNodeIds = nodeModels
     .filter((node) => node.type === NodeType.DECISION)
     .map((node) => node.id);
@@ -72,74 +71,78 @@ export default async function fetchBuilderPayload(
   return {
     flow: {
       ...this.getPayload(),
-      nodes: await Promise.all(nodeModels.map(async (node) => {
-        if (node.type === NodeType.STEP) {
-          const stepSummary = stepSummariesByNodeId.get(node.id);
+      nodes: await Promise.all(
+        nodeModels.map(async (node) => {
+          if (node.type === NodeType.STEP) {
+            const stepSummary = stepSummariesByNodeId.get(node.id);
 
-          if (!stepSummary) {
+            if (!stepSummary) {
+              throw new UnexpectedError(
+                `Step node id: ${node.id} has no hydrated step summary.`,
+              );
+            }
+
+            const stepEntity = await StepEntity.findById(stepSummary.nodeId);
+
+            if (!stepEntity) {
+              throw new UnexpectedError(
+                `Step node id: ${node.id} has no step entity.`,
+              );
+            }
+
+            const elements = await stepEntity.fetchStepElements(
+              this.dbModel.id,
+            );
+
+            return {
+              coordinates: stepSummary.coordinates,
+              elements,
+              name: stepSummary.name,
+              nextNodeId: stepSummary.nextNodeId,
+              nodeId: stepSummary.nodeId,
+              order: stepSummary.order,
+              type: node.type,
+            };
+          }
+
+          const coordinates = decisionCoordinatesByNodeId.get(node.id);
+          const nodeCoordinates = coordinates
+            ? {
+                x: coordinates.x,
+                y: coordinates.y,
+              }
+            : null;
+
+          const decisionNode = decisionNodesByNodeId.get(node.id);
+
+          if (!decisionNode) {
             throw new UnexpectedError(
-              `Step node id: ${node.id} has no hydrated step summary.`,
+              `Decision node id: ${node.id} has no decision record.`,
             );
           }
 
-          const stepEntity = await StepEntity.findById(stepSummary.nodeId);
-
-          if (!stepEntity) {
-            throw new UnexpectedError(
-              `Step node id: ${node.id} has no step entity.`,
-            );
-          }
-
-          const elements = await stepEntity.fetchStepElements(this.dbModel.id);
+          const conditions = (decisionConditionsByNodeId.get(node.id) ?? [])
+            .sort(
+              (left, right) =>
+                left.order - right.order || left.id.localeCompare(right.id),
+            )
+            .map((condition) => ({
+              id: condition.id,
+              order: condition.order,
+              statement: condition.statement,
+              toNodeId: condition.toNodeId,
+            }));
 
           return {
-            coordinates: stepSummary.coordinates,
-            elements,
-            name: stepSummary.name,
-            nextNodeId: stepSummary.nextNodeId,
-            nodeId: stepSummary.nodeId,
-            order: stepSummary.order,
+            conditions,
+            coordinates: nodeCoordinates,
+            fallbackNextNodeId: decisionNode.fallbackNextNodeId,
+            name: node.name,
+            nodeId: node.id,
             type: node.type,
           };
-        }
-
-        const coordinates = decisionCoordinatesByNodeId.get(node.id);
-        const nodeCoordinates = coordinates
-          ? {
-              x: coordinates.x,
-              y: coordinates.y,
-            }
-          : null;
-
-        const decisionNode = decisionNodesByNodeId.get(node.id);
-
-        if (!decisionNode) {
-          throw new UnexpectedError(
-            `Decision node id: ${node.id} has no decision record.`,
-          );
-        }
-
-        const conditions = (decisionConditionsByNodeId.get(node.id) ?? [])
-          .sort(
-            (left, right) =>
-              left.order - right.order || left.id.localeCompare(right.id),
-          )
-          .map((condition) => ({
-            id: condition.id,
-            order: condition.order,
-            statement: condition.statement,
-            toNodeId: condition.toNodeId,
-          }));
-
-        return {
-          conditions,
-          coordinates: nodeCoordinates,
-          fallbackNextNodeId: decisionNode.fallbackNextNodeId,
-          name: node.name,
-          nodeId: node.id,
-          type: node.type,
-        };
-      })),
+        }),
+      ),
     },
   };
 }

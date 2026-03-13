@@ -3,7 +3,7 @@ import type {
   UpdateStepElementsInput,
   UpdateStepElementsOutput,
 } from "@packages/shared/http/schemas/flows/steps/elements/updateStepElements";
-import { ElementPropertyTypes, NodeType } from "@packages/shared/types/enums";
+import { NodeType } from "@packages/shared/types/enums";
 import { Op } from "sequelize";
 
 import { Element } from "~db/models/Element";
@@ -17,111 +17,9 @@ import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 import type StepEntity from "../StepEntity";
-
-const getReferencedStepElementIds = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.flatMap((entry) => getReferencedStepElementIds(entry));
-  }
-
-  if (!value || typeof value !== "object") {
-    return [];
-  }
-
-  const record = value as Record<string, unknown>;
-
-  if (
-    record.type === "stepElementValue" &&
-    typeof record.stepElementId === "string"
-  ) {
-    return [record.stepElementId];
-  }
-
-  return Object.values(record).flatMap((entry) => getReferencedStepElementIds(entry));
-};
-
-const serializePropertyValue = (
-  rawValue: unknown,
-  propertyType: ElementPropertyTypes,
-): string => {
-  switch (propertyType) {
-    case ElementPropertyTypes.STRING: {
-      if (typeof rawValue !== "string") {
-        throw new InvalidRequestError("Expected a string property value.");
-      }
-
-      return rawValue;
-    }
-
-    case ElementPropertyTypes.NUMBER: {
-      const parsedNumber =
-        typeof rawValue === "number"
-          ? rawValue
-          : typeof rawValue === "string"
-            ? Number(rawValue)
-            : Number.NaN;
-
-      if (!Number.isFinite(parsedNumber)) {
-        throw new InvalidRequestError("Expected a finite numeric property value.");
-      }
-
-      return `${rawValue}`;
-    }
-
-    case ElementPropertyTypes.BOOLEAN: {
-      if (typeof rawValue === "boolean") {
-        return rawValue ? "true" : "false";
-      }
-
-      if (rawValue === "true" || rawValue === "false") {
-        return rawValue;
-      }
-
-      throw new InvalidRequestError("Expected a boolean property value.");
-    }
-
-    case ElementPropertyTypes.ARRAY: {
-      if (!Array.isArray(rawValue)) {
-        throw new InvalidRequestError("Expected an array property value.");
-      }
-
-      return JSON.stringify(rawValue);
-    }
-
-    case ElementPropertyTypes.OBJECT: {
-      if (!rawValue || typeof rawValue !== "object" || Array.isArray(rawValue)) {
-        throw new InvalidRequestError("Expected an object property value.");
-      }
-
-      return JSON.stringify(rawValue);
-    }
-  }
-};
-
-const defaultValueSatisfiesProperty = (
-  defaultValue: string,
-  propertyType: ElementPropertyTypes,
-): boolean => {
-  try {
-    switch (propertyType) {
-      case ElementPropertyTypes.STRING:
-        return true;
-      case ElementPropertyTypes.NUMBER:
-        return Number.isFinite(Number(defaultValue));
-      case ElementPropertyTypes.BOOLEAN:
-        return defaultValue === "true" || defaultValue === "false";
-      case ElementPropertyTypes.ARRAY: {
-        const parsed = JSON.parse(defaultValue);
-        return Array.isArray(parsed);
-      }
-      case ElementPropertyTypes.OBJECT: {
-        const parsed = JSON.parse(defaultValue);
-        return Boolean(parsed) && typeof parsed === "object" && !Array.isArray(parsed);
-      }
-    }
-  } catch {
-    return false;
-  }
-};
+import defaultValueSatisfiesStepElementProperty from "../utils/defaultValueSatisfiesStepElementProperty";
+import getReferencedStepElementIds from "../utils/getReferencedStepElementIds";
+import serializeStepElementPropertyValue from "../utils/serializeStepElementPropertyValue";
 
 export default async function updateStepElements(
   this: StepEntity,
@@ -197,7 +95,9 @@ export default async function updateStepElements(
       }),
     ]);
 
-    const elementDefinitionIds = new Set(elementModels.map((element) => element.id));
+    const elementDefinitionIds = new Set(
+      elementModels.map((element) => element.id),
+    );
 
     for (const element of submittedElements) {
       if (!elementDefinitionIds.has(element.elementId)) {
@@ -240,23 +140,27 @@ export default async function updateStepElements(
         validElementProperties.map((property) => [property.id, property]),
       );
 
-      const serializedProperties = submittedElement.properties.map((property) => {
-        const elementProperty = validElementPropertiesById.get(property.propertyId);
-
-        if (!elementProperty) {
-          throw new InvalidRequestError(
-            `Property id: ${property.propertyId} is invalid for element id: ${submittedElement.elementId}.`,
+      const serializedProperties = submittedElement.properties.map(
+        (property) => {
+          const elementProperty = validElementPropertiesById.get(
+            property.propertyId,
           );
-        }
 
-        return {
-          propertyId: property.propertyId,
-          propertyValue: serializePropertyValue(
-            property.value,
-            elementProperty.propertyType,
-          ),
-        };
-      });
+          if (!elementProperty) {
+            throw new InvalidRequestError(
+              `Property id: ${property.propertyId} is invalid for element id: ${submittedElement.elementId}.`,
+            );
+          }
+
+          return {
+            propertyId: property.propertyId,
+            propertyValue: serializeStepElementPropertyValue(
+              property.value,
+              elementProperty.propertyType,
+            ),
+          };
+        },
+      );
 
       for (const elementProperty of validElementProperties) {
         if (!elementProperty.required) {
@@ -272,7 +176,7 @@ export default async function updateStepElements(
         }
 
         if (
-          defaultValueSatisfiesProperty(
+          defaultValueSatisfiesStepElementProperty(
             elementProperty.defaultValue,
             elementProperty.propertyType,
           )
@@ -285,7 +189,10 @@ export default async function updateStepElements(
         );
       }
 
-      serializedPropertiesByStepElementId.set(submittedElement.id, serializedProperties);
+      serializedPropertiesByStepElementId.set(
+        submittedElement.id,
+        serializedProperties,
+      );
     }
 
     const removedStepElementIds = existingStepElements
@@ -313,14 +220,17 @@ export default async function updateStepElements(
       const survivingConditionModels = await StepElementCondition.findAll({
         transaction,
         where: {
-          stepElementId: { [Op.in]: flowStepElementModels.map((element) => element.id) },
+          stepElementId: {
+            [Op.in]: flowStepElementModels.map((element) => element.id),
+          },
         },
       });
 
       const referencingCondition = survivingConditionModels.find((condition) =>
-        getReferencedStepElementIds(condition.statement as ConditionStatement).some(
-          (referencedStepElementId) =>
-            removedStepElementIdSet.has(referencedStepElementId),
+        getReferencedStepElementIds(
+          condition.statement as ConditionStatement,
+        ).some((referencedStepElementId) =>
+          removedStepElementIdSet.has(referencedStepElementId),
         ),
       );
 
@@ -332,7 +242,9 @@ export default async function updateStepElements(
     }
 
     for (const [index, submittedElement] of submittedElements.entries()) {
-      const existingStepElement = existingStepElementsById.get(submittedElement.id);
+      const existingStepElement = existingStepElementsById.get(
+        submittedElement.id,
+      );
 
       if (existingStepElement) {
         await StepElement.update(
@@ -381,7 +293,9 @@ export default async function updateStepElements(
         transaction,
         where: {
           propertyId: {
-            [Op.notIn]: serializedProperties.map((property) => property.propertyId),
+            [Op.notIn]: serializedProperties.map(
+              (property) => property.propertyId,
+            ),
           },
           stepElementId: submittedElement.id,
         },

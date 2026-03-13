@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import requireLogin from "~src/http/utils/requireLogin";
 
-import createStepElement from "../createStepElement";
+import createStepElement from "./createStepElement";
 import fetchStepElements from "./fetchStepElements";
 import updateStepElements from "./updateStepElements";
 

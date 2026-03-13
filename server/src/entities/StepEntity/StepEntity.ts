@@ -1,9 +1,8 @@
 import { Step } from "~db/models/Step";
 
 import { staticImplements, type StaticMethods } from "../types";
-import getStepElementConditions from "./instanceMethods/getStepElementConditions";
-import getStepElementProperties from "./instanceMethods/getStepElementProperties";
-import getStepElements from "./instanceMethods/getStepElements";
+import fetchStepElements from "./instanceMethods/fetchStepElements";
+import updateStepElements from "./instanceMethods/updateStepElements";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
 
@@ -20,7 +19,6 @@ export default class StepEntity {
   static findById = findById;
 
   // PARTITION: Instance methods
-  getStepElements = getStepElements;
-  getStepElementProperties = getStepElementProperties;
-  getStepElementConditions = getStepElementConditions;
+  fetchStepElements = fetchStepElements;
+  updateStepElements = updateStepElements;
 }

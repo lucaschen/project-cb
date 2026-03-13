@@ -39,7 +39,7 @@ const createStepElement = enforceSchema({
 
     // Handle properties if provided - create corresponding StepElementProperties records
     if (properties) {
-      stepElementEntity.setProperties(properties);
+      await stepElementEntity.setProperties(properties);
     }
 
     const response = createStepElementOutput.parse({

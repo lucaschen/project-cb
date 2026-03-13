@@ -32,7 +32,7 @@ export default function serializeStepElementPropertyValue(
         );
       }
 
-      return `${rawValue}`;
+      return String(parsedNumber);
     }
     case ElementPropertyTypes.BOOLEAN: {
       if (typeof rawValue === "boolean") {

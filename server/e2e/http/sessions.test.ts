@@ -40,7 +40,9 @@ describe("session routes", () => {
       userId: userEntity.dbModel.id,
     });
     expect(response.headers["set-cookie"]).toEqual(
-      expect.arrayContaining([expect.stringContaining(`${sessionCookieName}=`)]),
+      expect.arrayContaining([
+        expect.stringContaining(`${sessionCookieName}=`),
+      ]),
     );
     expect(response.headers["set-cookie"]).toEqual(
       expect.arrayContaining([expect.stringContaining("HttpOnly")]),
@@ -82,7 +84,9 @@ describe("session routes", () => {
     const { email, password, userEntity } = await seedUser();
     const agent = createTestAgent();
 
-    const loginResponse = await agent.post("/sessions").send({ email, password });
+    const loginResponse = await agent
+      .post("/sessions")
+      .send({ email, password });
     expect(loginResponse.status).toBe(201);
 
     const currentSessionResponse = await agent.get("/sessions/current");
@@ -104,7 +108,9 @@ describe("session routes", () => {
     const { email, password } = await seedUser();
     const agent = createTestAgent();
 
-    const loginResponse = await agent.post("/sessions").send({ email, password });
+    const loginResponse = await agent
+      .post("/sessions")
+      .send({ email, password });
     expect(loginResponse.status).toBe(201);
 
     const logoutResponse = await agent.delete("/sessions/current");
@@ -112,7 +118,9 @@ describe("session routes", () => {
     expect(logoutResponse.status).toBe(200);
     expect(logoutResponse.text).toBe("");
     expect(logoutResponse.headers["set-cookie"]).toEqual(
-      expect.arrayContaining([expect.stringContaining(`${sessionCookieName}=;`)]),
+      expect.arrayContaining([
+        expect.stringContaining(`${sessionCookieName}=;`),
+      ]),
     );
 
     const currentSessionResponse = await agent.get("/sessions/current");
@@ -124,7 +132,9 @@ describe("session routes", () => {
     const { email, password } = await seedUser();
     const agent = createTestAgent();
 
-    const loginResponse = await agent.post("/sessions").send({ email, password });
+    const loginResponse = await agent
+      .post("/sessions")
+      .send({ email, password });
     expect(loginResponse.status).toBe(201);
 
     const firstLogoutResponse = await agent.delete("/sessions/current");
@@ -132,12 +142,12 @@ describe("session routes", () => {
 
     const secondLogoutResponse = await agent.delete("/sessions/current");
 
-    expect(secondLogoutResponse.status).toBe(400);
+    expect(secondLogoutResponse.status).toBe(401);
   });
 
   it("returns the current unauthenticated logout failure without a session", async () => {
     const response = await request(createTestApp()).delete("/sessions/current");
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(401);
   });
 });

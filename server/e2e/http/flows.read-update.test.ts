@@ -1,6 +1,9 @@
 import { fetchFlowOutput } from "@packages/shared/http/schemas/flows/fetchFlow";
 import { updateFlowMetadataOutput } from "@packages/shared/http/schemas/flows/updateFlowMetadata";
-import { OrganizationUserPermission } from "@packages/shared/types/enums";
+import {
+  ComparisonOperation,
+  OrganizationUserPermission,
+} from "@packages/shared/types/enums";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
@@ -91,7 +94,7 @@ describe("flow read and update routes", () => {
                   order: 0,
                   statement: {
                     leftValue: "left",
-                    operator: "===",
+                    operator: ComparisonOperation.EQ,
                     rightValue: "right",
                     type: "comparison",
                   },
@@ -170,9 +173,11 @@ describe("flow read and update routes", () => {
         slug: "edit-name-flow",
       });
 
-      const response = await agent.patch(`/flows/${flowEntity.dbModel.id}`).send({
-        name: "Updated name",
-      });
+      const response = await agent
+        .patch(`/flows/${flowEntity.dbModel.id}`)
+        .send({
+          name: "Updated name",
+        });
 
       expect(response.status).toBe(200);
       expect(updateFlowMetadataOutput.parse(response.body)).toMatchObject({
@@ -200,9 +205,11 @@ describe("flow read and update routes", () => {
         slug: "edit-description-flow",
       });
 
-      const response = await agent.patch(`/flows/${flowEntity.dbModel.id}`).send({
-        description: "Updated description",
-      });
+      const response = await agent
+        .patch(`/flows/${flowEntity.dbModel.id}`)
+        .send({
+          description: "Updated description",
+        });
 
       expect(response.status).toBe(200);
       expect(updateFlowMetadataOutput.parse(response.body)).toMatchObject({
@@ -226,12 +233,16 @@ describe("flow read and update routes", () => {
         slug: "clear-description-flow",
       });
 
-      const response = await agent.patch(`/flows/${flowEntity.dbModel.id}`).send({
-        description: null,
-      });
+      const response = await agent
+        .patch(`/flows/${flowEntity.dbModel.id}`)
+        .send({
+          description: null,
+        });
 
       expect(response.status).toBe(200);
-      expect(updateFlowMetadataOutput.parse(response.body).description).toBeNull();
+      expect(
+        updateFlowMetadataOutput.parse(response.body).description,
+      ).toBeNull();
 
       const persistedFlow = await FlowEntity.findById(flowEntity.dbModel.id);
       expect(persistedFlow?.dbModel.description).toBeNull();
@@ -279,9 +290,11 @@ describe("flow read and update routes", () => {
         slug: "viewer-update-flow",
       });
 
-      const response = await agent.patch(`/flows/${flowEntity.dbModel.id}`).send({
-        name: "Updated",
-      });
+      const response = await agent
+        .patch(`/flows/${flowEntity.dbModel.id}`)
+        .send({
+          name: "Updated",
+        });
 
       expect(response.status).toBe(401);
     });

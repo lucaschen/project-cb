@@ -22,47 +22,49 @@ export default async function syncBuilderSteps(
     transaction: Transaction;
   },
 ): Promise<void> {
-  for (const [index, step] of steps.entries()) {
-    if (existingNodeIds.has(step.nodeId)) {
-      await Node.update(
-        {
-          name: step.name,
-        },
-        {
-          transaction,
-          where: {
-            id: step.nodeId,
+  await Promise.all(
+    steps.map(async (step, index) => {
+      if (existingNodeIds.has(step.nodeId)) {
+        await Node.update(
+          {
+            name: step.name,
           },
-        },
-      );
-    } else {
-      await Node.create(
+          {
+            transaction,
+            where: {
+              id: step.nodeId,
+            },
+          },
+        );
+      } else {
+        await Node.create(
+          {
+            flowId,
+            id: step.nodeId,
+            name: step.name,
+            type: NodeType.STEP,
+          },
+          { transaction },
+        );
+      }
+
+      await Step.upsert(
         {
-          flowId,
-          id: step.nodeId,
-          name: step.name,
-          type: NodeType.STEP,
+          nextNodeId: step.nextNodeId,
+          nodeId: step.nodeId,
+          order: index,
         },
         { transaction },
       );
-    }
 
-    await Step.upsert(
-      {
-        nextNodeId: step.nextNodeId,
-        nodeId: step.nodeId,
-        order: index,
-      },
-      { transaction },
-    );
-
-    await NodeCoordinate.upsert(
-      {
-        nodeId: step.nodeId,
-        x: step.coordinates.x,
-        y: step.coordinates.y,
-      },
-      { transaction },
-    );
-  }
+      await NodeCoordinate.upsert(
+        {
+          nodeId: step.nodeId,
+          x: step.coordinates.x,
+          y: step.coordinates.y,
+        },
+        { transaction },
+      );
+    }),
+  );
 }

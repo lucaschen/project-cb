@@ -14,18 +14,20 @@ export default async function updateFromInput(
 
   await this.dbModel.save({ transaction });
 
-  for (const [index, condition] of input.conditions.entries()) {
-    await DecisionNodeCondition.upsert(
-      {
-        id: condition.id,
-        nodeId: this.dbModel.nodeId,
-        order: index,
-        statement: condition.statement,
-        toNodeId: condition.toNodeId,
-      },
-      { transaction },
-    );
-  }
+  await Promise.all(
+    input.conditions.map((condition, index) =>
+      DecisionNodeCondition.upsert(
+        {
+          id: condition.id,
+          nodeId: this.dbModel.nodeId,
+          order: index,
+          statement: condition.statement,
+          toNodeId: condition.toNodeId,
+        },
+        { transaction },
+      ),
+    ),
+  );
 
   if (input.conditions.length === 0) {
     await DecisionNodeCondition.destroy({

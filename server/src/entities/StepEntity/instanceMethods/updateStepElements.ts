@@ -74,7 +74,6 @@ export default async function updateStepElements(
     const removedStepElementIds = existingStepElements
       .map((stepElement) => stepElement.dbModel.id)
       .filter((id) => !submittedElementIdSet.has(id));
-    const removedStepElementIdSet = new Set(removedStepElementIds);
 
     if (removedStepElementIds.length > 0) {
       const flowStepNodes = await Node.findAll({
@@ -102,9 +101,7 @@ export default async function updateStepElements(
         },
       });
       const validRemainingStepElementIds = new Set(
-        flowStepElementModels
-          .map((element) => element.id)
-          .filter((stepElementId) => !removedStepElementIdSet.has(stepElementId)),
+        flowStepElementModels.map((element) => element.id),
       );
 
       const referencingCondition = survivingConditionModels.find((condition) =>

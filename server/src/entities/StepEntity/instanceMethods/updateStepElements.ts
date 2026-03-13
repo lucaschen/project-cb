@@ -6,20 +6,17 @@ import type {
 import { NodeType } from "@packages/shared/types/enums";
 import { Op } from "sequelize";
 
-import { Element } from "~db/models/Element";
-import { ElementProperties } from "~db/models/ElementProperties";
 import { Node } from "~db/models/Node";
 import { StepElement } from "~db/models/StepElement";
 import { StepElementCondition } from "~db/models/StepElementCondition";
 import { StepElementProperties } from "~db/models/StepElementProperties";
 import { sequelize } from "~db/sequelize";
+import StepElementEntity from "~entities/StepElementEntity";
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 import type StepEntity from "../StepEntity";
-import defaultValueSatisfiesStepElementProperty from "../utils/defaultValueSatisfiesStepElementProperty";
 import getReferencedStepElementIds from "../utils/getReferencedStepElementIds";
-import serializeStepElementPropertyValue from "../utils/serializeStepElementPropertyValue";
 
 export default async function updateStepElements(
   this: StepEntity,
@@ -50,153 +47,32 @@ export default async function updateStepElements(
       throw new InvalidRequestError("Step element ids must be unique.");
     }
 
-    const existingStepElements = await StepElement.findAll({
+    const existingStepElements = await StepElementEntity.findByStepId(
+      this.dbModel.nodeId,
       transaction,
-      where: {
-        stepId: this.dbModel.nodeId,
-      },
-    });
-
+    );
     const existingStepElementsById = new Map(
-      existingStepElements.map((stepElement) => [stepElement.id, stepElement]),
+      existingStepElements.map((stepElement) => [
+        stepElement.dbModel.id,
+        stepElement,
+      ]),
     );
 
-    const existingSubmittedStepElements = await StepElement.findAll({
+    const existingSubmittedStepElements = await StepElementEntity.findByIds(
+      submittedElementIds,
       transaction,
-      where: {
-        id: { [Op.in]: submittedElementIds },
-      },
-    });
+    );
 
     for (const existingStepElement of existingSubmittedStepElements) {
-      if (existingStepElement.stepId !== this.dbModel.nodeId) {
+      if (existingStepElement.dbModel.stepId !== this.dbModel.nodeId) {
         throw new InvalidRequestError(
-          `Step element id: ${existingStepElement.id} does not belong to step id: ${this.dbModel.nodeId}.`,
+          `Step element id: ${existingStepElement.dbModel.id} does not belong to step id: ${this.dbModel.nodeId}.`,
         );
       }
-    }
-
-    const submittedElementDefinitionIds = Array.from(
-      new Set(submittedElements.map((element) => element.elementId)),
-    );
-
-    const [elementModels, elementPropertyModels] = await Promise.all([
-      Element.findAll({
-        transaction,
-        where: {
-          id: { [Op.in]: submittedElementDefinitionIds },
-        },
-      }),
-      ElementProperties.findAll({
-        transaction,
-        where: {
-          elementId: { [Op.in]: submittedElementDefinitionIds },
-        },
-      }),
-    ]);
-
-    const elementDefinitionIds = new Set(
-      elementModels.map((element) => element.id),
-    );
-
-    for (const element of submittedElements) {
-      if (!elementDefinitionIds.has(element.elementId)) {
-        throw new InvalidRequestError(
-          `Unknown element id: ${element.elementId} for step element id: ${element.id}.`,
-        );
-      }
-    }
-
-    const elementPropertiesByElementId = new Map<string, ElementProperties[]>();
-
-    for (const elementProperty of elementPropertyModels) {
-      const existing =
-        elementPropertiesByElementId.get(elementProperty.elementId) ?? [];
-
-      existing.push(elementProperty);
-      elementPropertiesByElementId.set(elementProperty.elementId, existing);
-    }
-
-    const serializedPropertiesByStepElementId = new Map<
-      string,
-      Array<{ propertyId: string; propertyValue: string }>
-    >();
-
-    for (const submittedElement of submittedElements) {
-      const submittedPropertyIds = submittedElement.properties.map(
-        (property) => property.propertyId,
-      );
-      const submittedPropertyIdSet = new Set(submittedPropertyIds);
-
-      if (submittedPropertyIds.length !== submittedPropertyIdSet.size) {
-        throw new InvalidRequestError(
-          `Property ids must be unique for step element id: ${submittedElement.id}.`,
-        );
-      }
-
-      const validElementProperties =
-        elementPropertiesByElementId.get(submittedElement.elementId) ?? [];
-      const validElementPropertiesById = new Map(
-        validElementProperties.map((property) => [property.id, property]),
-      );
-
-      const serializedProperties = submittedElement.properties.map(
-        (property) => {
-          const elementProperty = validElementPropertiesById.get(
-            property.propertyId,
-          );
-
-          if (!elementProperty) {
-            throw new InvalidRequestError(
-              `Property id: ${property.propertyId} is invalid for element id: ${submittedElement.elementId}.`,
-            );
-          }
-
-          return {
-            propertyId: property.propertyId,
-            propertyValue: serializeStepElementPropertyValue(
-              property.value,
-              elementProperty.propertyType,
-            ),
-          };
-        },
-      );
-
-      for (const elementProperty of validElementProperties) {
-        if (!elementProperty.required) {
-          continue;
-        }
-
-        const submittedProperty = serializedProperties.find(
-          (property) => property.propertyId === elementProperty.id,
-        );
-
-        if (submittedProperty) {
-          continue;
-        }
-
-        if (
-          defaultValueSatisfiesStepElementProperty(
-            elementProperty.defaultValue,
-            elementProperty.propertyType,
-          )
-        ) {
-          continue;
-        }
-
-        throw new InvalidRequestError(
-          `Required property id: ${elementProperty.id} is missing for step element id: ${submittedElement.id}.`,
-        );
-      }
-
-      serializedPropertiesByStepElementId.set(
-        submittedElement.id,
-        serializedProperties,
-      );
     }
 
     const removedStepElementIds = existingStepElements
-      .map((stepElement) => stepElement.id)
+      .map((stepElement) => stepElement.dbModel.id)
       .filter((id) => !submittedElementIdSet.has(id));
     const removedStepElementIdSet = new Set(removedStepElementIds);
 
@@ -246,60 +122,26 @@ export default async function updateStepElements(
         submittedElement.id,
       );
 
-      if (existingStepElement) {
-        await StepElement.update(
-          {
-            elementId: submittedElement.elementId,
-            name: submittedElement.name,
-            order: index,
-          },
-          {
-            transaction,
-            where: {
-              id: submittedElement.id,
-            },
-          },
-        );
-      } else {
-        await StepElement.create(
-          {
-            elementId: submittedElement.elementId,
-            id: submittedElement.id,
-            name: submittedElement.name,
-            order: index,
-            stepId: this.dbModel.nodeId,
-          },
-          { transaction },
-        );
-      }
-
-      const serializedProperties =
-        serializedPropertiesByStepElementId.get(submittedElement.id) ?? [];
-
-      await Promise.all(
-        serializedProperties.map((property) =>
-          StepElementProperties.upsert(
+      const stepElementEntity =
+        existingStepElement ??
+        new StepElementEntity(
+          await StepElement.create(
             {
-              propertyId: property.propertyId,
-              propertyValue: property.propertyValue,
-              stepElementId: submittedElement.id,
+              elementId: submittedElement.elementId,
+              id: submittedElement.id,
+              name: submittedElement.name,
+              order: index,
+              stepId: this.dbModel.nodeId,
             },
             { transaction },
           ),
-        ),
-      );
+        );
 
-      await StepElementProperties.destroy({
+      await stepElementEntity.updateFromInput(
+        submittedElement,
+        index,
         transaction,
-        where: {
-          propertyId: {
-            [Op.notIn]: serializedProperties.map(
-              (property) => property.propertyId,
-            ),
-          },
-          stepElementId: submittedElement.id,
-        },
-      });
+      );
     }
 
     await StepElementProperties.destroy({

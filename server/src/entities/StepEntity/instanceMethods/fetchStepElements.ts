@@ -1,15 +1,12 @@
 import type { FindStepElementsOutput } from "@packages/shared/http/schemas/flows/steps/elements/findStepElements";
 import { NodeType } from "@packages/shared/types/enums";
-import { Op, type Transaction } from "sequelize";
+import type { Transaction } from "sequelize";
 
-import { ElementProperties } from "~db/models/ElementProperties";
 import { Node } from "~db/models/Node";
-import { StepElement } from "~db/models/StepElement";
-import { StepElementProperties } from "~db/models/StepElementProperties";
+import StepElementEntity from "~entities/StepElementEntity";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 import type StepEntity from "../StepEntity";
-import getHydratedStepElements from "../utils/hydrateStepElements";
 
 export default async function fetchStepElements(
   this: StepEntity,
@@ -31,36 +28,17 @@ export default async function fetchStepElements(
     );
   }
 
-  const stepElementModels = await StepElement.findAll({
+  const stepElementEntities = await StepElementEntity.findByStepId(
+    this.dbModel.nodeId,
     transaction,
-    where: {
-      stepId: this.dbModel.nodeId,
-    },
-  });
-
-  const stepElementIds = stepElementModels.map((stepElement) => stepElement.id);
-
-  const stepElementPropertyModels = await StepElementProperties.findAll({
-    transaction,
-    where: {
-      stepElementId: { [Op.in]: stepElementIds },
-    },
-  });
-
-  const propertyIds = Array.from(
-    new Set(stepElementPropertyModels.map((property) => property.propertyId)),
   );
 
-  const elementPropertyModels = await ElementProperties.findAll({
-    transaction,
-    where: {
-      id: { [Op.in]: propertyIds },
-    },
-  });
-
-  return getHydratedStepElements({
-    elementPropertyModels,
-    stepElementModels,
-    stepElementPropertyModels,
-  });
+  // Hydrate each entity via its own method for now; this read path is simple to
+  // follow and can be re-batched later if builder payload performance becomes a
+  // bottleneck.
+  return await Promise.all(
+    stepElementEntities.map((stepElementEntity) =>
+      stepElementEntity.fetchHydratedPayload(transaction),
+    ),
+  );
 }

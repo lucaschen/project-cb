@@ -5,13 +5,11 @@ import requireLogin from "~src/http/utils/requireLogin";
 import createStep from "./createStep";
 import elementsRouter from "./elements";
 import findSteps from "./findSteps";
-import saveSteps from "./saveSteps";
 
 const stepsRouter = Router({ mergeParams: true });
 
 stepsRouter.get("/", requireLogin(findSteps));
 stepsRouter.post("/", requireLogin(createStep));
-stepsRouter.put("/", requireLogin(saveSteps));
 stepsRouter.use("/:stepId/elements", elementsRouter);
 
 export default stepsRouter;

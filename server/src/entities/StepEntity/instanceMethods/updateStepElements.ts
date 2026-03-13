@@ -11,12 +11,12 @@ import { StepElement } from "~db/models/StepElement";
 import { StepElementCondition } from "~db/models/StepElementCondition";
 import { StepElementProperties } from "~db/models/StepElementProperties";
 import { sequelize } from "~db/sequelize";
+import findMissingReferencedStepElementId from "~entities/StepElementConditionEntity/utils/findMissingReferencedStepElementId";
 import StepElementEntity from "~entities/StepElementEntity";
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 import type StepEntity from "../StepEntity";
-import getReferencedStepElementIds from "../utils/getReferencedStepElementIds";
 
 export default async function updateStepElements(
   this: StepEntity,
@@ -74,7 +74,6 @@ export default async function updateStepElements(
     const removedStepElementIds = existingStepElements
       .map((stepElement) => stepElement.dbModel.id)
       .filter((id) => !submittedElementIdSet.has(id));
-    const removedStepElementIdSet = new Set(removedStepElementIds);
 
     if (removedStepElementIds.length > 0) {
       const flowStepNodes = await Node.findAll({
@@ -101,12 +100,16 @@ export default async function updateStepElements(
           },
         },
       });
+      const validRemainingStepElementIds = new Set(
+        flowStepElementModels.map((element) => element.id),
+      );
 
       const referencingCondition = survivingConditionModels.find((condition) =>
-        getReferencedStepElementIds(
-          condition.statement as ConditionStatement,
-        ).some((referencedStepElementId) =>
-          removedStepElementIdSet.has(referencedStepElementId),
+        Boolean(
+          findMissingReferencedStepElementId({
+            statement: condition.statement as ConditionStatement,
+            validStepElementIds: validRemainingStepElementIds,
+          }),
         ),
       );
 

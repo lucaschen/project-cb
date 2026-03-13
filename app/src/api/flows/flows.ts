@@ -1,5 +1,4 @@
 import { flowPayload } from "@packages/shared/http/schemas/flows/common";
-import type { CreateFlowOutput } from "@packages/shared/http/schemas/flows/createFlow";
 import {
   createFlowInput,
   createFlowOutput,
@@ -15,8 +14,6 @@ const findFlowsParams = z.object({
 
 const findFlowsOutput = z.array(flowPayload);
 
-type FindFlowsOutput = z.infer<typeof findFlowsOutput>;
-
 export const getOrganizationFlows = enforceStrictSchema({
   handler: ({ organizationId }) =>
     apiRequest({
@@ -25,7 +22,7 @@ export const getOrganizationFlows = enforceStrictSchema({
     }),
   inputSchema: findFlowsParams,
   outputSchema: findFlowsOutput,
-}) as (input: { organizationId: string }) => Promise<FindFlowsOutput>;
+});
 
 export const createFlow = enforceStrictSchema({
   handler: (input) =>
@@ -36,8 +33,4 @@ export const createFlow = enforceStrictSchema({
     }),
   inputSchema: createFlowInput,
   outputSchema: createFlowOutput,
-}) as (input: {
-  name: string;
-  organizationId: string;
-  slug: string;
-}) => Promise<CreateFlowOutput>;
+});

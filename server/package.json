@@ -9,6 +9,8 @@
     "lint:fix": "eslint --fix .",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "db:seed": "ts-node -r tsconfig-paths/register src/db/seeds",
     "generate:element-schemas": "ts-node -r tsconfig-paths/register scripts/generate-element-zod-schemas.ts"
   },
@@ -37,11 +39,16 @@
     "@types/express-serve-static-core": "^5.1.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "concurrently": "^9.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "supertest": "^7.2.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4"
+    "typescript-eslint": "^8.46.4",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.0"
   }
 }

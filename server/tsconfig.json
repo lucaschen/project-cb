@@ -9,8 +9,9 @@
       "~db/*": ["./src/db/*"],
       "~sharedTypes/*": ["./src/sharedTypes/*"],
       "~entities/*": ["./src/entities/*"],
-      "~src/*": ["./src/*"]
+      "~src/*": ["./src/*"],
+      "~e2e/*": ["./e2e/*"]
     }
   },
-  "include": ["src", "scripts"]
+  "include": ["src", "scripts", "e2e"]
 }

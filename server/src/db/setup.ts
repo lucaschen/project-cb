@@ -1,5 +1,6 @@
+import { sequelize } from "~db/sequelize";
+
 import { initModels } from "./models";
-import { sequelize } from "./sequelize";
 
 export const models = initModels(sequelize);
 

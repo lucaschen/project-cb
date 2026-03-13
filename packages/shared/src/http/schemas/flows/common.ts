@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import { conditionStatementSchema } from "~shared/db/schemas/conditionStatement";
+import { NodeType } from "~shared/types/enums";
+
 import {
   hydratedStepElementPropertySchema,
   hydratedStepElementSchema,
-} from "~shared/http/schemas/flows/steps/elements/common";
-import { NodeType } from "~shared/types/enums";
+} from "./steps/elements/common";
 
 export const flowSchema = z.object({
   description: z.string().nullable(),

@@ -3,12 +3,14 @@ import {
   createFlowOutput,
 } from "@packages/shared/http/schemas/flows/createFlow";
 import checkExists from "@packages/shared/utils/checkExists";
+import { UniqueConstraintError } from "sequelize";
 
 import FlowEntity from "~entities/FlowEntity";
 import OrganizationEntity from "~entities/OrganizationEntity";
 import enforceSchema from "~src/http/utils/enforceSchema";
 import handleRouteError from "~src/http/utils/handleRouteError";
 import InvalidCredentialsError from "~src/utils/errors/InvalidCredentialsError";
+import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createFlow = enforceSchema({
@@ -32,12 +34,21 @@ const createFlow = enforceSchema({
     }
 
     // Question: do flows require an organizationId? can a user directly own a flow?
-    const flowEntity = await FlowEntity.create({
-      description: description ?? null,
-      name,
-      organizationId,
-      slug,
-    });
+    let flowEntity;
+    try {
+      flowEntity = await FlowEntity.create({
+        description: description ?? null,
+        name,
+        organizationId,
+        slug,
+      });
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        throw new InvalidRequestError("Flow already exists.");
+      }
+
+      throw error;
+    }
 
     res.status(201).json(flowEntity.getPayload());
   },

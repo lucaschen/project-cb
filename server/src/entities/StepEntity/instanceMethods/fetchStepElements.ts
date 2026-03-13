@@ -9,7 +9,7 @@ import { StepElementProperties } from "~db/models/StepElementProperties";
 import NotFoundError from "~src/utils/errors/NotFoundError";
 
 import type StepEntity from "../StepEntity";
-import getHydratedStepElements from "./getHydratedStepElements";
+import getHydratedStepElements from "../utils/hydrateStepElements";
 
 export default async function fetchStepElements(
   this: StepEntity,

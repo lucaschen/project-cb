@@ -4,12 +4,9 @@ import { Op } from "sequelize";
 
 import { DecisionNode } from "~db/models/DecisionNode";
 import { DecisionNodeCondition } from "~db/models/DecisionNodeCondition";
-import { ElementProperties } from "~db/models/ElementProperties";
 import { Node } from "~db/models/Node";
 import { NodeCoordinate } from "~db/models/NodeCoordinate";
-import { StepElement } from "~db/models/StepElement";
-import { StepElementProperties } from "~db/models/StepElementProperties";
-import getHydratedStepElements from "~entities/StepEntity/instanceMethods/getHydratedStepElements";
+import StepEntity from "~entities/StepEntity";
 import UnexpectedError from "~src/utils/errors/UnexpectedError";
 
 import type FlowEntity from "../FlowEntity";
@@ -49,40 +46,9 @@ export default async function fetchBuilderPayload(
     }),
   ]);
 
-  const [stepElementModels, decisionConditionModels] = await Promise.all([
-    StepElement.findAll({
-      where: {
-        stepId: { [Op.in]: stepNodeIds },
-      },
-    }),
-    DecisionNodeCondition.findAll({
-      where: {
-        nodeId: { [Op.in]: decisionNodeIds },
-      },
-    }),
-  ]);
-
-  const stepElementIds = stepElementModels.map((stepElement) => stepElement.id);
-
-  const hydratedStepElementPropertyModels = await StepElementProperties.findAll(
-    {
-      where: {
-        stepElementId: { [Op.in]: stepElementIds },
-      },
-    },
-  );
-
-  const propertyIds = Array.from(
-    new Set(
-      hydratedStepElementPropertyModels.map(
-        (stepElementProperty) => stepElementProperty.propertyId,
-      ),
-    ),
-  );
-
-  const elementPropertyModels = await ElementProperties.findAll({
+  const decisionConditionModels = await DecisionNodeCondition.findAll({
     where: {
-      id: { [Op.in]: propertyIds },
+      nodeId: { [Op.in]: decisionNodeIds },
     },
   });
 
@@ -95,12 +61,6 @@ export default async function fetchBuilderPayload(
       decisionNode,
     ]),
   );
-  const stepElementsByStepId = new Map<string, StepElement[]>();
-  for (const stepElement of stepElementModels) {
-    const existing = stepElementsByStepId.get(stepElement.stepId) ?? [];
-    existing.push(stepElement);
-    stepElementsByStepId.set(stepElement.stepId, existing);
-  }
 
   const decisionConditionsByNodeId = new Map<string, DecisionNodeCondition[]>();
   for (const condition of decisionConditionModels) {
@@ -112,7 +72,7 @@ export default async function fetchBuilderPayload(
   return {
     flow: {
       ...this.getPayload(),
-      nodes: nodeModels.map((node) => {
+      nodes: await Promise.all(nodeModels.map(async (node) => {
         if (node.type === NodeType.STEP) {
           const stepSummary = stepSummariesByNodeId.get(node.id);
 
@@ -122,25 +82,19 @@ export default async function fetchBuilderPayload(
             );
           }
 
-          const elements = (
-            stepElementsByStepId.get(stepSummary.nodeId) ?? []
-          ).sort(
-            (left, right) =>
-              left.order - right.order || left.id.localeCompare(right.id),
-          );
-          const elementIds = elements.map((element) => element.id);
-          const hydratedElements = getHydratedStepElements({
-            elementPropertyModels,
-            stepElementModels: elements,
-            stepElementPropertyModels: hydratedStepElementPropertyModels.filter(
-              (stepElementProperty) =>
-                elementIds.includes(stepElementProperty.stepElementId),
-            ),
-          });
+          const stepEntity = await StepEntity.findById(stepSummary.nodeId);
+
+          if (!stepEntity) {
+            throw new UnexpectedError(
+              `Step node id: ${node.id} has no step entity.`,
+            );
+          }
+
+          const elements = await stepEntity.fetchStepElements(this.dbModel.id);
 
           return {
             coordinates: stepSummary.coordinates,
-            elements: hydratedElements,
+            elements,
             name: stepSummary.name,
             nextNodeId: stepSummary.nextNodeId,
             nodeId: stepSummary.nodeId,
@@ -185,7 +139,7 @@ export default async function fetchBuilderPayload(
           nodeId: node.id,
           type: node.type,
         };
-      }),
+      })),
     },
   };
 }

@@ -22,7 +22,7 @@ const createOrganization = enforceSchema({
       slug,
     });
 
-    organizationEntity.addUser({
+    await organizationEntity.addUser({
       userId: userEntity.dbModel.id,
       permissions: OrganizationUserPermission.ADMIN,
     });

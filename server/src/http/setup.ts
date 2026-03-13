@@ -9,16 +9,19 @@ import setupRoutes from "./routes/setup";
 
 const { PORT } = envs;
 
+export const createHttpApp = () => {
+  const app = express();
+
+  setupMiddleware(app);
+  setupRoutes(app);
+  handleErrors(app);
+
+  return app;
+};
+
 const setupHttpServer = () =>
   new Promise<void>((resolve) => {
-    const app = express();
-    const httpServer = createServer(app);
-
-    setupMiddleware(app);
-
-    setupRoutes(app);
-
-    handleErrors(app);
+    const httpServer = createServer(createHttpApp());
 
     httpServer.listen(PORT, resolve);
   });

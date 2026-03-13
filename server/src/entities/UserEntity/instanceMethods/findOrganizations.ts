@@ -10,8 +10,6 @@ export default async function findOrganizations(this: UserEntity) {
     },
   });
 
-  console.log(organizationUsers, this.dbModel.id);
-
   const organizationEntities = await Promise.all(
     organizationUsers.map(({ organizationId }) =>
       OrganizationEntity.findById(organizationId),

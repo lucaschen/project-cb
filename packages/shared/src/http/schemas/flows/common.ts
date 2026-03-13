@@ -20,7 +20,7 @@ export const nodeCoordinatesSchema = z
   })
   .nullable();
 
-export type NodeCoordinatesSchema = z.infer<typeof nodeCoordinatesSchema>;
+export type NodeCoordinatesType = z.infer<typeof nodeCoordinatesSchema>;
 
 export const flowStepElementPropertyValueSchema = z.object({
   defaultValue: z.string(),
@@ -31,7 +31,7 @@ export const flowStepElementPropertyValueSchema = z.object({
   value: z.string(),
 });
 
-export type FlowStepElementPropertyValueSchema = z.infer<
+export type FlowStepElementPropertyValueType = z.infer<
   typeof flowStepElementPropertyValueSchema
 >;
 
@@ -43,7 +43,7 @@ export const flowStepElementSchema = z.object({
   properties: z.array(flowStepElementPropertyValueSchema),
 });
 
-export type FlowStepElementSchema = z.infer<typeof flowStepElementSchema>;
+export type FlowStepElementType = z.infer<typeof flowStepElementSchema>;
 
 export const flowDecisionConditionSchema = z.object({
   id: z.string().min(1),
@@ -52,7 +52,7 @@ export const flowDecisionConditionSchema = z.object({
   toNodeId: z.string().min(1),
 });
 
-export type FlowDecisionConditionSchema = z.infer<
+export type FlowDecisionConditionType = z.infer<
   typeof flowDecisionConditionSchema
 >;
 
@@ -65,7 +65,7 @@ export const flowStepNodeSchema = z.object({
   type: z.literal(NodeType.STEP),
 });
 
-export type FlowStepNodeSchema = z.infer<typeof flowStepNodeSchema>;
+export type FlowStepNodeType = z.infer<typeof flowStepNodeSchema>;
 
 export const flowDecisionNodeSchema = z.object({
   conditions: z.array(flowDecisionConditionSchema),
@@ -76,23 +76,23 @@ export const flowDecisionNodeSchema = z.object({
   type: z.literal(NodeType.DECISION),
 });
 
-export type FlowDecisionNodeSchema = z.infer<typeof flowDecisionNodeSchema>;
+export type FlowDecisionNodeType = z.infer<typeof flowDecisionNodeSchema>;
 
 export const flowNodeSchema = z.discriminatedUnion("type", [
   flowStepNodeSchema,
   flowDecisionNodeSchema,
 ]);
 
-export type FlowNodeSchema = z.infer<typeof flowNodeSchema>;
+export type FlowNodeType = z.infer<typeof flowNodeSchema>;
 
 export const flowWithNodesSchema = flowPayload.extend({
   nodes: z.array(flowNodeSchema),
 });
 
-export type FlowWithNodesSchema = z.infer<typeof flowWithNodesSchema>;
+export type FlowWithNodesType = z.infer<typeof flowWithNodesSchema>;
 
 export const flowBuilderSchema = z.object({
   flow: flowWithNodesSchema,
 });
 
-export type FlowBuilderSchema = z.infer<typeof flowBuilderSchema>;
+export type FlowBuilderType = z.infer<typeof flowBuilderSchema>;

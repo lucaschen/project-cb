@@ -1,24 +1,17 @@
 import { AppLogo } from "@app/components/ui/AppLogo";
 import { Button } from "@app/components/ui/Button";
+import useLogout from "@app/hooks/useLogout";
 import { path as flowDetailsPath } from "@app/pages/flows/FlowDetails";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 import { path as loginPath } from "@app/pages/Login";
 import { path as organizationOnboardingPath } from "@app/pages/organizations/OrganizationOnboarding";
 import { path as signupPath } from "@app/pages/Signup";
 import type { OrganizationPayload } from "@packages/shared/http/schemas/organizations/common";
-import type { DeleteCurrentSessionOutput } from "@packages/shared/http/schemas/sessions/deleteCurrentSession";
 import type { GetCurrentSessionOutput } from "@packages/shared/http/schemas/sessions/getCurrentSession";
-import type { UseMutationResult } from "@tanstack/react-query";
 import { Link, NavLink, useLocation, useMatch } from "react-router-dom";
 
 type TopNavigationProps = {
   activeOrganization: OrganizationPayload | null;
-  logoutMutation: UseMutationResult<
-    DeleteCurrentSessionOutput | void,
-    Error,
-    void,
-    unknown
-  >;
   sessionData: GetCurrentSessionOutput | null;
 };
 
@@ -42,9 +35,9 @@ const protectedNavItems = [
 
 const TopNavigation = ({
   activeOrganization,
-  logoutMutation,
   sessionData,
 }: TopNavigationProps) => {
+  const { mutate: logout, isPending: isLogoutPending } = useLogout();
   const location = useLocation();
   const isFlowDetailsRoute = useMatch(flowDetailsPath);
   const isAuthenticated = Boolean(sessionData);
@@ -114,8 +107,8 @@ const TopNavigation = ({
             {isAuthenticated ? (
               <Button
                 className="px-3 py-2 text-sm"
-                isBusy={logoutMutation.isPending}
-                onClick={() => logoutMutation.mutate()}
+                isBusy={isLogoutPending}
+                onClick={() => logout()}
                 variant="ghost"
               >
                 Sign out
@@ -123,7 +116,9 @@ const TopNavigation = ({
             ) : null}
           </div>
         </div>
-        {isAuthenticated && !activeOrganization && location.pathname !== organizationOnboardingPath ? (
+        {isAuthenticated &&
+        !activeOrganization &&
+        location.pathname !== organizationOnboardingPath ? (
           <p className="text-sm leading-6 text-slate-400">
             No active organization is set. Continue into organization onboarding
             before using protected workspace routes.

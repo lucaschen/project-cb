@@ -7,6 +7,7 @@ import { Card } from "@app/components/ui/Card";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import useRootContext from "@app/hooks/useRootContext";
+import { flowToReactFlow } from "@app/utils/flowToReactFlow";
 import { useQuery } from "@tanstack/react-query";
 import type { NodeTypes } from "@xyflow/react";
 import {
@@ -20,12 +21,11 @@ import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 
 import { path as flowsListPath } from "../FlowsList";
-import useBuilderStore from "./builderStore";
-import DecisionFlowNode from "./DecisionFlowNode";
-import FlowMetadataForm from "./FlowMetadataForm";
-import FlowStructureList from "./FlowStructureList";
-import { flowToReactFlow } from "./flowToReactFlow";
-import StepFlowNode from "./StepFlowNode";
+import DecisionFlowNode from "./components/DecisionFlowNode";
+import FlowMetadataForm from "./components/FlowMetadataForm";
+import FlowStructureList from "./components/FlowStructureList";
+import StepFlowNode from "./components/StepFlowNode";
+import useBuilderStore from "./store/builderStore";
 
 const nodeTypes: NodeTypes = {
   decision: DecisionFlowNode,
@@ -148,7 +148,9 @@ const FlowDetails = () => {
       </div>
 
       <div className="mt-3 grid min-h-0 flex-1 gap-3 lg:grid-cols-[216px_minmax(0,1fr)_292px]">
-        <aside className={`min-h-0 ${isPaletteOpen ? "block" : "hidden"} lg:block`}>
+        <aside
+          className={`min-h-0 ${isPaletteOpen ? "block" : "hidden"} lg:block`}
+        >
           <Card className="rounded-[22px] p-4 lg:h-full">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -245,7 +247,9 @@ const FlowDetails = () => {
           )}
         </section>
 
-        <aside className={`min-h-0 ${isInspectorOpen ? "block" : "hidden"} lg:block`}>
+        <aside
+          className={`min-h-0 ${isInspectorOpen ? "block" : "hidden"} lg:block`}
+        >
           <div className="space-y-3 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-y-auto">
             <div className="flex gap-2">
               <Button

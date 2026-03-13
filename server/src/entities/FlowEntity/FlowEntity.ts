@@ -4,7 +4,7 @@ import { staticImplements, type StaticMethods } from "../types";
 import fetchBuilderPayload from "./instanceMethods/fetchBuilderPayload";
 import findStepSummaries from "./instanceMethods/findStepSummaries";
 import getPayload from "./instanceMethods/getPayload";
-import saveSteps from "./instanceMethods/saveSteps";
+import updateBuilder from "./instanceMethods/updateBuilder";
 import updateMetadata from "./instanceMethods/updateMetadata";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
@@ -27,6 +27,6 @@ export default class FlowEntity {
   fetchBuilderPayload = fetchBuilderPayload;
   findStepSummaries = findStepSummaries;
   getPayload = getPayload;
-  saveSteps = saveSteps;
+  updateBuilder = updateBuilder;
   updateMetadata = updateMetadata;
 }

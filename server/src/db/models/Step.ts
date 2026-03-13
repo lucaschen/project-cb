@@ -1,4 +1,5 @@
 import {
+  CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
@@ -12,12 +13,18 @@ export class Step extends Model<
 > {
   declare nodeId: string;
   declare nextNodeId: string | null;
+  declare order: CreationOptional<number>;
 
   static initModel(sequelize: Sequelize) {
     Step.init(
       {
         nodeId: { type: DataTypes.UUID, primaryKey: true },
         nextNodeId: { type: DataTypes.UUID, allowNull: true },
+        order: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
       },
       {
         sequelize,

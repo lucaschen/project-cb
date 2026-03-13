@@ -2,7 +2,9 @@ import { Flow } from "~db/models/Flow";
 
 import { staticImplements, type StaticMethods } from "../types";
 import fetchBuilderPayload from "./instanceMethods/fetchBuilderPayload";
+import findStepSummaries from "./instanceMethods/findStepSummaries";
 import getPayload from "./instanceMethods/getPayload";
+import saveSteps from "./instanceMethods/saveSteps";
 import updateMetadata from "./instanceMethods/updateMetadata";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
@@ -23,6 +25,8 @@ export default class FlowEntity {
 
   // PARTITION: Instance methods
   fetchBuilderPayload = fetchBuilderPayload;
+  findStepSummaries = findStepSummaries;
   getPayload = getPayload;
+  saveSteps = saveSteps;
   updateMetadata = updateMetadata;
 }

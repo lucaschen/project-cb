@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { NodeType } from "~shared/types/enums";
 
-export const decisionNodePayload = z.object({
+export const decisionNodeSchema = z.object({
   fallbackNextNodeId: z.string(),
   flowId: z.string(),
   name: z.string(),
@@ -10,4 +10,4 @@ export const decisionNodePayload = z.object({
   type: z.literal(NodeType.DECISION),
 });
 
-export type DecisionNodePayload = z.infer<typeof decisionNodePayload>;
+export type DecisionNodeType = z.infer<typeof decisionNodeSchema>;

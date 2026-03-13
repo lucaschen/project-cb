@@ -17,38 +17,38 @@ import type FlowEntity from "../FlowEntity";
 export default async function fetchBuilderPayload(
   this: FlowEntity,
 ): Promise<FetchFlowOutput> {
-  const nodeModels = await Node.findAll({
-    order: [
-      ["name", "ASC"],
-      ["id", "ASC"],
-    ],
-    where: { flowId: this.dbModel.id },
-  });
+  const [nodeModels, stepSummaries] = await Promise.all([
+    Node.findAll({
+      order: [
+        ["name", "ASC"],
+        ["id", "ASC"],
+      ],
+      where: { flowId: this.dbModel.id },
+    }),
+    this.findStepSummaries(),
+  ]);
 
   const nodeIds = nodeModels.map((node) => node.id);
+  const stepSummariesByNodeId = new Map(
+    stepSummaries.map((stepSummary) => [stepSummary.nodeId, stepSummary]),
+  );
+  const stepNodeIds = stepSummaries.map((stepSummary) => stepSummary.nodeId);
+  const decisionNodeIds = nodeModels
+    .filter((node) => node.type === NodeType.DECISION)
+    .map((node) => node.id);
 
-  const [coordinateModels, stepModels, decisionNodeModels] = await Promise.all([
+  const [coordinateModels, decisionNodeModels] = await Promise.all([
     NodeCoordinate.findAll({
       where: {
-        nodeId: { [Op.in]: nodeIds },
-      },
-    }),
-    Step.findAll({
-      where: {
-        nodeId: { [Op.in]: nodeIds },
+        nodeId: { [Op.in]: decisionNodeIds },
       },
     }),
     DecisionNode.findAll({
       where: {
-        nodeId: { [Op.in]: nodeIds },
+        nodeId: { [Op.in]: decisionNodeIds },
       },
     }),
   ]);
-
-  const stepNodeIds = stepModels.map((step) => step.nodeId);
-  const decisionNodeIds = decisionNodeModels.map(
-    (decisionNode) => decisionNode.nodeId,
-  );
 
   const [stepElementModels, decisionConditionModels] = await Promise.all([
     StepElement.findAll({
@@ -85,10 +85,9 @@ export default async function fetchBuilderPayload(
     },
   });
 
-  const coordinatesByNodeId = new Map(
+  const decisionCoordinatesByNodeId = new Map(
     coordinateModels.map((coordinate) => [coordinate.nodeId, coordinate]),
   );
-  const stepsByNodeId = new Map(stepModels.map((step) => [step.nodeId, step]));
   const decisionNodesByNodeId = new Map(
     decisionNodeModels.map((decisionNode) => [decisionNode.nodeId, decisionNode]),
   );
@@ -129,24 +128,16 @@ export default async function fetchBuilderPayload(
     flow: {
       ...this.getPayload(),
       nodes: nodeModels.map((node) => {
-        const coordinates = coordinatesByNodeId.get(node.id);
-        const nodeCoordinates = coordinates
-          ? {
-              x: coordinates.x,
-              y: coordinates.y,
-            }
-          : null;
-
         if (node.type === NodeType.STEP) {
-          const step = stepsByNodeId.get(node.id);
+          const stepSummary = stepSummariesByNodeId.get(node.id);
 
-          if (!step) {
+          if (!stepSummary) {
             throw new UnexpectedError(
-              `Step node id: ${node.id} has no step record.`,
+              `Step node id: ${node.id} has no hydrated step summary.`,
             );
           }
 
-          const elements = (stepElementsByStepId.get(step.nodeId) ?? [])
+          const elements = (stepElementsByStepId.get(stepSummary.nodeId) ?? [])
             .sort(
               (left, right) =>
                 left.order - right.order || left.id.localeCompare(right.id),
@@ -191,14 +182,23 @@ export default async function fetchBuilderPayload(
             });
 
           return {
-            coordinates: nodeCoordinates,
+            coordinates: stepSummary.coordinates,
             elements,
-            name: node.name,
-            nextNodeId: step.nextNodeId,
-            nodeId: node.id,
+            name: stepSummary.name,
+            nextNodeId: stepSummary.nextNodeId,
+            nodeId: stepSummary.nodeId,
+            order: stepSummary.order,
             type: node.type,
           };
         }
+
+        const coordinates = decisionCoordinatesByNodeId.get(node.id);
+        const nodeCoordinates = coordinates
+          ? {
+              x: coordinates.x,
+              y: coordinates.y,
+            }
+          : null;
 
         const decisionNode = decisionNodesByNodeId.get(node.id);
 

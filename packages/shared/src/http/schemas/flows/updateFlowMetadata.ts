@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { flowPayload } from "./common";
+import { flowSchema } from "./common";
 
 export const updateFlowMetadataParams = z.object({
   flowId: z.string().min(1),
@@ -25,6 +25,6 @@ export const updateFlowMetadataInput = z
 
 export type UpdateFlowMetadataInput = z.infer<typeof updateFlowMetadataInput>;
 
-export const updateFlowMetadataOutput = flowPayload;
+export const updateFlowMetadataOutput = flowSchema;
 
 export type UpdateFlowMetadataOutput = z.infer<typeof updateFlowMetadataOutput>;

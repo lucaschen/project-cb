@@ -9,9 +9,10 @@
 - `fetch*`: asynchronous guaranteed result; throw if missing
 - `find*`: asynchronous non-guaranteed result; return nullable or empty results
 - `get*`: synchronous guaranteed result
-- Shared HTTP schema files should use `*Input`, `*Output`, and `*Params` for endpoint contracts
-- Reusable nested Zod schemas should use `*Schema`
-- Do not introduce new shared schema names ending in `*Payload`
+- In `common` HTTP schema files, Zod schema constants should end in `Schema`
+- In `common` HTTP schema files, inferred TypeScript types should end in `Type`
+- In non-`common` HTTP schema files, Zod schema constants should use `*Input`, `*Output`, and `*Params`
+- In non-`common` HTTP schema files, inferred TypeScript types should match those names with leading capitalisation, for example `CreateFlowInput`
 - Only create shared schemas when they are consumed
 - Put persistence or domain-level schemas under `packages/shared/src/db/schemas`, not under `http/schemas`
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { conditionStatementSchema } from "~shared/db/schemas/conditionStatement";
 import { ElementPropertyTypes, NodeType } from "~shared/types/enums";
 
-export const flowPayload = z.object({
+export const flowSchema = z.object({
   description: z.string().nullable(),
   id: z.string().min(1),
   name: z.string().min(1),
@@ -11,7 +11,7 @@ export const flowPayload = z.object({
   slug: z.string().min(1),
 });
 
-export type FlowPayload = z.infer<typeof flowPayload>;
+export type FlowType = z.infer<typeof flowSchema>;
 
 export const nodeCoordinatesSchema = z
   .object({
@@ -62,6 +62,7 @@ export const flowStepNodeSchema = z.object({
   name: z.string().min(1),
   nextNodeId: z.string().nullable(),
   nodeId: z.string().min(1),
+  order: z.number().int().nonnegative(),
   type: z.literal(NodeType.STEP),
 });
 
@@ -85,7 +86,7 @@ export const flowNodeSchema = z.discriminatedUnion("type", [
 
 export type FlowNodeType = z.infer<typeof flowNodeSchema>;
 
-export const flowWithNodesSchema = flowPayload.extend({
+export const flowWithNodesSchema = flowSchema.extend({
   nodes: z.array(flowNodeSchema),
 });
 

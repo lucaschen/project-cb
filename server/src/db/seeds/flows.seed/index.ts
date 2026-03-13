@@ -26,6 +26,19 @@ export async function seedFlows(models: Models) {
 
   const steps = await seedSteps(models);
 
+  await Promise.all([
+    steps.step1.update({ order: 0 }),
+    steps.step2.update({ order: 1 }),
+    steps.step3.update({ order: 2 }),
+    steps.step4.update({ order: 3 }),
+    steps.step4Point5.update({ order: 4 }),
+    steps.step5.update({ order: 5 }),
+    steps.step6.update({ order: 6 }),
+    steps.step7.update({ order: 7 }),
+    steps.step8A.update({ order: 8 }),
+    steps.step8B.update({ order: 9 }),
+  ]);
+
   // ───────────────────
   // Decision nodes & connections
   // Represent: if Step4.firstHomeBuyer === 'No' then go to Step4Point5, else continue to Step5

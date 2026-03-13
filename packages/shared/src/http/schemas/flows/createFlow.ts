@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { flowPayload } from "./common";
+import { flowSchema } from "./common";
 
 export const createFlowInput = z.object({
   description: z.string().nullable().optional(),
@@ -9,8 +9,8 @@ export const createFlowInput = z.object({
   slug: z.string().min(1),
 });
 
-export type createFlowInput = z.infer<typeof createFlowInput>;
+export type CreateFlowInput = z.infer<typeof createFlowInput>;
 
-export const createFlowOutput = flowPayload;
+export const createFlowOutput = flowSchema;
 
 export type CreateFlowOutput = z.infer<typeof createFlowOutput>;

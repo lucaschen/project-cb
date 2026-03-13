@@ -1,9 +1,7 @@
-import type { CreateOrganizationOutput } from "@packages/shared/http/schemas/organizations/createOrganization";
 import {
   createOrganizationInput,
   createOrganizationOutput,
 } from "@packages/shared/http/schemas/organizations/createOrganization";
-import type { FindOrganizationsForCurrentUserOutput } from "@packages/shared/http/schemas/organizations/findOrganizationsForCurrentUser";
 import { findOrganizationsForCurrentUserOutput } from "@packages/shared/http/schemas/organizations/findOrganizationsForCurrentUser";
 import { z } from "zod";
 
@@ -18,7 +16,7 @@ export const getCurrentUserOrganizations = enforceStrictSchema({
     }),
   inputSchema: z.any(),
   outputSchema: findOrganizationsForCurrentUserOutput,
-}) as () => Promise<FindOrganizationsForCurrentUserOutput>;
+});
 
 export const createOrganization = enforceStrictSchema({
   handler: (input) =>
@@ -29,7 +27,4 @@ export const createOrganization = enforceStrictSchema({
     }),
   inputSchema: createOrganizationInput,
   outputSchema: createOrganizationOutput,
-}) as (input: {
-  name: string;
-  slug: string;
-}) => Promise<CreateOrganizationOutput>;
+});

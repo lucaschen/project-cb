@@ -3,6 +3,15 @@ import {
   createFlowInput,
   createFlowOutput,
 } from "@packages/shared/http/schemas/flows/createFlow";
+import {
+  fetchFlowOutput,
+  fetchFlowParams,
+} from "@packages/shared/http/schemas/flows/fetchFlow";
+import {
+  updateFlowMetadataInput,
+  updateFlowMetadataOutput,
+  updateFlowMetadataParams,
+} from "@packages/shared/http/schemas/flows/updateFlowMetadata";
 import { z } from "zod";
 
 import { apiRequest } from "../client";
@@ -33,4 +42,28 @@ export const createFlow = enforceStrictSchema({
     }),
   inputSchema: createFlowInput,
   outputSchema: createFlowOutput,
+});
+
+export const getFlow = enforceStrictSchema({
+  handler: ({ flowId }) =>
+    apiRequest({
+      method: "GET",
+      path: `/flows/${flowId}`,
+    }),
+  inputSchema: fetchFlowParams,
+  outputSchema: fetchFlowOutput,
+});
+
+export const updateFlowMetadata = enforceStrictSchema({
+  handler: ({ flowId, input }) =>
+    apiRequest({
+      body: input,
+      method: "PATCH",
+      path: `/flows/${flowId}`,
+    }),
+  inputSchema: z.object({
+    flowId: updateFlowMetadataParams.shape.flowId,
+    input: updateFlowMetadataInput,
+  }),
+  outputSchema: updateFlowMetadataOutput,
 });

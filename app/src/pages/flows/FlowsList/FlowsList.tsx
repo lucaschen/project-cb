@@ -6,6 +6,7 @@ import { EmptyState } from "@app/components/ui/EmptyState";
 import { FormField } from "@app/components/ui/FormField";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
+import { TextAreaField } from "@app/components/ui/TextAreaField";
 import useRootContext from "@app/hooks/useRootContext";
 import { toSlug } from "@app/utils/slug";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,11 +28,18 @@ const validateFlowName = (name: string) => {
   };
 };
 
+const normalizeDescription = (description: string) => {
+  const trimmedDescription = description.trim();
+
+  return trimmedDescription ? trimmedDescription : null;
+};
+
 const FlowsList = () => {
   const { activeOrganization, logoutMutation, sessionData } = useRootContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [flowDescription, setFlowDescription] = useState("");
   const [flowName, setFlowName] = useState("");
   const [fieldError, setFieldError] = useState("");
   const [formError, setFormError] = useState("");
@@ -57,10 +65,7 @@ const FlowsList = () => {
         });
       }
 
-      setFlowName("");
-      setFieldError("");
-      setFormError("");
-      setIsCreateOpen(false);
+      resetCreateFlowForm();
       navigate(getFlowDetailsPath(flow.id));
     },
     onError: (error) => {
@@ -89,7 +94,17 @@ const FlowsList = () => {
     );
   }
 
-  const handleCreateSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const resetCreateFlowForm = () => {
+    setFlowDescription("");
+    setFlowName("");
+    setFieldError("");
+    setFormError("");
+    setIsCreateOpen(false);
+  };
+
+  const handleCreateSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     const validationResult = validateFlowName(flowName);
@@ -101,6 +116,7 @@ const FlowsList = () => {
     }
 
     await createFlowMutation.mutateAsync({
+      description: normalizeDescription(flowDescription),
       name: validationResult.trimmedName,
       organizationId: activeOrganization.id,
       slug: validationResult.slug,
@@ -116,9 +132,9 @@ const FlowsList = () => {
           <SectionLabel>Protected Area</SectionLabel>
           <h1 className="text-3xl font-semibold text-white">Flows workspace</h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-300">
-            Auth, org-aware redirects, and active-org persistence are in place.
-            Flow list and metadata editing remain deferred until the missing
-            backend APIs exist.
+            Create flows for {activeOrganization.name}, review the available
+            workspace, and continue into top-level metadata editing before the
+            deeper builder experience lands.
           </p>
         </div>
         <div className="flex flex-col items-start gap-3 text-sm text-slate-300 md:items-end">
@@ -154,7 +170,7 @@ const FlowsList = () => {
             <h2 className="text-2xl font-semibold text-white">Create a flow</h2>
             <p className="text-sm leading-6 text-slate-300">
               Create a flow in {activeOrganization.name} and continue straight
-              into the future builder route.
+              into its metadata page.
             </p>
           </div>
           <form className="mt-6 space-y-5" onSubmit={handleCreateSubmit}>
@@ -166,6 +182,14 @@ const FlowsList = () => {
               placeholder="Customer intake"
               value={flowName}
             />
+            <TextAreaField
+              helperText="Optional context for internal users. You can update this later."
+              id="flow-description"
+              label="Description"
+              onChange={(event) => setFlowDescription(event.target.value)}
+              placeholder="Capture the purpose of this flow and who it serves."
+              value={flowDescription}
+            />
             {formError ? (
               <p className="text-sm text-rose-300">{formError}</p>
             ) : null}
@@ -174,12 +198,7 @@ const FlowsList = () => {
                 Create flow
               </Button>
               <Button
-                onClick={() => {
-                  setIsCreateOpen(false);
-                  setFlowName("");
-                  setFieldError("");
-                  setFormError("");
-                }}
+                onClick={resetCreateFlowForm}
                 type="button"
                 variant="ghost"
               >

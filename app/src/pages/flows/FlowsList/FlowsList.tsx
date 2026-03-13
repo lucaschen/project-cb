@@ -9,6 +9,7 @@ import { SectionLabel } from "@app/components/ui/SectionLabel";
 import { TextAreaField } from "@app/components/ui/TextAreaField";
 import useRootContext from "@app/hooks/useRootContext";
 import { toSlug } from "@app/utils/slug";
+import { trimAndNullOnEmpty } from "@app/utils/string";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useState } from "react";
@@ -26,12 +27,6 @@ const validateFlowName = (name: string) => {
     trimmedName,
     slug,
   };
-};
-
-const normalizeDescription = (description: string) => {
-  const trimmedDescription = description.trim();
-
-  return trimmedDescription ? trimmedDescription : null;
 };
 
 const FlowsList = () => {
@@ -116,7 +111,7 @@ const FlowsList = () => {
     }
 
     await createFlowMutation.mutateAsync({
-      description: normalizeDescription(flowDescription),
+      description: trimAndNullOnEmpty(flowDescription),
       name: validationResult.trimmedName,
       organizationId: activeOrganization.id,
       slug: validationResult.slug,

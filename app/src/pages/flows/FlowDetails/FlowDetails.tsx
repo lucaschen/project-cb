@@ -8,9 +8,11 @@ import { PageMessage } from "@app/components/ui/PageMessage";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
 import { TextAreaField } from "@app/components/ui/TextAreaField";
 import useRootContext from "@app/hooks/useRootContext";
+import { trimAndNullOnEmpty } from "@app/utils/string";
 import type { FlowPayload } from "@packages/shared/http/schemas/flows/common";
 import type { FlowWithNodesType } from "@packages/shared/http/schemas/flows/common";
 import type { FetchFlowOutput } from "@packages/shared/http/schemas/flows/fetchFlow";
+import type { UpdateFlowMetadataInput } from "@packages/shared/http/schemas/flows/updateFlowMetadata";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useState } from "react";
@@ -26,12 +28,6 @@ type FlowMetadataBaseline = {
 type FlowMetadataFormProps = {
   activeOrganizationId: string | null;
   flow: FlowWithNodesType;
-};
-
-const normalizeDescription = (description: string) => {
-  const trimmedDescription = description.trim();
-
-  return trimmedDescription ? trimmedDescription : null;
 };
 
 const FlowMetadataForm = ({
@@ -103,7 +99,7 @@ const FlowMetadataForm = ({
   });
 
   const trimmedName = flowName.trim();
-  const normalizedDescription = normalizeDescription(flowDescription);
+  const normalizedDescription = trimAndNullOnEmpty(flowDescription);
   const isDirty =
     trimmedName !== baseline.name ||
     normalizedDescription !== baseline.description;
@@ -124,10 +120,7 @@ const FlowMetadataForm = ({
       return;
     }
 
-    const input: {
-      description?: string | null;
-      name?: string;
-    } = {};
+    const input: UpdateFlowMetadataInput = {};
 
     if (trimmedName !== baseline.name) {
       input.name = trimmedName;

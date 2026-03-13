@@ -26,12 +26,7 @@ const findFlows = enforceSchema({
     }
 
     const flowEntities = await FlowEntity.findByOrganizationId(organizationId);
-    const response = flowEntities.map(({ dbModel }) => ({
-      id: dbModel.id,
-      name: dbModel.name,
-      organizationId: dbModel.organizationId,
-      slug: dbModel.slug,
-    }));
+    const response = flowEntities.map((flowEntity) => flowEntity.getPayload());
 
     res.status(200).json(response);
   },

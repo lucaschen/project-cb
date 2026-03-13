@@ -13,7 +13,7 @@ import NotFoundError from "~src/utils/errors/NotFoundError";
 
 const createFlow = enforceSchema({
   handler: async (req, res) => {
-    const { name, organizationId, slug } = req.body;
+    const { description, name, organizationId, slug } = req.body;
 
     const userEntity = await checkExists(req.context.sessionEntity).fetchUserEntity();
 
@@ -33,17 +33,13 @@ const createFlow = enforceSchema({
 
     // Question: do flows require an organizationId? can a user directly own a flow?
     const flowEntity = await FlowEntity.create({
+      description: description ?? null,
       name,
       organizationId,
       slug,
     });
 
-    res.status(201).json({
-      id: flowEntity.dbModel.id,
-      name: flowEntity.dbModel.name,
-      organizationId: flowEntity.dbModel.organizationId,
-      slug: flowEntity.dbModel.slug,
-    });
+    res.status(201).json(flowEntity.getPayload());
   },
   inputSchema: createFlowInput,
   outputSchema: createFlowOutput,

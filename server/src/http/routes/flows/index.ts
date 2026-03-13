@@ -6,6 +6,7 @@ import createFlow from "./createFlow";
 import decisionNodeRouter from "./decisionNodes";
 import fetchFlow from "./fetchFlow";
 import stepsRouter from "./steps";
+import updateFlowMetadata from "./updateFlowMetadata";
 
 const flowsRouter = Router({
   mergeParams: true,
@@ -14,6 +15,7 @@ const flowsRouter = Router({
 flowsRouter.use("/:flowId/decision-nodes", decisionNodeRouter);
 flowsRouter.use("/:flowId/steps", stepsRouter);
 flowsRouter.get("/:flowId", requireLogin(fetchFlow));
+flowsRouter.patch("/:flowId", requireLogin(updateFlowMetadata));
 flowsRouter.post("/", requireLogin(createFlow));
 
 export default flowsRouter;

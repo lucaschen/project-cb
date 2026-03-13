@@ -127,10 +127,7 @@ export default async function fetchBuilderPayload(
 
   return {
     flow: {
-      id: this.dbModel.id,
-      name: this.dbModel.name,
-      organizationId: this.dbModel.organizationId,
-      slug: this.dbModel.slug,
+      ...this.getPayload(),
       nodes: nodeModels.map((node) => {
         const coordinates = coordinatesByNodeId.get(node.id);
         const nodeCoordinates = coordinates

@@ -4,6 +4,7 @@ import { conditionStatementSchema } from "~shared/db/schemas/conditionStatement"
 import { ElementPropertyTypes, NodeType } from "~shared/types/enums";
 
 export const flowPayload = z.object({
+  description: z.string().nullable(),
   id: z.string().min(1),
   name: z.string().min(1),
   organizationId: z.string().min(1),

@@ -5,22 +5,25 @@ Expose the backend APIs required to persist, validate, and reload branching rule
 
 ## Scope
 - Read decision nodes and their conditions as part of flow loading
-- CRUD endpoints for decision node conditions
-- Validation for destination references, ordering, and condition statements
-- Persist fallback routing and explicit conditional routes
+- Save one decision node’s full current branching configuration in one request
+- Persist fallback routing and full ordered condition lists
+- Validate destination references, condition statements, and graph loops
 - Return logic payloads that builder and preview can consume without local-only reconstruction
 
 ## Technical Notes
 - The current backend supports creating a decision node, but not managing its conditions; FE 10 needs that persistence layer
+- Scope is step-routing only for MVP; field-level visibility stays out of BE 05
+- Persist one decision node at a time using a full replacement payload instead of granular condition CRUD routes
 - Keep branching tied to stable node IDs rather than step indices
-- Use the existing condition statement model as the starting point rather than inventing a second logic DSL
-- Validation should prevent obviously broken routes before the frontend enters preview
+- Reuse the existing shared condition DSL and supported operators only: `===`, `>=`, `<=`
+- Validation should prevent broken destinations and loop-producing routing before the frontend enters preview
 
 ## Acceptance Criteria
-- FE 10 can create, edit, delete, and reload supported branching rules
+- FE 10 can create a decision node, save its fallback route and ordered condition list, and reload that saved logic reliably
 - The backend validates condition payloads and rejects invalid routes clearly
 - Flow reads include saved branching data in a stable order
-- Fallback routing and explicit conditional routing are both represented consistently
+- Fallback routing and explicit conditional routing are represented consistently
+- Saves that introduce loops, invalid destinations, duplicate condition ids, or invalid `stepElementValue` references are rejected
 - Saved logic can be consumed by later preview work without additional backend changes to the core branching model
 
 ## Dependencies
@@ -29,6 +32,5 @@ Expose the backend APIs required to persist, validate, and reload branching rule
 - Existing decision node creation support
 
 ## Open Questions
-- Exact condition operators supported in MVP
-- Whether MVP branching is limited to step-to-step routing or also covers field-level visibility
-- Whether branching validation should reject cycles or only structurally invalid destinations
+- Exact request/response contract for the single decision-node save payload
+- Whether decision-node delete should be added in a later ticket or stay out of MVP

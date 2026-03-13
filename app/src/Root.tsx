@@ -8,7 +8,7 @@ import { path as flowDetailsPath } from "./pages/flows/FlowDetails";
 
 const Root = () => {
   const isFlowDetailsRoute = useMatch(flowDetailsPath);
-  const { isPending, logoutMutation, sessionData } = useSession();
+  const { isPending, sessionData } = useSession();
   const {
     activeOrganization,
     isPending: areOrganizationsPending,
@@ -38,14 +38,14 @@ const Root = () => {
     >
       <TopNavigation
         activeOrganization={activeOrganization}
-        logoutMutation={logoutMutation}
         sessionData={sessionData}
       />
-      <div className={isFlowDetailsRoute ? "min-h-0 flex-1 overflow-hidden" : ""}>
+      <div
+        className={isFlowDetailsRoute ? "min-h-0 flex-1 overflow-hidden" : ""}
+      >
         <Outlet
           context={{
             activeOrganization,
-            logoutMutation,
             organizations,
             sessionData,
           }}

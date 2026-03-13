@@ -12,16 +12,26 @@ const FlowStructureList = ({
   onSelectNode,
   selectedNodeId,
 }: FlowStructureListProps) => {
-  const stepNodes = nodes.filter((node) => node.type === "STEP");
-  const decisionNodes = nodes.filter((node) => node.type === "DECISION");
+  const { stepNodes, decisionNodes } = nodes.reduce<{
+    stepNodes: FlowNodeType[];
+    decisionNodes: FlowNodeType[];
+  }>(
+    (acc, node) => {
+      if (node.type === "STEP") {
+        acc.stepNodes.push(node);
+      } else if (node.type === "DECISION") {
+        acc.decisionNodes.push(node);
+      }
+      return acc;
+    },
+    { stepNodes: [], decisionNodes: [] },
+  );
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
         <h3 className="text-lg font-semibold text-white">Structure</h3>
-        <p className="text-sm text-slate-400">
-          Current nodes in this flow.
-        </p>
+        <p className="text-sm text-slate-400">Current nodes in this flow.</p>
       </div>
       <div className="space-y-4">
         <div className="space-y-2">

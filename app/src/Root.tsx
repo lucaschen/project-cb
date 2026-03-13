@@ -1,12 +1,14 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useMatch } from "react-router-dom";
 
 import TopNavigation from "./components/TopNavigation";
 import { PageMessage } from "./components/ui/PageMessage";
 import useCurrentUserOrganizations from "./hooks/useCurrentUserOrganizations";
 import useSession from "./hooks/useSession";
+import { path as flowDetailsPath } from "./pages/flows/FlowDetails";
 
 const Root = () => {
-  const { isPending, logoutMutation, sessionData } = useSession();
+  const isFlowDetailsRoute = useMatch(flowDetailsPath);
+  const { isPending, sessionData } = useSession();
   const {
     activeOrganization,
     isPending: areOrganizationsPending,
@@ -27,16 +29,28 @@ const Root = () => {
   }
 
   return (
-    <div className="min-h-screen">
-      <TopNavigation />
-      <Outlet
-        context={{
-          activeOrganization,
-          logoutMutation,
-          organizations,
-          sessionData,
-        }}
+    <div
+      className={
+        isFlowDetailsRoute
+          ? "flex h-screen flex-col overflow-hidden"
+          : "min-h-screen"
+      }
+    >
+      <TopNavigation
+        activeOrganization={activeOrganization}
+        sessionData={sessionData}
       />
+      <div
+        className={isFlowDetailsRoute ? "min-h-0 flex-1 overflow-hidden" : ""}
+      >
+        <Outlet
+          context={{
+            activeOrganization,
+            organizations,
+            sessionData,
+          }}
+        />
+      </div>
     </div>
   );
 };

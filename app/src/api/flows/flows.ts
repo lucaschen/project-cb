@@ -1,4 +1,4 @@
-import { flowPayload } from "@packages/shared/http/schemas/flows/common";
+import { flowSchema } from "@packages/shared/http/schemas/flows/common";
 import {
   createFlowInput,
   createFlowOutput,
@@ -21,7 +21,7 @@ const findFlowsParams = z.object({
   organizationId: z.string().min(1),
 });
 
-const findFlowsOutput = z.array(flowPayload);
+const findFlowsOutput = z.array(flowSchema);
 
 export const getOrganizationFlows = enforceStrictSchema({
   handler: ({ organizationId }) =>

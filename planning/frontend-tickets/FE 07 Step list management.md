@@ -1,33 +1,38 @@
-# FE 07 Step list management
+# FE 07 Builder graph interactions and node management
 
 ## Goal
-Enable users to manage the ordered set of steps within a flow.
+Add the first real builder logic on top of the FE 06 shell so users can create, select, remove, and manage nodes directly in the builder.
 
 ## Scope
-- Add step
-- Delete step
-- Reorder steps
-- Select active step
-- Show step summary in the list
+- Drag node types from the left palette into the canvas to spawn draft nodes
+- Click/select nodes from the canvas and from the structure list
+- Keep the structure list in sync with the current builder graph
+- Delete nodes
+- Reorder steps where the backend supports ordered behavior
+- Establish local draft graph state boundaries for builder interactions
 
 ## Technical Notes
-- Reordering should be explicit and stable because branching later depends on predictable step identity
-- Keep temporary reorder interactions local until persisted successfully
-- Step list UX should support future step type expansion without redesigning the entire panel
+- FE 07 owns the first actual builder interaction logic; FE 06 should remain mostly visual shell work
+- Use `Zustand` for local builder graph interaction state, selection state, and unsaved editor context
+- Keep persisted server state in `TanStack Query`, but introduce a local draft graph that powers the React Flow canvas
+- Drag/drop from the left palette should create new draft nodes at the canvas drop location
+- The structure list in the right `Flow` tab should reflect the current graph, not a separate parallel source of truth
+- Reordering should stay explicit and stable because later branching logic depends on predictable node identity
 
 ## Acceptance Criteria
-- User can add a new step to a flow
-- User can remove an existing step
-- User can reorder steps and see the new order reflected consistently
-- Selecting a step updates the editing context in the builder
+- User can spawn a new node into the canvas from the left palette
+- User can select a node from either the canvas or the structure list and see selection state stay in sync
+- User can remove supported nodes and see the canvas and structure list update consistently
+- User can reorder steps where supported and see the new order reflected consistently
+- Builder interaction state is clearly separated from persisted server state
 
 ## Dependencies
 - [FE 06 Flow builder shell](./FE%2006%20Flow%20builder%20shell.md)
 
 ## Backend Dependencies
 - Blocked by [BE 03 Step CRUD and ordering APIs](../backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md)
-- Requires step list, update, delete, and reorder APIs in addition to the current create-step support
+- Requires create, update, delete, and reorder APIs that support the first real builder graph mutations
 
 ## Open Questions
-- Whether a default step template is created when adding a step
-- Whether duplicate-step behavior is needed in MVP
+- Whether decision-node creation lands in the same ticket or follows immediately after the first step-node flow
+- Whether newly spawned nodes persist immediately or remain local drafts until an explicit save point exists

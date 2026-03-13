@@ -7,7 +7,6 @@ import { DecisionNodeCondition } from "~db/models/DecisionNodeCondition";
 import { ElementProperties } from "~db/models/ElementProperties";
 import { Node } from "~db/models/Node";
 import { NodeCoordinate } from "~db/models/NodeCoordinate";
-import { Step } from "~db/models/Step";
 import { StepElement } from "~db/models/StepElement";
 import { StepElementProperties } from "~db/models/StepElementProperties";
 import UnexpectedError from "~src/utils/errors/UnexpectedError";
@@ -28,7 +27,6 @@ export default async function fetchBuilderPayload(
     this.findStepSummaries(),
   ]);
 
-  const nodeIds = nodeModels.map((node) => node.id);
   const stepSummariesByNodeId = new Map(
     stepSummaries.map((stepSummary) => [stepSummary.nodeId, stepSummary]),
   );
@@ -65,11 +63,13 @@ export default async function fetchBuilderPayload(
 
   const stepElementIds = stepElementModels.map((stepElement) => stepElement.id);
 
-  const hydratedStepElementPropertyModels = await StepElementProperties.findAll({
-    where: {
-      stepElementId: { [Op.in]: stepElementIds },
+  const hydratedStepElementPropertyModels = await StepElementProperties.findAll(
+    {
+      where: {
+        stepElementId: { [Op.in]: stepElementIds },
+      },
     },
-  });
+  );
 
   const propertyIds = Array.from(
     new Set(
@@ -89,10 +89,16 @@ export default async function fetchBuilderPayload(
     coordinateModels.map((coordinate) => [coordinate.nodeId, coordinate]),
   );
   const decisionNodesByNodeId = new Map(
-    decisionNodeModels.map((decisionNode) => [decisionNode.nodeId, decisionNode]),
+    decisionNodeModels.map((decisionNode) => [
+      decisionNode.nodeId,
+      decisionNode,
+    ]),
   );
   const elementPropertiesById = new Map(
-    elementPropertyModels.map((elementProperty) => [elementProperty.id, elementProperty]),
+    elementPropertyModels.map((elementProperty) => [
+      elementProperty.id,
+      elementProperty,
+    ]),
   );
 
   const stepElementsByStepId = new Map<string, StepElement[]>();
@@ -108,8 +114,9 @@ export default async function fetchBuilderPayload(
   >();
   for (const stepElementProperty of hydratedStepElementPropertyModels) {
     const existing =
-      stepElementPropertiesByStepElementId.get(stepElementProperty.stepElementId) ??
-      [];
+      stepElementPropertiesByStepElementId.get(
+        stepElementProperty.stepElementId,
+      ) ?? [];
     existing.push(stepElementProperty);
     stepElementPropertiesByStepElementId.set(
       stepElementProperty.stepElementId,

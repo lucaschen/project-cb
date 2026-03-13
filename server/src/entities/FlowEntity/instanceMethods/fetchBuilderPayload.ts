@@ -9,6 +9,7 @@ import { Node } from "~db/models/Node";
 import { NodeCoordinate } from "~db/models/NodeCoordinate";
 import { StepElement } from "~db/models/StepElement";
 import { StepElementProperties } from "~db/models/StepElementProperties";
+import getHydratedStepElements from "~entities/StepEntity/instanceMethods/getHydratedStepElements";
 import UnexpectedError from "~src/utils/errors/UnexpectedError";
 
 import type FlowEntity from "../FlowEntity";
@@ -94,34 +95,11 @@ export default async function fetchBuilderPayload(
       decisionNode,
     ]),
   );
-  const elementPropertiesById = new Map(
-    elementPropertyModels.map((elementProperty) => [
-      elementProperty.id,
-      elementProperty,
-    ]),
-  );
-
   const stepElementsByStepId = new Map<string, StepElement[]>();
   for (const stepElement of stepElementModels) {
     const existing = stepElementsByStepId.get(stepElement.stepId) ?? [];
     existing.push(stepElement);
     stepElementsByStepId.set(stepElement.stepId, existing);
-  }
-
-  const stepElementPropertiesByStepElementId = new Map<
-    string,
-    StepElementProperties[]
-  >();
-  for (const stepElementProperty of hydratedStepElementPropertyModels) {
-    const existing =
-      stepElementPropertiesByStepElementId.get(
-        stepElementProperty.stepElementId,
-      ) ?? [];
-    existing.push(stepElementProperty);
-    stepElementPropertiesByStepElementId.set(
-      stepElementProperty.stepElementId,
-      existing,
-    );
   }
 
   const decisionConditionsByNodeId = new Map<string, DecisionNodeCondition[]>();
@@ -144,53 +122,25 @@ export default async function fetchBuilderPayload(
             );
           }
 
-          const elements = (stepElementsByStepId.get(stepSummary.nodeId) ?? [])
-            .sort(
-              (left, right) =>
-                left.order - right.order || left.id.localeCompare(right.id),
-            )
-            .map((stepElement) => {
-              const properties = (
-                stepElementPropertiesByStepElementId.get(stepElement.id) ?? []
-              )
-                .map((stepElementProperty) => {
-                  const elementProperty = elementPropertiesById.get(
-                    stepElementProperty.propertyId,
-                  );
-
-                  if (!elementProperty) {
-                    throw new UnexpectedError(
-                      `Element property id: ${stepElementProperty.propertyId} not found.`,
-                    );
-                  }
-
-                  return {
-                    defaultValue: elementProperty.defaultValue,
-                    propertyId: elementProperty.id,
-                    propertyName: elementProperty.propertyName,
-                    propertyType: elementProperty.propertyType,
-                    required: elementProperty.required,
-                    value: stepElementProperty.propertyValue,
-                  };
-                })
-                .sort(
-                  (left, right) =>
-                    left.propertyName.localeCompare(right.propertyName) ||
-                    left.propertyId.localeCompare(right.propertyId),
-                );
-
-              return {
-                elementId: stepElement.elementId,
-                id: stepElement.id,
-                name: stepElement.name,
-                order: stepElement.order,
-                properties,
-              };
-            });
+          const elements = (
+            stepElementsByStepId.get(stepSummary.nodeId) ?? []
+          ).sort(
+            (left, right) =>
+              left.order - right.order || left.id.localeCompare(right.id),
+          );
+          const elementIds = elements.map((element) => element.id);
+          const hydratedElements = getHydratedStepElements({
+            elementPropertyModels,
+            stepElementModels: elements,
+            stepElementPropertyModels: hydratedStepElementPropertyModels.filter(
+              (stepElementProperty) =>
+                elementIds.includes(stepElementProperty.stepElementId),
+            ),
+          });
 
           return {
             coordinates: stepSummary.coordinates,
-            elements,
+            elements: hydratedElements,
             name: stepSummary.name,
             nextNodeId: stepSummary.nextNodeId,
             nodeId: stepSummary.nodeId,

@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 import { conditionStatementSchema } from "~shared/db/schemas/conditionStatement";
-import { ElementPropertyTypes, NodeType } from "~shared/types/enums";
+import {
+  hydratedStepElementPropertySchema,
+  hydratedStepElementSchema,
+} from "~shared/http/schemas/flows/steps/elements/common";
+import { NodeType } from "~shared/types/enums";
 
 export const flowSchema = z.object({
   description: z.string().nullable(),
@@ -22,26 +26,14 @@ export const nodeCoordinatesSchema = z
 
 export type NodeCoordinatesType = z.infer<typeof nodeCoordinatesSchema>;
 
-export const flowStepElementPropertyValueSchema = z.object({
-  defaultValue: z.string(),
-  propertyId: z.string().min(1),
-  propertyName: z.string().min(1),
-  propertyType: z.enum(ElementPropertyTypes),
-  required: z.boolean(),
-  value: z.string(),
-});
+export const flowStepElementPropertyValueSchema =
+  hydratedStepElementPropertySchema;
 
 export type FlowStepElementPropertyValueType = z.infer<
   typeof flowStepElementPropertyValueSchema
 >;
 
-export const flowStepElementSchema = z.object({
-  elementId: z.string().min(1),
-  id: z.string().min(1),
-  name: z.string().min(1),
-  order: z.number(),
-  properties: z.array(flowStepElementPropertyValueSchema),
-});
+export const flowStepElementSchema = hydratedStepElementSchema;
 
 export type FlowStepElementType = z.infer<typeof flowStepElementSchema>;
 

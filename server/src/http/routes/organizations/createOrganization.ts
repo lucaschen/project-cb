@@ -27,12 +27,7 @@ const createOrganization = enforceSchema({
       permissions: OrganizationUserPermission.ADMIN,
     });
 
-    res.status(201).json({
-      apiKey: organizationEntity.dbModel.apiKey,
-      id: organizationEntity.dbModel.id,
-      name: organizationEntity.dbModel.name,
-      slug: organizationEntity.dbModel.slug,
-    });
+    res.status(201).json(organizationEntity.getAdminDetail());
   },
   inputSchema: createOrganizationInput,
   outputSchema: createOrganizationOutput,

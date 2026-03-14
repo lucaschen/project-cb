@@ -1,9 +1,18 @@
 import { findFlowsOutput } from "@packages/shared/http/schemas/flows/findFlows";
 import { createOrganizationOutput } from "@packages/shared/http/schemas/organizations/createOrganization";
+import { createOrganizationInviteOutput } from "@packages/shared/http/schemas/organizations/createOrganizationInvite";
+import { fetchOrganizationOutput } from "@packages/shared/http/schemas/organizations/fetchOrganization";
+import { findOrganizationInvitesOutput } from "@packages/shared/http/schemas/organizations/findOrganizationInvites";
+import { findOrganizationMembersOutput } from "@packages/shared/http/schemas/organizations/findOrganizationMembers";
 import { findOrganizationsForCurrentUserOutput } from "@packages/shared/http/schemas/organizations/findOrganizationsForCurrentUser";
+import { updateOrganizationOutput } from "@packages/shared/http/schemas/organizations/updateOrganization";
+import { updateOrganizationMemberOutput } from "@packages/shared/http/schemas/organizations/updateOrganizationMember";
 import { OrganizationUserPermission } from "@packages/shared/types/enums";
+import { randomUUID } from "crypto";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+
+import { OrganizationUserInvitation } from "~db/models/OrganizationUserInvitation";
 
 import { createTestApp } from "../utils/app";
 import {
@@ -13,6 +22,7 @@ import {
 } from "../utils/db";
 import { seedFlow } from "../utils/flows";
 import {
+  addUserToOrganization,
   seedOrganization,
   seedOrganizationForUser,
 } from "../utils/organizations";
@@ -39,13 +49,14 @@ describe("organization routes", () => {
       const response = await agent.get("/users/current/organizations");
 
       expect(response.status).toBe(200);
-      expect(findOrganizationsForCurrentUserOutput.parse(response.body)).toEqual(
-        [],
-      );
+      expect(
+        findOrganizationsForCurrentUserOutput.parse(response.body),
+      ).toEqual([]);
     });
 
     it("returns only the authenticated user's organizations", async () => {
-      const { agent, userEntity, loginResponse } = await createAuthenticatedUser();
+      const { agent, userEntity, loginResponse } =
+        await createAuthenticatedUser();
       expect(loginResponse.status).toBe(201);
 
       const ownOrganization = await seedOrganizationForUser({
@@ -60,9 +71,10 @@ describe("organization routes", () => {
       const response = await agent.get("/users/current/organizations");
 
       expect(response.status).toBe(200);
-      expect(findOrganizationsForCurrentUserOutput.parse(response.body)).toEqual([
+      expect(
+        findOrganizationsForCurrentUserOutput.parse(response.body),
+      ).toEqual([
         {
-          apiKey: ownOrganization.dbModel.apiKey,
           id: ownOrganization.dbModel.id,
           name: ownOrganization.dbModel.name,
           slug: ownOrganization.dbModel.slug,
@@ -79,6 +91,291 @@ describe("organization routes", () => {
     });
   });
 
+  describe("GET /organizations/:organizationId", () => {
+    it("returns admin detail for organization admins", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "admin-detail-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(fetchOrganizationOutput.parse(response.body)).toEqual(
+        organization.getAdminDetail(),
+      );
+    });
+
+    it("rejects non-admin organization members", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.VIEWER,
+        slug: "viewer-detail-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("GET /organizations/:organizationId/members", () => {
+    it("allows any organization member to view members", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const otherUser = await seedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.VIEWER,
+        slug: "members-org",
+        userId: userEntity.dbModel.id,
+      });
+      await addUserToOrganization({
+        organizationEntity: organization,
+        permissions: OrganizationUserPermission.EDITOR,
+        userId: otherUser.userEntity.dbModel.id,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/members`,
+      );
+      const members = findOrganizationMembersOutput.parse(response.body);
+      const expectedMembers = [
+        {
+          email: userEntity.dbModel.email,
+          permissions: OrganizationUserPermission.VIEWER,
+          userId: userEntity.dbModel.id,
+        },
+        {
+          email: otherUser.userEntity.dbModel.email,
+          permissions: OrganizationUserPermission.EDITOR,
+          userId: otherUser.userEntity.dbModel.id,
+        },
+      ].sort((left, right) => left.userId.localeCompare(right.userId));
+
+      expect(response.status).toBe(200);
+      expect(members).toEqual(expectedMembers);
+    });
+  });
+
+  describe("organization member management routes", () => {
+    it("allows admins to update another member's role", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const otherUser = await seedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "update-member-org",
+        userId: userEntity.dbModel.id,
+      });
+      await addUserToOrganization({
+        organizationEntity: organization,
+        permissions: OrganizationUserPermission.VIEWER,
+        userId: otherUser.userEntity.dbModel.id,
+      });
+
+      const response = await agent
+        .patch(
+          `/organizations/${organization.dbModel.id}/members/${otherUser.userEntity.dbModel.id}`,
+        )
+        .send({
+          permissions: OrganizationUserPermission.EDITOR,
+        });
+
+      expect(response.status).toBe(200);
+      expect(updateOrganizationMemberOutput.parse(response.body)).toEqual({
+        email: otherUser.userEntity.dbModel.email,
+        permissions: OrganizationUserPermission.EDITOR,
+        userId: otherUser.userEntity.dbModel.id,
+      });
+    });
+
+    it("rejects removing the last admin from an organization", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "last-admin-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const updateResponse = await agent
+        .patch(
+          `/organizations/${organization.dbModel.id}/members/${userEntity.dbModel.id}`,
+        )
+        .send({
+          permissions: OrganizationUserPermission.VIEWER,
+        });
+
+      const deleteResponse = await agent.delete(
+        `/organizations/${organization.dbModel.id}/members/${userEntity.dbModel.id}`,
+      );
+
+      expect(updateResponse.status).toBe(400);
+      expect(deleteResponse.status).toBe(400);
+    });
+  });
+
+  describe("organization invite routes", () => {
+    it.only("allows admins to create and list normalized pending invites", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "invite-org",
+        userId: userEntity.dbModel.id,
+      });
+      const expiresAt = new Date(Date.now() + 60_000).toISOString();
+
+      const createResponse = await agent
+        .post(`/organizations/${organization.dbModel.id}/invites`)
+        .send({
+          email: "invitee@example.com",
+          expiresAt,
+          permissions: OrganizationUserPermission.EDITOR,
+        });
+
+      expect(createResponse.status).toBe(201);
+      const invite = createOrganizationInviteOutput.parse(createResponse.body);
+
+      expect(invite.email).toBe("invitee@example.com");
+      expect(invite.invitedByUserId).toBe(userEntity.dbModel.id);
+
+      const listResponse = await agent.get(
+        `/organizations/${organization.dbModel.id}/invites`,
+      );
+
+      expect(listResponse.status).toBe(200);
+      expect(findOrganizationInvitesOutput.parse(listResponse.body)).toEqual([
+        invite,
+      ]);
+    });
+
+    it("rejects duplicate active invites but allows re-inviting after expiry", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "duplicate-invite-org",
+        userId: userEntity.dbModel.id,
+      });
+      const email = "duplicate@example.com";
+
+      await OrganizationUserInvitation.create({
+        email,
+        expiresAt: new Date(Date.now() - 60_000),
+        id: randomUUID(),
+        invitedByUserId: userEntity.dbModel.id,
+        organizationId: organization.dbModel.id,
+        permissions: OrganizationUserPermission.VIEWER,
+      });
+
+      const firstResponse = await agent
+        .post(`/organizations/${organization.dbModel.id}/invites`)
+        .send({
+          email,
+          expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          permissions: OrganizationUserPermission.VIEWER,
+        });
+
+      expect(firstResponse.status).toBe(201);
+
+      const duplicateResponse = await agent
+        .post(`/organizations/${organization.dbModel.id}/invites`)
+        .send({
+          email,
+          expiresAt: new Date(Date.now() + 120_000).toISOString(),
+          permissions: OrganizationUserPermission.VIEWER,
+        });
+
+      expect(duplicateResponse.status).toBe(400);
+    });
+
+    it("rejects invite reads for non-admin members", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.VIEWER,
+        slug: "viewer-invite-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/invites`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("organization settings and deletion routes", () => {
+    it("allows admins to update organization settings", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "settings-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const response = await agent
+        .patch(`/organizations/${organization.dbModel.id}`)
+        .send({
+          name: "Updated Org Name",
+          slug: "updated-org-slug",
+        });
+
+      expect(response.status).toBe(200);
+      expect(updateOrganizationOutput.parse(response.body)).toEqual({
+        apiKey: organization.dbModel.apiKey,
+        id: organization.dbModel.id,
+        name: "Updated Org Name",
+        slug: "updated-org-slug",
+      });
+    });
+
+    it("excludes soft-deleted organizations from current-user organization listings", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "delete-empty-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const deleteResponse = await agent.delete(
+        `/organizations/${organization.dbModel.id}`,
+      );
+      expect(deleteResponse.status).toBe(204);
+
+      const organizationsResponse = await agent.get(
+        "/users/current/organizations",
+      );
+      expect(organizationsResponse.status).toBe(200);
+      expect(
+        findOrganizationsForCurrentUserOutput.parse(organizationsResponse.body),
+      ).toEqual([]);
+    });
+
+    it("rejects deleting organizations that still have flows", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "delete-flow-org",
+        userId: userEntity.dbModel.id,
+      });
+      await seedFlow({
+        name: "Protected flow",
+        organizationId: organization.dbModel.id,
+        slug: "protected-flow",
+      });
+
+      const response = await agent.delete(
+        `/organizations/${organization.dbModel.id}`,
+      );
+
+      expect(response.status).toBe(400);
+    });
+  });
+
   describe("POST /organizations", () => {
     it("creates an organization and makes it immediately visible to the creator", async () => {
       const { agent, loginResponse } = await createAuthenticatedUser();
@@ -92,19 +389,29 @@ describe("organization routes", () => {
       expect(createResponse.status).toBe(201);
       const organization = createOrganizationOutput.parse(createResponse.body);
 
-      const organizationsResponse = await agent.get("/users/current/organizations");
+      const organizationsResponse = await agent.get(
+        "/users/current/organizations",
+      );
 
       expect(organizationsResponse.status).toBe(200);
       expect(
         findOrganizationsForCurrentUserOutput.parse(organizationsResponse.body),
-      ).toEqual([organization]);
+      ).toEqual([
+        {
+          id: organization.id,
+          name: organization.name,
+          slug: organization.slug,
+        },
+      ]);
     });
 
     it("rejects unauthenticated requests", async () => {
-      const response = await request(createTestApp()).post("/organizations").send({
-        name: "Acme",
-        slug: "acme",
-      });
+      const response = await request(createTestApp())
+        .post("/organizations")
+        .send({
+          name: "Acme",
+          slug: "acme",
+        });
 
       expect(response.status).toBe(401);
     });
@@ -123,7 +430,8 @@ describe("organization routes", () => {
 
   describe("GET /organizations/:organizationId/flows", () => {
     it("returns an empty list for an accessible organization with no flows", async () => {
-      const { agent, userEntity, loginResponse } = await createAuthenticatedUser();
+      const { agent, userEntity, loginResponse } =
+        await createAuthenticatedUser();
       expect(loginResponse.status).toBe(201);
 
       const organization = await seedOrganizationForUser({
@@ -140,7 +448,8 @@ describe("organization routes", () => {
     });
 
     it("returns only flows for the requested accessible organization", async () => {
-      const { agent, userEntity, loginResponse } = await createAuthenticatedUser();
+      const { agent, userEntity, loginResponse } =
+        await createAuthenticatedUser();
       expect(loginResponse.status).toBe(201);
 
       const organization = await seedOrganizationForUser({

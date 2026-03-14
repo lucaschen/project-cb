@@ -11,12 +11,9 @@ const createOrganization = enforceSchema({
     ).fetchUserEntity();
 
     const organizationEntities = await userEntity.findOrganizations();
-    const payload = organizationEntities.map(({ dbModel }) => ({
-      id: dbModel.id,
-      slug: dbModel.slug,
-      apiKey: dbModel.apiKey,
-      name: dbModel.name,
-    }));
+    const payload = organizationEntities.map((organizationEntity) =>
+      organizationEntity.getSummary(),
+    );
 
     res.status(200).json(payload);
   },

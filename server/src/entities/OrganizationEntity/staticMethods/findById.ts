@@ -6,7 +6,12 @@ export default async function findById(
   this: typeof OrganizationEntity,
   id: string
 ): Promise<OrganizationEntity | null> {
-  const organization = await Organization.findByPk(id);
+  const organization = await Organization.findOne({
+    where: {
+      deletedAt: null,
+      id,
+    },
+  });
 
   if (!organization) return null;
 

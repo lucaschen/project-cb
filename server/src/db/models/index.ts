@@ -157,12 +157,12 @@ export function initModels(sequelize: Sequelize) {
     as: "organization",
   });
   User.hasMany(OrganizationUserInvitation, {
-    foreignKey: "userId",
-    as: "invitations",
+    foreignKey: "invitedByUserId",
+    as: "sentOrganizationInvitations",
   });
   OrganizationUserInvitation.belongsTo(User, {
-    foreignKey: "userId",
-    as: "user",
+    foreignKey: "invitedByUserId",
+    as: "invitedByUser",
   });
 
   // sessions

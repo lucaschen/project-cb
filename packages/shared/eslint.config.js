@@ -1,5 +1,3 @@
-// @ts-check
-
 import eslint from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
 import eslintPluginImportX from "eslint-plugin-import-x";
@@ -7,21 +5,26 @@ import eslintPluginOnlyWarn from "eslint-plugin-only-warn";
 import eslintPluginPerfectionist from "eslint-plugin-perfectionist";
 import eslintPluginReact from "eslint-plugin-react";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
-import globals from "globals";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
-export default [
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  eslintConfigPrettier,
-  eslintPluginPerfectionist.configs["recommended-alphabetical"],
-  eslintPluginReact.configs.flat?.recommended,
+export default defineConfig([
+  globalIgnores(["dist"]),
   {
-    files: ["**/*.{cjs,js,jsx,mjs,ts,tsx}"],
-    ignores: ["./node_modules/*"],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      eslintConfigPrettier,
+      eslintPluginPerfectionist.configs["recommended-alphabetical"],
+      eslintPluginReact.configs.flat?.recommended,
+    ],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      globals: globals.browser,
+      ecmaVersion: 2020,
       parserOptions: {
+        parserOptions: {
+          project: ["./tsconfig.json"],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
       sourceType: "module",
@@ -128,4 +131,4 @@ export default [
       },
     },
   },
-];
+]);

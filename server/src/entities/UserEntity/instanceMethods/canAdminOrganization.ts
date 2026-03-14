@@ -1,12 +1,11 @@
 import { OrganizationUserPermission } from "@packages/shared/types/enums";
-import { Op } from "sequelize";
 
 import { OrganizationUser } from "~db/models/OrganizationUser";
 import OrganizationEntity from "~entities/OrganizationEntity";
 
 import type UserEntity from "../UserEntity";
 
-export default async function canCreateFlowsInOrganization(
+export default async function canAdminOrganization(
   this: UserEntity,
   organizationId: string,
 ): Promise<boolean> {
@@ -19,12 +18,7 @@ export default async function canCreateFlowsInOrganization(
   const organizationUserRecord = await OrganizationUser.findOne({
     where: {
       organizationId,
-      permissions: {
-        [Op.in]: [
-          OrganizationUserPermission.ADMIN,
-          OrganizationUserPermission.EDITOR,
-        ],
-      },
+      permissions: OrganizationUserPermission.ADMIN,
       userId: this.dbModel.id,
     },
   });

@@ -2,10 +2,10 @@ import {
   getStoredActiveOrganizationId,
   setStoredActiveOrganizationId,
 } from "@app/utils/localStorage";
-import type { OrganizationPayload } from "@packages/shared/http/schemas/organizations/common";
+import type { OrganizationSummaryType } from "@packages/shared/http/schemas/organizations/common";
 
 export const resolveActiveOrganizationId = (
-  organizations: OrganizationPayload[],
+  organizations: OrganizationSummaryType[],
   storedActiveOrganizationId = getStoredActiveOrganizationId(),
 ) => {
   if (organizations.length === 0) {
@@ -26,7 +26,7 @@ export const resolveActiveOrganizationId = (
 };
 
 export const syncActiveOrganizationId = (
-  organizations: OrganizationPayload[],
+  organizations: OrganizationSummaryType[],
 ) => {
   const nextOrganizationId = resolveActiveOrganizationId(organizations);
 

@@ -1,4 +1,5 @@
 import {
+  CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
@@ -14,6 +15,7 @@ export class Organization extends Model<
   declare name: string;
   declare slug: string;
   declare apiKey: string;
+  declare deletedAt: CreationOptional<Date | null>;
 
   static initModel(sequelize: Sequelize) {
     Organization.init(
@@ -33,6 +35,11 @@ export class Organization extends Model<
         apiKey: {
           type: DataTypes.STRING,
           allowNull: false,
+        },
+        deletedAt: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          defaultValue: null,
         },
       },
       {

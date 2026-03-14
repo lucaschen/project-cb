@@ -12,9 +12,10 @@ export default async function create(
     id,
     apiKey,
     ...params
-  }: Omit<InferCreationAttributes<Organization>, "id" | "apiKey"> & {
+  }: Omit<InferCreationAttributes<Organization>, "apiKey" | "deletedAt" | "id"> & {
     id?: string;
     apiKey?: string;
+    deletedAt?: Date | null;
   },
 ): Promise<OrganizationEntity> {
   // Check if id already exists

@@ -4,8 +4,11 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
+  NonAttribute,
   Sequelize,
 } from "sequelize";
+
+import type { User } from "./User";
 
 export class OrganizationUser extends Model<
   InferAttributes<OrganizationUser>,
@@ -14,6 +17,7 @@ export class OrganizationUser extends Model<
   declare organizationId: string;
   declare userId: string;
   declare permissions: OrganizationUserPermission;
+  declare user?: NonAttribute<User>;
 
   static initModel(sequelize: Sequelize) {
     OrganizationUser.init(

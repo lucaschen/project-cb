@@ -6,12 +6,12 @@ import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 import { path as loginPath } from "@app/pages/Login";
 import { path as organizationOnboardingPath } from "@app/pages/organizations/OrganizationOnboarding";
 import { path as signupPath } from "@app/pages/Signup";
-import type { OrganizationPayload } from "@packages/shared/http/schemas/organizations/common";
+import type { OrganizationSummaryType } from "@packages/shared/http/schemas/organizations/common";
 import type { GetCurrentSessionOutput } from "@packages/shared/http/schemas/sessions/getCurrentSession";
 import { Link, NavLink, useLocation, useMatch } from "react-router-dom";
 
 type TopNavigationProps = {
-  activeOrganization: OrganizationPayload | null;
+  activeOrganization: OrganizationSummaryType | null;
   sessionData: GetCurrentSessionOutput | null;
 };
 

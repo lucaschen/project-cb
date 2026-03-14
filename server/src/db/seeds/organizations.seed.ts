@@ -7,7 +7,6 @@ export async function seedOrganizations(models: Models) {
     id: uuidV4(),
     name: "Seed Org",
     slug: "seed-org",
-    apiKey: "cb_test_key_123",
   });
 
   console.log("🌱 Seeded organizations");

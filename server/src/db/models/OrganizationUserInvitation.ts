@@ -13,7 +13,8 @@ export class OrganizationUserInvitation extends Model<
 > {
   declare id: string;
   declare organizationId: string;
-  declare userId: string;
+  declare email: string;
+  declare invitedByUserId: string;
   declare expiresAt: Date;
   declare permissions: OrganizationUserPermission;
 
@@ -22,7 +23,12 @@ export class OrganizationUserInvitation extends Model<
       {
         id: { type: DataTypes.UUID, primaryKey: true },
         organizationId: { type: DataTypes.UUID, allowNull: false },
-        userId: { type: DataTypes.UUID, allowNull: false },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: { isEmail: true },
+        },
+        invitedByUserId: { type: DataTypes.UUID, allowNull: false },
         expiresAt: { type: DataTypes.DATE, allowNull: false },
         permissions: {
           type: DataTypes.ENUM(...Object.values(OrganizationUserPermission)),
@@ -35,7 +41,8 @@ export class OrganizationUserInvitation extends Model<
         tableName: "organizationUserInvitations",
         indexes: [
           { fields: ["organizationId"] },
-          { fields: ["userId"] },
+          { fields: ["invitedByUserId"] },
+          { fields: ["email"] },
           { fields: ["expiresAt"] },
         ],
       },

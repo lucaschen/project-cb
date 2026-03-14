@@ -3,11 +3,7 @@ import type {
   FlowNodeType,
   FlowWithNodesType,
 } from "@packages/shared/http/schemas/flows/common";
-import type {
-  Edge,
-  Node,
-  XYPosition,
-} from "@xyflow/react";
+import type { Edge, Node, XYPosition } from "@xyflow/react";
 
 const FALLBACK_NODE_X = 120;
 const FALLBACK_NODE_Y = 120;

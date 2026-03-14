@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { organizationPayload } from "./common";
+import { organizationSummarySchema } from "./common";
 
 export const findOrganizationsForCurrentUserOutput =
-  z.array(organizationPayload);
+  z.array(organizationSummarySchema);
 
 export type FindOrganizationsForCurrentUserOutput = z.infer<
   typeof findOrganizationsForCurrentUserOutput

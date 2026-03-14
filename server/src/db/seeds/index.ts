@@ -52,6 +52,11 @@ export async function clearDatabase(models: Models) {
 
   await models.Flow.destroy({ where: {}, truncate: true, cascade: true });
 
+  await models.OrganizationApiKey.destroy({
+    where: {},
+    truncate: true,
+    cascade: true,
+  });
   await models.OrganizationUser.destroy({
     where: {},
     truncate: true,

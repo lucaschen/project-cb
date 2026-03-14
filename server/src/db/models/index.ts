@@ -8,6 +8,7 @@ import { Flow } from "./Flow";
 import { Node } from "./Node";
 import { NodeCoordinate } from "./NodeCoordinate";
 import { Organization } from "./Organization";
+import { OrganizationApiKey } from "./OrganizationApiKey";
 import { OrganizationUser } from "./OrganizationUser";
 import { OrganizationUserInvitation } from "./OrganizationUserInvitation";
 import { Step } from "./Step";
@@ -29,6 +30,7 @@ export function initModels(sequelize: Sequelize) {
   Node.initModel(sequelize);
   NodeCoordinate.initModel(sequelize);
   Organization.initModel(sequelize);
+  OrganizationApiKey.initModel(sequelize);
   OrganizationUser.initModel(sequelize);
   OrganizationUserInvitation.initModel(sequelize);
   Step.initModel(sequelize);
@@ -147,6 +149,33 @@ export function initModels(sequelize: Sequelize) {
   });
   OrganizationUser.belongsTo(User, { foreignKey: "userId", as: "user" });
 
+  Organization.hasMany(OrganizationApiKey, {
+    foreignKey: "organizationId",
+    as: "apiKeys",
+  });
+  OrganizationApiKey.belongsTo(Organization, {
+    foreignKey: "organizationId",
+    as: "organization",
+  });
+
+  User.hasMany(OrganizationApiKey, {
+    foreignKey: "createdByUserId",
+    as: "createdOrganizationApiKeys",
+  });
+  OrganizationApiKey.belongsTo(User, {
+    foreignKey: "createdByUserId",
+    as: "createdByUser",
+  });
+
+  User.hasMany(OrganizationApiKey, {
+    foreignKey: "revokedByUserId",
+    as: "revokedOrganizationApiKeys",
+  });
+  OrganizationApiKey.belongsTo(User, {
+    foreignKey: "revokedByUserId",
+    as: "revokedByUser",
+  });
+
   // invitations
   Organization.hasMany(OrganizationUserInvitation, {
     foreignKey: "organizationId",
@@ -157,12 +186,12 @@ export function initModels(sequelize: Sequelize) {
     as: "organization",
   });
   User.hasMany(OrganizationUserInvitation, {
-    foreignKey: "userId",
-    as: "invitations",
+    foreignKey: "invitedByUserId",
+    as: "sentOrganizationInvitations",
   });
   OrganizationUserInvitation.belongsTo(User, {
-    foreignKey: "userId",
-    as: "user",
+    foreignKey: "invitedByUserId",
+    as: "invitedByUser",
   });
 
   // sessions
@@ -188,6 +217,7 @@ export function initModels(sequelize: Sequelize) {
     ElementProperties,
     Flow,
     Organization,
+    OrganizationApiKey,
     OrganizationUser,
     OrganizationUserInvitation,
     Step,

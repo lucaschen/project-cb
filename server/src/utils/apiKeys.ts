@@ -1,5 +1,9 @@
 import { randomBytes } from "crypto";
 
-export const generateApiKey = () => {
-  return "org_" + randomBytes(32).toString("base64url"); // ~256 bits
+export const generateOrganizationApiKey = () => {
+  return "org_" + randomBytes(32).toString("base64url");
+};
+
+export const getOrganizationApiKeyPrefix = (apiKey: string) => {
+  return apiKey.slice(0, 12);
 };

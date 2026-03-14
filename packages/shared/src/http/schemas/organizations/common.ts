@@ -9,9 +9,7 @@ export const organizationSummarySchema = z.object({
 
 export type OrganizationSummaryType = z.infer<typeof organizationSummarySchema>;
 
-export const organizationAdminDetailSchema = organizationSummarySchema.extend({
-  apiKey: z.string().min(1),
-});
+export const organizationAdminDetailSchema = organizationSummarySchema;
 
 export type OrganizationAdminDetailType = z.infer<
   typeof organizationAdminDetailSchema
@@ -34,6 +32,28 @@ export const organizationInviteSchema = z.object({
 });
 
 export type OrganizationInviteType = z.infer<typeof organizationInviteSchema>;
+
+export const organizationApiKeySchema = z.object({
+  createdAt: z.string().datetime(),
+  createdByUserId: z.string().uuid(),
+  expiresAt: z.string().datetime().nullable(),
+  id: z.string().uuid(),
+  lastUsedAt: z.string().datetime().nullable(),
+  name: z.string().min(1),
+  prefix: z.string().min(1),
+  revokedAt: z.string().datetime().nullable(),
+  revokedByUserId: z.string().uuid().nullable(),
+});
+
+export type OrganizationApiKeyType = z.infer<typeof organizationApiKeySchema>;
+
+export const createdOrganizationApiKeySchema = organizationApiKeySchema.extend({
+  key: z.string().min(1),
+});
+
+export type CreatedOrganizationApiKeyType = z.infer<
+  typeof createdOrganizationApiKeySchema
+>;
 
 export const organizationIdParamsSchema = z.object({
   organizationId: z.string().uuid(),
@@ -61,4 +81,12 @@ export const organizationInviteParamsSchema = organizationIdParamsSchema.extend(
 
 export type OrganizationInviteParamsType = z.infer<
   typeof organizationInviteParamsSchema
+>;
+
+export const organizationApiKeyParamsSchema = organizationIdParamsSchema.extend({
+  apiKeyId: z.string().uuid(),
+});
+
+export type OrganizationApiKeyParamsType = z.infer<
+  typeof organizationApiKeyParamsSchema
 >;

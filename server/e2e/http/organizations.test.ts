@@ -1,7 +1,9 @@
 import { findFlowsOutput } from "@packages/shared/http/schemas/flows/findFlows";
 import { createOrganizationOutput } from "@packages/shared/http/schemas/organizations/createOrganization";
+import { createOrganizationApiKeyOutput } from "@packages/shared/http/schemas/organizations/createOrganizationApiKey";
 import { createOrganizationInviteOutput } from "@packages/shared/http/schemas/organizations/createOrganizationInvite";
 import { fetchOrganizationOutput } from "@packages/shared/http/schemas/organizations/fetchOrganization";
+import { findOrganizationApiKeysOutput } from "@packages/shared/http/schemas/organizations/findOrganizationApiKeys";
 import { findOrganizationInvitesOutput } from "@packages/shared/http/schemas/organizations/findOrganizationInvites";
 import { findOrganizationMembersOutput } from "@packages/shared/http/schemas/organizations/findOrganizationMembers";
 import { findOrganizationsForCurrentUserOutput } from "@packages/shared/http/schemas/organizations/findOrganizationsForCurrentUser";
@@ -9,10 +11,18 @@ import { updateOrganizationOutput } from "@packages/shared/http/schemas/organiza
 import { updateOrganizationMemberOutput } from "@packages/shared/http/schemas/organizations/updateOrganizationMember";
 import { OrganizationUserPermission } from "@packages/shared/types/enums";
 import { randomUUID } from "crypto";
+import { QueryTypes } from "sequelize";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import {
+  backfillLegacyOrganizationApiKeys,
+  captureLegacyOrganizationApiKeys,
+} from "~db/backfillLegacyOrganizationApiKeys";
+import { OrganizationApiKey } from "~db/models/OrganizationApiKey";
 import { OrganizationUserInvitation } from "~db/models/OrganizationUserInvitation";
+import { sequelize } from "~db/sequelize";
+import { models } from "~src/db/setup";
 
 import { createTestApp } from "../utils/app";
 import {
@@ -105,9 +115,11 @@ describe("organization routes", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(fetchOrganizationOutput.parse(response.body)).toEqual(
-        organization.getAdminDetail(),
-      );
+      expect(fetchOrganizationOutput.parse(response.body)).toEqual({
+        id: organization.dbModel.id,
+        name: organization.dbModel.name,
+        slug: organization.dbModel.slug,
+      });
     });
 
     it("rejects non-admin organization members", async () => {
@@ -219,8 +231,148 @@ describe("organization routes", () => {
     });
   });
 
+  describe("organization API key routes", () => {
+    it("allows admins to create, list, and revoke organization API keys", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "api-keys-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const createResponse = await agent
+        .post(`/organizations/${organization.dbModel.id}/api-keys`)
+        .send({
+          name: "Primary key",
+        });
+
+      expect(createResponse.status).toBe(201);
+      const createdApiKey = createOrganizationApiKeyOutput.parse(
+        createResponse.body,
+      );
+      expect(createdApiKey.key.startsWith("org_")).toBe(true);
+      expect(createdApiKey.createdByUserId).toBe(userEntity.dbModel.id);
+
+      const listResponse = await agent.get(
+        `/organizations/${organization.dbModel.id}/api-keys`,
+      );
+
+      expect(listResponse.status).toBe(200);
+      expect(findOrganizationApiKeysOutput.parse(listResponse.body)).toEqual([
+        {
+          createdAt: createdApiKey.createdAt,
+          createdByUserId: createdApiKey.createdByUserId,
+          expiresAt: createdApiKey.expiresAt,
+          id: createdApiKey.id,
+          lastUsedAt: createdApiKey.lastUsedAt,
+          name: createdApiKey.name,
+          prefix: createdApiKey.prefix,
+          revokedAt: createdApiKey.revokedAt,
+          revokedByUserId: createdApiKey.revokedByUserId,
+        },
+      ]);
+
+      const revokeResponse = await agent.delete(
+        `/organizations/${organization.dbModel.id}/api-keys/${createdApiKey.id}`,
+      );
+
+      expect(revokeResponse.status).toBe(204);
+
+      const afterRevokeResponse = await agent.get(
+        `/organizations/${organization.dbModel.id}/api-keys`,
+      );
+      expect(afterRevokeResponse.status).toBe(200);
+      expect(
+        findOrganizationApiKeysOutput.parse(afterRevokeResponse.body),
+      ).toEqual([]);
+    });
+
+    it("excludes expired organization API keys from active listings", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "expired-api-key-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      await OrganizationApiKey.create({
+        createdByUserId: userEntity.dbModel.id,
+        expiresAt: new Date(Date.now() - 60_000),
+        id: randomUUID(),
+        key: "org_expired_test_key",
+        lastUsedAt: null,
+        name: "Expired key",
+        organizationId: organization.dbModel.id,
+        prefix: "org_expired_",
+        revokedAt: null,
+        revokedByUserId: null,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/api-keys`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(findOrganizationApiKeysOutput.parse(response.body)).toEqual([]);
+    });
+
+    it("rejects API key reads for non-admin members", async () => {
+      const { agent, userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.VIEWER,
+        slug: "viewer-api-key-org",
+        userId: userEntity.dbModel.id,
+      });
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/api-keys`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+
+    it("backfills a legacy organization apiKey column into the new table", async () => {
+      const { userEntity } = await createAuthenticatedUser();
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.ADMIN,
+        slug: "legacy-api-key-org",
+        userId: userEntity.dbModel.id,
+      });
+      const legacyApiKey = "org_legacy_key_for_backfill";
+
+      await sequelize.query(
+        'ALTER TABLE organizations ADD COLUMN "apiKey" VARCHAR',
+        { type: QueryTypes.RAW },
+      );
+      await sequelize.query(
+        'UPDATE organizations SET "apiKey" = :apiKey WHERE id = :organizationId',
+        {
+          replacements: {
+            apiKey: legacyApiKey,
+            organizationId: organization.dbModel.id,
+          },
+          type: QueryTypes.UPDATE,
+        },
+      );
+
+      const capturedLegacyApiKeys =
+        await captureLegacyOrganizationApiKeys(sequelize);
+      await backfillLegacyOrganizationApiKeys(capturedLegacyApiKeys, models);
+
+      const apiKeys = await OrganizationApiKey.findAll({
+        where: {
+          organizationId: organization.dbModel.id,
+        },
+      });
+
+      expect(apiKeys).toHaveLength(1);
+      expect(apiKeys[0]?.key).toBe(legacyApiKey);
+      expect(apiKeys[0]?.createdByUserId).toBe(userEntity.dbModel.id);
+    });
+  });
+
   describe("organization invite routes", () => {
-    it.only("allows admins to create and list normalized pending invites", async () => {
+    it("allows admins to create and list normalized pending invites", async () => {
       const { agent, userEntity } = await createAuthenticatedUser();
       const organization = await seedOrganizationForUser({
         permissions: OrganizationUserPermission.ADMIN,
@@ -326,7 +478,6 @@ describe("organization routes", () => {
 
       expect(response.status).toBe(200);
       expect(updateOrganizationOutput.parse(response.body)).toEqual({
-        apiKey: organization.dbModel.apiKey,
         id: organization.dbModel.id,
         name: "Updated Org Name",
         slug: "updated-org-slug",

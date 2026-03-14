@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { organizationAdminDetailSchema } from "./common";
+import { organizationSummarySchema } from "./common";
 
 export const createOrganizationInput = z.object({
   name: z.string().min(1),
@@ -9,6 +9,6 @@ export const createOrganizationInput = z.object({
 
 export type CreateOrganizationInput = z.infer<typeof createOrganizationInput>;
 
-export const createOrganizationOutput = organizationAdminDetailSchema;
+export const createOrganizationOutput = organizationSummarySchema;
 
 export type CreateOrganizationOutput = z.infer<typeof createOrganizationOutput>;

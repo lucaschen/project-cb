@@ -1,4 +1,5 @@
 import { Flow } from "~db/models/Flow";
+import { OrganizationApiKey } from "~db/models/OrganizationApiKey";
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 
 import type OrganizationEntity from "../OrganizationEntity";
@@ -15,6 +16,19 @@ export default async function softDelete(this: OrganizationEntity): Promise<void
       "Organization cannot be deleted while flows still exist.",
     );
   }
+
+  await OrganizationApiKey.update(
+    {
+      revokedAt: new Date(),
+      revokedByUserId: null,
+    },
+    {
+      where: {
+        organizationId: this.dbModel.id,
+        revokedAt: null,
+      },
+    },
+  );
 
   this.dbModel.deletedAt = new Date();
   await this.dbModel.save();

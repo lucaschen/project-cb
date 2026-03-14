@@ -14,7 +14,6 @@ export class Organization extends Model<
   declare id: string;
   declare name: string;
   declare slug: string;
-  declare apiKey: string;
   declare deletedAt: CreationOptional<Date | null>;
 
   static initModel(sequelize: Sequelize) {
@@ -32,10 +31,6 @@ export class Organization extends Model<
           type: DataTypes.STRING,
           allowNull: false,
         },
-        apiKey: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
         deletedAt: {
           type: DataTypes.DATE,
           allowNull: true,
@@ -45,10 +40,7 @@ export class Organization extends Model<
       {
         sequelize,
         tableName: "organizations",
-        indexes: [
-          { unique: true, fields: ["apiKey"] },
-          { unique: true, fields: ["slug"] },
-        ],
+        indexes: [{ unique: true, fields: ["slug"] }],
       }
     );
     return Organization;

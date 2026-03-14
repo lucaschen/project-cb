@@ -6,7 +6,6 @@ export default function getAdminDetail(
   this: OrganizationEntity,
 ): OrganizationAdminDetailType {
   return {
-    apiKey: this.dbModel.apiKey,
     id: this.dbModel.id,
     name: this.dbModel.name,
     slug: this.dbModel.slug,

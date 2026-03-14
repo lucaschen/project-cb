@@ -3,11 +3,7 @@ import type {
   FlowNodeType,
   FlowWithNodesType,
 } from "@packages/shared/http/schemas/flows/common";
-import type {
-  Edge,
-  Node,
-  XYPosition,
-} from "@xyflow/react";
+import type { Edge, Node, XYPosition } from "@xyflow/react";
 
 const FALLBACK_NODE_X = 120;
 const FALLBACK_NODE_Y = 120;
@@ -26,14 +22,6 @@ export type BuilderFlowEdge = Edge<{
   kind: "default" | "decision" | "fallback";
 }>;
 
-const isStepNode = (node: FlowNodeType) => {
-  return "elements" in node;
-};
-
-const isDecisionNode = (node: FlowNodeType): node is FlowDecisionNodeType => {
-  return "conditions" in node;
-};
-
 const getFallbackPosition = (index: number): XYPosition => {
   return {
     x: FALLBACK_NODE_X + index * FALLBACK_NODE_X_GAP,
@@ -46,7 +34,7 @@ const getNodePosition = (node: FlowNodeType, index: number): XYPosition => {
 };
 
 const getFlowNodeData = (node: FlowNodeType): BuilderFlowNodeData => {
-  if (isStepNode(node)) {
+  if (node.type === "STEP") {
     return {
       elementCount: node.elements.length,
       kind: "step",
@@ -55,7 +43,7 @@ const getFlowNodeData = (node: FlowNodeType): BuilderFlowNodeData => {
   }
 
   return {
-    conditionCount: isDecisionNode(node) ? node.conditions.length : 0,
+    conditionCount: node.conditions.length,
     kind: "decision",
     name: node.name,
   };
@@ -97,7 +85,7 @@ export const flowToReactFlow = (flow: FlowWithNodesType) => {
   }));
 
   const edges: BuilderFlowEdge[] = flow.nodes.flatMap((node) => {
-    if (isStepNode(node)) {
+    if (node.type === "STEP") {
       return node.nextNodeId
         ? [
             {
@@ -113,7 +101,7 @@ export const flowToReactFlow = (flow: FlowWithNodesType) => {
         : [];
     }
 
-    return isDecisionNode(node) ? getDecisionEdges(node) : [];
+    return getDecisionEdges(node);
   });
 
   return {

@@ -23,7 +23,7 @@ export default async function syncBuilderSteps(
   },
 ): Promise<void> {
   await Promise.all(
-    steps.map(async (step, index) => {
+    steps.map(async (step) => {
       if (existingNodeIds.has(step.nodeId)) {
         await Node.update(
           {
@@ -52,7 +52,7 @@ export default async function syncBuilderSteps(
         {
           nextNodeId: step.nextNodeId,
           nodeId: step.nodeId,
-          order: index,
+          order: 0,
         },
         { transaction },
       );

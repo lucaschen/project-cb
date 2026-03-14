@@ -38,7 +38,6 @@ const createStepNode = enforceSchema({
       );
     }
 
-    const nextOrder = (await flowEntity.findStepSummaries()).length;
     const nodeEntity = await NodeEntity.create({
       id: uuidv4(),
       type: NodeType.STEP,
@@ -48,7 +47,7 @@ const createStepNode = enforceSchema({
     const stepEntity = await StepEntity.create({
       nodeId: nodeEntity.dbModel.id,
       nextNodeId,
-      order: nextOrder,
+      order: 0,
     });
 
     const nextCoordinates = coordinates ?? { x: 0, y: 0 };
@@ -65,7 +64,6 @@ const createStepNode = enforceSchema({
       name: nodeEntity.dbModel.name,
       nextNodeId: stepEntity.dbModel.nextNodeId,
       nodeId: stepEntity.dbModel.nodeId,
-      order: nextOrder,
       type: nodeEntity.dbModel.type,
     });
   },

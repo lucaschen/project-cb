@@ -209,7 +209,6 @@ describe("flow builder update routes", () => {
               name: "A intro step",
               nextNodeId: decisionNodeId,
               nodeId: introStepNodeId,
-              order: 0,
               type: NodeType.STEP,
             },
             {
@@ -238,7 +237,6 @@ describe("flow builder update routes", () => {
               name: "C finish step",
               nextNodeId: null,
               nodeId: finishStepNodeId,
-              order: 1,
               type: NodeType.STEP,
             },
           ],
@@ -250,7 +248,7 @@ describe("flow builder update routes", () => {
       expect(fetchFlowOutput.parse(fetchResponse.body)).toEqual(response.body);
     });
 
-    it("rewrites the existing builder graph in one request, including step order and decision routing", async () => {
+    it("rewrites the existing builder graph in one request, including decision routing", async () => {
       const { agent, userEntity } = await createAuthenticatedUser();
       const organization = await seedOrganizationForUser({
         permissions: OrganizationUserPermission.EDITOR,
@@ -315,7 +313,6 @@ describe("flow builder update routes", () => {
               name: "A intro step",
               nextNodeId: decisionNodeId,
               nodeId: introStepNodeId,
-              order: 0,
               type: NodeType.STEP,
             },
             {
@@ -344,27 +341,11 @@ describe("flow builder update routes", () => {
               name: "C step updated",
               nextNodeId: null,
               nodeId: stepNodeId,
-              order: 1,
               type: NodeType.STEP,
             },
           ],
         },
       });
-
-      const persistedSteps = await Step.findAll({
-        order: [["order", "ASC"]],
-        where: { nodeId: [introStepNodeId, stepNodeId] },
-      });
-
-      expect(
-        persistedSteps.map((step) => ({
-          nodeId: step.nodeId,
-          order: step.order,
-        })),
-      ).toEqual([
-        { nodeId: introStepNodeId, order: 0 },
-        { nodeId: stepNodeId, order: 1 },
-      ]);
     });
 
     it("rejects removing a step when a surviving decision condition still references one of that step's elements", async () => {

@@ -84,7 +84,6 @@ describe("flow read and update routes", () => {
               name: "A step",
               nextNodeId: decisionNodeId,
               nodeId: stepNodeId,
-              order: 0,
               type: "STEP",
             },
             {

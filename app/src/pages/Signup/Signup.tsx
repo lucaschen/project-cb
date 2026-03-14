@@ -5,10 +5,11 @@ import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
 import { path as homePath } from "@app/pages/Home";
+import { useToast } from "@app/components/ui/ToastProvider";
+import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";
 import { syncActiveOrganizationId } from "@app/utils/organizations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -29,6 +30,7 @@ const validate = (email: string, password: string, confirmPassword: string) => {
 const Signup = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -37,7 +39,6 @@ const Signup = () => {
     email: "",
     password: "",
   });
-  const [formError, setFormError] = useState("");
 
   const signupMutation = useMutation({
     mutationFn: async () => {
@@ -68,14 +69,14 @@ const Signup = () => {
       navigate(homePath, { replace: true });
     },
     onError: (error) => {
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        setFormError(
-          "Unable to create account with those details. Try another email.",
-        );
-        return;
-      }
-
-      setFormError("Unable to create your account right now. Try again.");
+      toast.error(
+        getApiErrorMessage(error, {
+          byStatus: {
+            400: "Unable to create account with those details. Try another email.",
+          },
+          default: "Unable to create your account right now. Try again.",
+        }),
+      );
     },
   });
 
@@ -88,7 +89,6 @@ const Signup = () => {
       email: nextErrors.email,
       password: nextErrors.password,
     });
-    setFormError("");
 
     if (
       nextErrors.email ||
@@ -99,7 +99,11 @@ const Signup = () => {
       return;
     }
 
-    await signupMutation.mutateAsync();
+    try {
+      await signupMutation.mutateAsync();
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -162,9 +166,6 @@ const Signup = () => {
           type="password"
           value={confirmPassword}
         />
-        {formError ? (
-          <p className="text-sm text-rose-300">{formError}</p>
-        ) : null}
         <Button
           className="w-full"
           isBusy={signupMutation.isPending}

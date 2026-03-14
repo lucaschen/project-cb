@@ -1,3 +1,8 @@
+import {
+  updateBuilderInput,
+  updateBuilderOutput,
+  updateBuilderParams,
+} from "@packages/shared/http/schemas/flows/builder/updateBuilder";
 import { flowSchema } from "@packages/shared/http/schemas/flows/common";
 import {
   createFlowInput,
@@ -52,6 +57,20 @@ export const getFlow = enforceStrictSchema({
     }),
   inputSchema: fetchFlowParams,
   outputSchema: fetchFlowOutput,
+});
+
+export const updateFlowBuilder = enforceStrictSchema({
+  handler: ({ flowId, input }) =>
+    apiRequest({
+      body: input,
+      method: "PUT",
+      path: `/flows/${flowId}/builder`,
+    }),
+  inputSchema: z.object({
+    flowId: updateBuilderParams.shape.flowId,
+    input: updateBuilderInput,
+  }),
+  outputSchema: updateBuilderOutput,
 });
 
 export const updateFlowMetadata = enforceStrictSchema({

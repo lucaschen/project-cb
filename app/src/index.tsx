@@ -5,6 +5,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+import { ToastProvider } from "./components/ui/ToastProvider";
 import FlowDetails, { path as flowDetailsPath } from "./pages/flows/FlowDetails";
 import FlowsList, { path as flowsListPath } from "./pages/flows/FlowsList";
 import Home, { path as homePath } from "./pages/Home";
@@ -69,8 +70,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ToastProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ToastProvider>
   </React.StrictMode>,
 );

@@ -1,14 +1,11 @@
-import {
-  AlertCircle,
-  CheckCircle2,
-  Info,
-  X,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -70,9 +67,12 @@ const toneConfig: Record<
 
 export const ToastProvider = ({ children }: PropsWithChildren) => {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
+  const timeoutRefs = useRef<Set<number>>(new Set());
 
   const dismiss = useCallback((id: number) => {
-    setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
+    setToasts((currentToasts) =>
+      currentToasts.filter((toast) => toast.id !== id),
+    );
   }, []);
 
   const showToast = useCallback(
@@ -81,9 +81,12 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
 
       setToasts((currentToasts) => [...currentToasts, { id, message, tone }]);
 
-      window.setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
+        timeoutRefs.current.delete(timeoutId);
         dismiss(id);
       }, options?.duration ?? DEFAULT_DURATION_MS);
+
+      timeoutRefs.current.add(timeoutId);
 
       return id;
     },
@@ -99,6 +102,12 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
     }),
     [dismiss, showToast],
   );
+
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach((timeout) => clearTimeout(timeout));
+    };
+  }, []);
 
   return (
     <ToastContext.Provider value={value}>

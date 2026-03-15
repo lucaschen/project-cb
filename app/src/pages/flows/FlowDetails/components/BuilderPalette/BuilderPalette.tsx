@@ -1,4 +1,3 @@
-import { Card } from "@app/components/ui/Card";
 import { NodeType } from "@packages/shared/types/enums";
 
 export const BUILDER_NODE_KIND = "application/project-cb-builder-node";
@@ -33,7 +32,7 @@ type BuilderPaletteProps = {
 const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
   return (
     <aside className={`h-full min-h-0 w-full ${isOpen ? "block" : "hidden"}`}>
-      <Card className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto rounded-[24px] border-white/10 bg-slate-950/85 p-3">
+      <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto border-r border-white/8 bg-slate-950/94 px-4 py-5">
         <div className="space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Palette
@@ -48,7 +47,7 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
 
             return (
               <div
-                className={`rounded-[20px] border border-dashed px-3 py-3 ${
+                className={`rounded-[18px] border border-dashed px-3 py-3 ${
                   isDisabled
                     ? "cursor-not-allowed border-white/10 bg-white/5 opacity-60"
                     : item.nodeType === NodeType.DECISION
@@ -87,7 +86,7 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
             );
           })}
         </div>
-      </Card>
+      </div>
     </aside>
   );
 };

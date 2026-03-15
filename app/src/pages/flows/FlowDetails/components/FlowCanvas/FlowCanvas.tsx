@@ -1,4 +1,3 @@
-import { Card } from "@app/components/ui/Card";
 import type {
   FlowGraphEdge,
   FlowGraphNode,
@@ -51,13 +50,7 @@ const getEdgeColor = (edge: FlowGraphEdge, selected: boolean) => {
   return selected ? "#7dd3fc" : "#38bdf8";
 };
 
-type FlowCanvasProps = {
-  flowName: string;
-  flowSlug: string;
-  isDirty: boolean;
-};
-
-const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
+const FlowCanvas = () => {
   const applyNodeChanges = useBuilderStore((state) => state.applyNodeChanges);
   const edges = useBuilderStore((state) => state.edges);
   const nodes = useBuilderStore((state) => state.nodes);
@@ -219,95 +212,82 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
 
   return (
     <section className="min-h-0 min-w-0 grow">
-      <Card className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] p-0">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
-          <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-white">
-              {flowName}
-            </p>
-            <p className="text-xs text-slate-400">Slug: {flowSlug}</p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300">
-            {isDirty ? "Draft changes in progress" : "Builder synced"}
-          </div>
-        </div>
-        <div className="min-h-0 flex-1 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.98))]">
-          <ReactFlow
-            deleteKeyCode={["Delete", "Backspace"]}
-            edges={builderEdges}
-            edgesReconnectable
-            edgeTypes={edgeTypes}
-            elementsSelectable
-            fitView
-            nodeTypes={nodeTypes}
-            nodes={builderNodes}
-            nodesConnectable
-            nodesDraggable
-            onNodesChange={applyNodeChanges}
-            onConnect={handleConnect}
-            onDragOver={(event) => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "move";
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
+      <div className="h-full min-h-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.99))]">
+        <ReactFlow
+          deleteKeyCode={["Delete", "Backspace"]}
+          edges={builderEdges}
+          edgesReconnectable
+          edgeTypes={edgeTypes}
+          elementsSelectable
+          fitView
+          nodeTypes={nodeTypes}
+          nodes={builderNodes}
+          nodesConnectable
+          nodesDraggable
+          onNodesChange={applyNodeChanges}
+          onConnect={handleConnect}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
 
-              const kind = event.dataTransfer.getData(BUILDER_NODE_KIND);
+            const kind = event.dataTransfer.getData(BUILDER_NODE_KIND);
 
-              if (
-                (kind !== "step" && kind !== "decision") ||
-                !reactFlowInstance
-              ) {
-                return;
-              }
+            if (
+              (kind !== "step" && kind !== "decision") ||
+              !reactFlowInstance
+            ) {
+              return;
+            }
 
-              createNodeAtPosition(
-                kind,
-                reactFlowInstance.screenToFlowPosition({
-                  x: event.clientX,
-                  y: event.clientY,
-                }),
-              );
-            }}
-            onEdgesDelete={handleEdgesDelete}
-            onEdgeClick={(_, edge) => {
-              selectItem({
-                id: edge.id,
-                kind: "edge",
-              });
-            }}
-            onInit={setReactFlowInstance}
-            onNodeClick={(_, node) => {
-              selectItem({
-                id: node.id,
-                kind: "node",
-              });
-            }}
-            onNodeDoubleClick={(_, node) => {
-              selectItem({
-                id: node.id,
-                kind: "node",
-              });
-            }}
-            onNodeDragStart={(_, node) => {
-              selectItem({
-                id: node.id,
-                kind: "node",
-              });
-            }}
-            onNodesDelete={handleNodesDelete}
-            onPaneClick={() => {
-              selectItem(null);
-            }}
-            onReconnect={handleReconnect}
-            onReconnectEnd={handleReconnectEnd}
-            onReconnectStart={handleReconnectStart}
-          >
-            <Background color="rgba(148, 163, 184, 0.22)" gap={24} />
-            <Controls showInteractive={false} />
-          </ReactFlow>
-        </div>
-      </Card>
+            createNodeAtPosition(
+              kind,
+              reactFlowInstance.screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+              }),
+            );
+          }}
+          onEdgesDelete={handleEdgesDelete}
+          onEdgeClick={(_, edge) => {
+            selectItem({
+              id: edge.id,
+              kind: "edge",
+            });
+          }}
+          onInit={setReactFlowInstance}
+          onNodeClick={(_, node) => {
+            selectItem({
+              id: node.id,
+              kind: "node",
+            });
+          }}
+          onNodeDoubleClick={(_, node) => {
+            selectItem({
+              id: node.id,
+              kind: "node",
+            });
+          }}
+          onNodeDragStart={(_, node) => {
+            selectItem({
+              id: node.id,
+              kind: "node",
+            });
+          }}
+          onNodesDelete={handleNodesDelete}
+          onPaneClick={() => {
+            selectItem(null);
+          }}
+          onReconnect={handleReconnect}
+          onReconnectEnd={handleReconnectEnd}
+          onReconnectStart={handleReconnectStart}
+        >
+          <Background color="rgba(148, 163, 184, 0.22)" gap={24} />
+          <Controls showInteractive={false} />
+        </ReactFlow>
+      </div>
     </section>
   );
 };

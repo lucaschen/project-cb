@@ -5,10 +5,11 @@ import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
 import { path as homePath } from "@app/pages/Home";
+import { useToast } from "@app/components/ui/ToastProvider";
+import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";
 import { syncActiveOrganizationId } from "@app/utils/organizations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -22,13 +23,13 @@ const validate = (email: string, password: string) => {
 const Login = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState({
     email: "",
     password: "",
   });
-  const [formError, setFormError] = useState("");
 
   const { mutateAsync: login, isPending: isLoginPending } = useMutation({
     mutationFn: createSession,
@@ -49,14 +50,14 @@ const Login = () => {
       navigate(homePath, { replace: true });
     },
     onError: (error) => {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        setFormError(
-          "Login unsuccessful. Check your email and password and try again.",
-        );
-        return;
-      }
-
-      setFormError("Unable to sign in right now. Try again.");
+      toast.error(
+        getApiErrorMessage(error, {
+          byStatus: {
+            401: "Login unsuccessful. Check your email and password and try again.",
+          },
+          default: "Unable to sign in right now. Try again.",
+        }),
+      );
     },
   });
 
@@ -65,16 +66,19 @@ const Login = () => {
 
     const nextErrors = validate(email, password);
     setFieldErrors(nextErrors);
-    setFormError("");
 
     if (nextErrors.email || nextErrors.password) {
       return;
     }
 
-    await login({
-      email: email.trim(),
-      password,
-    });
+    try {
+      await login({
+        email: email.trim(),
+        password,
+      });
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -124,9 +128,6 @@ const Login = () => {
           type="password"
           value={password}
         />
-        {formError ? (
-          <p className="text-sm text-rose-300">{formError}</p>
-        ) : null}
         <Button className="w-full" isBusy={isLoginPending} type="submit">
           Sign in
         </Button>

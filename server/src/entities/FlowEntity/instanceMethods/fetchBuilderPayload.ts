@@ -100,7 +100,6 @@ export default async function fetchBuilderPayload(
               name: stepSummary.name,
               nextNodeId: stepSummary.nextNodeId,
               nodeId: stepSummary.nodeId,
-              order: stepSummary.order,
               type: node.type,
             };
           }

@@ -7,11 +7,12 @@ import { FormField } from "@app/components/ui/FormField";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
 import { TextAreaField } from "@app/components/ui/TextAreaField";
+import { useToast } from "@app/components/ui/ToastProvider";
 import useRootContext from "@app/hooks/useRootContext";
+import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { toSlug } from "@app/utils/slug";
 import { trimAndNullOnEmpty } from "@app/utils/string";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
@@ -33,11 +34,11 @@ const FlowsList = () => {
   const { activeOrganization, sessionData } = useRootContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [flowDescription, setFlowDescription] = useState("");
   const [flowName, setFlowName] = useState("");
   const [fieldError, setFieldError] = useState("");
-  const [formError, setFormError] = useState("");
 
   const flowsQuery = useQuery({
     enabled: Boolean(activeOrganization),
@@ -64,14 +65,14 @@ const FlowsList = () => {
       navigate(getFlowDetailsPath(flow.id));
     },
     onError: (error) => {
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        setFormError(
-          "Unable to create a flow with that name right now. Try a different name.",
-        );
-        return;
-      }
-
-      setFormError("Unable to create the flow right now. Try again.");
+      toast.error(
+        getApiErrorMessage(error, {
+          byStatus: {
+            400: "Unable to create a flow with that name right now. Try a different name.",
+          },
+          default: "Unable to create the flow right now. Try again.",
+        }),
+      );
     },
   });
 
@@ -93,7 +94,6 @@ const FlowsList = () => {
     setFlowDescription("");
     setFlowName("");
     setFieldError("");
-    setFormError("");
     setIsCreateOpen(false);
   };
 
@@ -104,18 +104,21 @@ const FlowsList = () => {
 
     const validationResult = validateFlowName(flowName);
     setFieldError(validationResult.name || validationResult.slugError);
-    setFormError("");
 
     if (validationResult.name || validationResult.slugError) {
       return;
     }
 
-    await createFlowMutation.mutateAsync({
-      description: trimAndNullOnEmpty(flowDescription),
-      name: validationResult.trimmedName,
-      organizationId: activeOrganization.id,
-      slug: validationResult.slug,
-    });
+    try {
+      await createFlowMutation.mutateAsync({
+        description: trimAndNullOnEmpty(flowDescription),
+        name: validationResult.trimmedName,
+        organizationId: activeOrganization.id,
+        slug: validationResult.slug,
+      });
+    } catch {
+      return;
+    }
   };
 
   const flows = flowsQuery.data ?? [];
@@ -168,9 +171,6 @@ const FlowsList = () => {
               placeholder="Capture the purpose of this flow and who it serves."
               value={flowDescription}
             />
-            {formError ? (
-              <p className="text-sm text-rose-300">{formError}</p>
-            ) : null}
             <div className="flex gap-3">
               <Button isBusy={createFlowMutation.isPending} type="submit">
                 Create flow

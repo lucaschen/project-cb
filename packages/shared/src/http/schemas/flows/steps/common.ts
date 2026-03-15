@@ -15,7 +15,6 @@ export const stepSummarySchema = z.object({
   name: z.string(),
   nextNodeId: z.string().or(z.null()),
   nodeId: z.string(),
-  order: z.number().int().nonnegative(),
   type: z.literal(NodeType.STEP),
 });
 

@@ -15,7 +15,7 @@ export type UpdateBuilderParams = z.infer<typeof updateBuilderParams>;
 export const updateBuilderInput = z
   .object({
     decisionNodes: z.array(builderDecisionNodeInputSchema),
-    steps: z.array(builderStepInputSchema),
+    stepNodes: z.array(builderStepInputSchema),
   })
   .strict();
 

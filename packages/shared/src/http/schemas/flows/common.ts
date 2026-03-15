@@ -38,31 +38,28 @@ export const flowStepElementSchema = hydratedStepElementSchema;
 
 export type FlowStepElementType = z.infer<typeof flowStepElementSchema>;
 
-export const flowDecisionConditionSchema = z.object({
+export const decisionConditionSchema = z.object({
   id: z.string().min(1),
   order: z.number(),
   statement: conditionStatementSchema,
   toNodeId: z.string().min(1),
 });
 
-export type FlowDecisionConditionType = z.infer<
-  typeof flowDecisionConditionSchema
->;
+export type DecisionConditionType = z.infer<typeof decisionConditionSchema>;
 
-export const flowStepNodeSchema = z.object({
+export const stepNodeSchema = z.object({
   coordinates: nodeCoordinatesSchema,
   elements: z.array(flowStepElementSchema),
   name: z.string().min(1),
   nextNodeId: z.string().nullable(),
   nodeId: z.string().min(1),
-  order: z.number().int().nonnegative(),
   type: z.literal(NodeType.STEP),
 });
 
-export type FlowStepNodeType = z.infer<typeof flowStepNodeSchema>;
+export type StepNodeType = z.infer<typeof stepNodeSchema>;
 
-export const flowDecisionNodeSchema = z.object({
-  conditions: z.array(flowDecisionConditionSchema),
+export const decisionNodeSchema = z.object({
+  conditions: z.array(decisionConditionSchema),
   coordinates: nodeCoordinatesSchema,
   fallbackNextNodeId: z.string().min(1),
   name: z.string().min(1),
@@ -70,17 +67,17 @@ export const flowDecisionNodeSchema = z.object({
   type: z.literal(NodeType.DECISION),
 });
 
-export type FlowDecisionNodeType = z.infer<typeof flowDecisionNodeSchema>;
+export type DecisionNodeType = z.infer<typeof decisionNodeSchema>;
 
-export const flowNodeSchema = z.discriminatedUnion("type", [
-  flowStepNodeSchema,
-  flowDecisionNodeSchema,
+export const nodeSchema = z.discriminatedUnion("type", [
+  stepNodeSchema,
+  decisionNodeSchema,
 ]);
 
-export type FlowNodeType = z.infer<typeof flowNodeSchema>;
+export type NodePayloadType = z.infer<typeof nodeSchema>;
 
 export const flowWithNodesSchema = flowSchema.extend({
-  nodes: z.array(flowNodeSchema),
+  nodes: z.array(nodeSchema),
 });
 
 export type FlowWithNodesType = z.infer<typeof flowWithNodesSchema>;

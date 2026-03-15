@@ -4,11 +4,12 @@ import { Button } from "@app/components/ui/Button";
 import { Card } from "@app/components/ui/Card";
 import { FormField } from "@app/components/ui/FormField";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
+import { useToast } from "@app/components/ui/ToastProvider";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
+import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { syncActiveOrganizationId } from "@app/utils/organizations";
 import { toSlug } from "@app/utils/slug";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +23,7 @@ const validate = (name: string, slug: string) => {
 const OrganizationOnboarding = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -29,7 +31,6 @@ const OrganizationOnboarding = () => {
     name: "",
     slug: "",
   });
-  const [formError, setFormError] = useState("");
 
   const createOrganizationMutation = useMutation({
     mutationFn: createOrganization,
@@ -41,14 +42,14 @@ const OrganizationOnboarding = () => {
       navigate(flowsListPath, { replace: true });
     },
     onError: (error) => {
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        setFormError(
-          "Unable to create the organization with those details. Try another name or slug.",
-        );
-        return;
-      }
-
-      setFormError("Unable to create the organization right now. Try again.");
+      toast.error(
+        getApiErrorMessage(error, {
+          byStatus: {
+            400: "Unable to create the organization with those details. Try another name or slug.",
+          },
+          default: "Unable to create the organization right now. Try again.",
+        }),
+      );
     },
   });
 
@@ -57,16 +58,19 @@ const OrganizationOnboarding = () => {
 
     const nextErrors = validate(name, slug);
     setFieldErrors(nextErrors);
-    setFormError("");
 
     if (nextErrors.name || nextErrors.slug) {
       return;
     }
 
-    await createOrganizationMutation.mutateAsync({
-      name: name.trim(),
-      slug: slug.trim(),
-    });
+    try {
+      await createOrganizationMutation.mutateAsync({
+        name: name.trim(),
+        slug: slug.trim(),
+      });
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -126,9 +130,6 @@ const OrganizationOnboarding = () => {
               placeholder="acme-research"
               value={slug}
             />
-            {formError ? (
-              <p className="text-sm text-rose-300">{formError}</p>
-            ) : null}
             <Button
               className="w-full"
               isBusy={createOrganizationMutation.isPending}

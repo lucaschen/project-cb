@@ -34,8 +34,6 @@ const DEFAULT_DURATION_MS = 4000;
 
 const ToastContext = createContext<ToastApi | null>(null);
 
-let nextToastId = 0;
-
 const toneConfig: Record<
   ToastTone,
   {
@@ -67,6 +65,7 @@ const toneConfig: Record<
 
 export const ToastProvider = ({ children }: PropsWithChildren) => {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
+  const nextToastId = useRef(0);
   const timeoutRefs = useRef<Set<number>>(new Set());
 
   const dismiss = useCallback((id: number) => {
@@ -77,7 +76,7 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
 
   const showToast = useCallback(
     (tone: ToastTone, message: string, options?: ToastOptions) => {
-      const id = ++nextToastId;
+      const id = ++nextToastId.current;
 
       setToasts((currentToasts) => [...currentToasts, { id, message, tone }]);
 

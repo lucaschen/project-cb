@@ -5,9 +5,10 @@ import { queryKeys } from "@app/api/queryKeys";
 import { Button } from "@app/components/ui/Button";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import useDebouncedMemo from "@app/hooks/useDebouncedMemo";
+import useRootContext from "@app/hooks/useRootContext";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
-import useRootContext from "@app/hooks/useRootContext";
+import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import type { FlowWithNodesType } from "@packages/shared/http/schemas/flows/common";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +20,6 @@ import FlowCanvas from "./components/FlowCanvas";
 import useBuilderLeaveConfirmation from "./hooks/useBuilderLeaveConfirmation";
 import useBuilderStore from "./store/builderStore";
 import { flowToReactFlow } from "./utils/builderFlowToReactFlow";
-import { getBuilderValidationErrors, isGraphDirty } from "./utils/builderGraph";
 
 const Wrapper = () => {
   const { flowId } = useParams<{ flowId: string }>();
@@ -68,7 +68,8 @@ const Wrapper = () => {
           byStatus: {
             404: "Project CB could not find this flow. It may have been removed or you may no longer have access to it.",
           },
-          default: "Project CB could not load this flow right now. Retry the request or return to the flows workspace.",
+          default:
+            "Project CB could not load this flow right now. Retry the request or return to the flows workspace.",
         })}
         eyebrow="Flow Unavailable"
         title="Unable to load flow"
@@ -86,6 +87,10 @@ type Props = {
 const FlowDetails = ({ flow }: Props) => {
   const { activeOrganization } = useRootContext();
   const baseReactFlowGraph = useMemo(() => flowToReactFlow(flow), [flow]);
+  const baseBuilderPayload = useMemo(
+    () => FlowBuilderEntity.fromFlow(flow).getPayload(),
+    [flow],
+  );
 
   const initializeGraph = useBuilderStore((state) => state.initializeGraph);
   const edges = useBuilderStore((state) => state.edges);
@@ -97,15 +102,17 @@ const FlowDetails = ({ flow }: Props) => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(true);
 
   const isDirty = useDebouncedMemo(
-    () => isGraphDirty(currentGraph, baseReactFlowGraph),
-    [currentGraph, baseReactFlowGraph],
-    500,
+    () =>
+      JSON.stringify(FlowBuilderEntity.fromGraph(currentGraph).getPayload()) !==
+      JSON.stringify(baseBuilderPayload),
+    [baseBuilderPayload, currentGraph],
+    200,
   );
 
   const validationErrors = useDebouncedMemo(
-    () => getBuilderValidationErrors(baseReactFlowGraph ? currentGraph : null),
-    [baseReactFlowGraph, currentGraph],
-    500,
+    () => FlowBuilderEntity.fromGraph(currentGraph).getValidationErrors(),
+    [currentGraph],
+    200,
   );
 
   useEffect(() => {
@@ -123,26 +130,26 @@ const FlowDetails = ({ flow }: Props) => {
       <div className="relative flex min-h-0 flex-1 items-stretch gap-2 overflow-hidden">
         <div className="pointer-events-none absolute inset-x-3 top-3 z-30 flex items-start justify-between">
           <button
-            className={`pointer-events-auto rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur ${
+            className={`pointer-events-auto rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur transition ${
               isPaletteOpen
-                ? "border-sky-300/30 bg-sky-300/10 text-sky-100"
-                : "border-white/10 bg-slate-950/85 text-slate-300"
+                ? "border-sky-300/30 bg-sky-300/12 text-sky-100"
+                : "border-white/10 bg-slate-950/85 text-slate-400"
             }`}
             onClick={() => setIsPaletteOpen((currentValue) => !currentValue)}
             type="button"
           >
-            {isPaletteOpen ? "Hide palette" : "Show palette"}
+            {isPaletteOpen ? "Palette on" : "Palette off"}
           </button>
           <button
-            className={`pointer-events-auto rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur ${
+            className={`pointer-events-auto rounded-2xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur transition ${
               isInspectorOpen
-                ? "border-fuchsia-300/30 bg-fuchsia-300/10 text-fuchsia-100"
-                : "border-white/10 bg-slate-950/85 text-slate-300"
+                ? "border-fuchsia-300/30 bg-fuchsia-300/12 text-fuchsia-100"
+                : "border-white/10 bg-slate-950/85 text-slate-400"
             }`}
             onClick={() => setIsInspectorOpen((currentValue) => !currentValue)}
             type="button"
           >
-            {isInspectorOpen ? "Hide inspector" : "Show inspector"}
+            {isInspectorOpen ? "Inspector on" : "Inspector off"}
           </button>
         </div>
         {isPaletteOpen ? (
@@ -158,7 +165,7 @@ const FlowDetails = ({ flow }: Props) => {
           />
         </div>
         {isInspectorOpen ? (
-          <div className="flex h-full min-h-0 w-[404px] shrink-0 pt-16">
+          <div className="flex h-full min-h-0 w-[392px] shrink-0 pt-16 xl:w-[404px]">
             <BuilderSidebar
               activeOrganizationId={activeOrganization.id}
               flow={flow}

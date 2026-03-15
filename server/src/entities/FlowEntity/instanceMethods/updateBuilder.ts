@@ -1,3 +1,4 @@
+import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import type {
   UpdateBuilderInput,
   UpdateBuilderOutput,
@@ -12,14 +13,15 @@ import StepEntity from "~entities/StepEntity";
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 
 import type FlowEntity from "../FlowEntity";
-import getBuilderValidationErrors from "../utils/getBuilderValidationErrors";
 
 export default async function updateBuilder(
   this: FlowEntity,
   payload: UpdateBuilderInput,
 ): Promise<UpdateBuilderOutput> {
   await sequelize.transaction(async (transaction) => {
-    const validationErrors = getBuilderValidationErrors(payload);
+    const validationErrors = new FlowBuilderEntity(
+      payload,
+    ).getValidationErrors();
 
     if (validationErrors.length > 0) {
       throw new InvalidRequestError(validationErrors[0]);

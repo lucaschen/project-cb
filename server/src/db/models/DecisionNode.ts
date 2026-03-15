@@ -11,13 +11,13 @@ export class DecisionNode extends Model<
   InferCreationAttributes<DecisionNode>
 > {
   declare nodeId: string;
-  declare fallbackNextNodeId: string;
+  declare fallbackNextNodeId: string | null;
 
   static initModel(sequelize: Sequelize) {
     DecisionNode.init(
       {
         nodeId: { type: DataTypes.UUID, primaryKey: true },
-        fallbackNextNodeId: { type: DataTypes.UUID, allowNull: false },
+        fallbackNextNodeId: { type: DataTypes.UUID, allowNull: true },
       },
       {
         sequelize,

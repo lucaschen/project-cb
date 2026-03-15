@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
+import type { PropsWithChildren } from "react";
 import {
   createContext,
   useCallback,
@@ -8,8 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-
-import type { PropsWithChildren } from "react";
 
 type ToastTone = "error" | "info" | "success";
 

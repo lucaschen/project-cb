@@ -1,5 +1,9 @@
 import { Card } from "@app/components/ui/Card";
 import type {
+  FlowGraphEdge,
+  FlowGraphNode,
+} from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
+import type {
   Connection,
   EdgeTypes,
   FinalConnectionState,
@@ -11,27 +15,10 @@ import { Background, Controls, MarkerType, ReactFlow } from "@xyflow/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import useBuilderStore from "../../store/builderStore";
-import type {
-  BuilderFlowEdge,
-  BuilderFlowNode,
-} from "../../utils/builderFlowToReactFlow";
 import {
-  getDecisionConditionIdFromSourceHandle,
-  isBuilderDecisionNode,
-  isBuilderStepNode,
-  isDecisionEdge,
-  isDecisionFallbackSourceHandle,
-  isDefaultEdge,
-  isFallbackEdge,
+  isDecisionFallbackEdge,
+  isDecisionRuleEdge,
 } from "../../utils/builderFlowToReactFlow";
-import {
-  addNodeToGraph,
-  removeEditableEdgeFromGraph,
-  removeNodeFromGraph,
-  setDecisionFallbackConnection,
-  setDecisionRuleConnection,
-  setStepConnection,
-} from "../../utils/builderGraph";
 import { BUILDER_NODE_KIND } from "../BuilderPalette/BuilderPalette";
 import BuilderFlowEdgeRenderer from "./components/BuilderFlowEdge";
 import DecisionFlowNode from "./components/DecisionFlowNode";
@@ -48,12 +35,12 @@ const edgeTypes: EdgeTypes = {
 
 const DECISION_RULE_COLORS = ["#22d3ee", "#a855f7", "#f97316", "#84cc16"];
 
-const getEdgeColor = (edge: BuilderFlowEdge, selected: boolean) => {
-  if (isFallbackEdge(edge)) {
+const getEdgeColor = (edge: FlowGraphEdge, selected: boolean) => {
+  if (isDecisionFallbackEdge(edge)) {
     return selected ? "#fbbf24" : "#f59e0b";
   }
 
-  if (isDecisionEdge(edge)) {
+  if (isDecisionRuleEdge(edge)) {
     return selected
       ? "#ffffff"
       : DECISION_RULE_COLORS[
@@ -74,22 +61,14 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
   const applyNodeChanges = useBuilderStore((state) => state.applyNodeChanges);
   const edges = useBuilderStore((state) => state.edges);
   const nodes = useBuilderStore((state) => state.nodes);
-  const initializeGraph = useBuilderStore((state) => state.initializeGraph);
+  const updateGraph = useBuilderStore((state) => state.updateGraph);
   const selectedItem = useBuilderStore((state) => state.selectedItem);
   const selectItem = useBuilderStore((state) => state.selectItem);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
-    BuilderFlowNode,
-    BuilderFlowEdge
+    FlowGraphNode,
+    FlowGraphEdge
   > | null>(null);
   const reconnectSucceededRef = useRef(false);
-
-  const currentGraph = useMemo(
-    () => ({
-      edges,
-      nodes,
-    }),
-    [edges, nodes],
-  );
 
   const builderNodes = useMemo(
     () =>
@@ -115,9 +94,9 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
           width: 18,
         },
         reconnectable:
-          edge.data.kind === "default" ||
-          edge.data.kind === "fallback" ||
-          edge.data.kind === "decision",
+          edge.data.type === "step" ||
+          edge.data.type === "fallback" ||
+          edge.data.type === "decision",
         selected: selectedItem?.kind === "edge" && selectedItem.id === edge.id,
         selectable: true,
         type: "builder",
@@ -126,20 +105,22 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
   );
 
   const createNodeAtPosition = useCallback(
-    (kind: "decision" | "step", position: { x: number; y: number }) => {
-      const result = addNodeToGraph(currentGraph, { kind, position });
+    (type: "decision" | "step", position: { x: number; y: number }) => {
+      updateGraph((graph) => {
+        const createdNode = graph.addNode({
+          position,
+          type,
+        });
 
-      if (!result.ok) {
-        return;
-      }
+        if (!createdNode) return;
 
-      initializeGraph(result.graph, { preserveSelection: true });
-      selectItem({
-        id: result.nodeId,
-        kind: "node",
+        selectItem({
+          id: createdNode.id,
+          kind: "node",
+        });
       });
     },
-    [currentGraph, initializeGraph, selectItem],
+    [updateGraph, selectItem],
   );
 
   const handleConnect = useCallback(
@@ -152,141 +133,42 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
         return;
       }
 
-      const sourceNode = nodes.find((node) => node.id === connection.source);
-
-      if (!sourceNode) {
-        return;
-      }
-
-      if (isBuilderStepNode(sourceNode)) {
-        initializeGraph(
-          setStepConnection(currentGraph, connection.source, connection.target),
-          { preserveSelection: true },
-        );
-      } else if (
-        isBuilderDecisionNode(sourceNode) &&
-        isDecisionFallbackSourceHandle(connection.sourceHandle)
-      ) {
-        initializeGraph(
-          setDecisionFallbackConnection(
-            currentGraph,
-            connection.source,
-            connection.target,
-          ),
-          { preserveSelection: true },
-        );
-      } else if (isBuilderDecisionNode(sourceNode)) {
-        const conditionId = getDecisionConditionIdFromSourceHandle(
-          connection.sourceHandle,
-        );
-
-        if (!conditionId) {
-          return;
-        }
-
-        initializeGraph(
-          setDecisionRuleConnection(
-            currentGraph,
-            connection.source,
-            conditionId,
-            connection.target,
-          ),
-          { preserveSelection: true },
-        );
-      } else {
-        return;
-      }
-
-      selectItem({
-        id: connection.source,
-        kind: "node",
+      updateGraph((graph) => {
+        graph.setConnection({
+          sourceHandle: connection.sourceHandle ?? undefined,
+          sourceNodeId: connection.source,
+          targetNodeId: connection.target,
+        });
       });
     },
-    [currentGraph, nodes, initializeGraph, selectItem],
+    [updateGraph],
   );
 
   const handleEdgesDelete = useCallback(
-    (edgesToDelete: BuilderFlowEdge[]) => {
-      let nextGraph = currentGraph;
-
-      for (const edge of edgesToDelete) {
-        nextGraph = removeEditableEdgeFromGraph(nextGraph, edge.id);
-      }
-
-      initializeGraph(nextGraph, { preserveSelection: true });
+    (edgesToDelete: FlowGraphEdge[]) => {
+      updateGraph((graph) => {
+        for (const edge of edgesToDelete) {
+          graph.removeEdgeById(edge.id);
+        }
+      });
     },
-    [currentGraph, initializeGraph],
+    [updateGraph],
   );
 
   const handleNodesDelete = useCallback(
-    (nodesToDelete: BuilderFlowNode[]) => {
-      let nextGraph = currentGraph;
-
-      for (const node of nodesToDelete) {
-        const result = removeNodeFromGraph(nextGraph, node.id);
-
-        if (!result.ok) {
-          continue;
+    (nodesToDelete: FlowGraphNode[]) => {
+      updateGraph((graph) => {
+        for (const node of nodesToDelete) {
+          graph.removeNodeById(node.id);
         }
-
-        nextGraph = result.graph;
-      }
-
-      initializeGraph(nextGraph, { preserveSelection: true });
+      });
     },
-    [currentGraph, initializeGraph],
+    [updateGraph],
   );
 
   const handleReconnect = useCallback(
-    (oldEdge: BuilderFlowEdge, connection: Connection) => {
+    (oldEdge: FlowGraphEdge, connection: Connection) => {
       if (!connection.target) {
-        return;
-      }
-
-      if (isDefaultEdge(oldEdge)) {
-        const sourceNodeId = connection.source ?? oldEdge.source;
-
-        if (!sourceNodeId) {
-          return;
-        }
-
-        reconnectSucceededRef.current = true;
-        handleConnect({
-          ...connection,
-          source: sourceNodeId,
-        });
-        return;
-      }
-
-      if (!isFallbackEdge(oldEdge)) {
-        if (!isDecisionEdge(oldEdge)) {
-          return;
-        }
-
-        const sourceNodeId = connection.source ?? oldEdge.source;
-        const conditionId =
-          getDecisionConditionIdFromSourceHandle(
-            connection.sourceHandle ?? oldEdge.sourceHandle,
-          ) ?? oldEdge.data.conditionId;
-
-        if (!sourceNodeId || sourceNodeId === connection.target) {
-          return;
-        }
-
-        reconnectSucceededRef.current = true;
-        initializeGraph(
-          setDecisionRuleConnection(
-            currentGraph,
-            sourceNodeId,
-            conditionId,
-            connection.target,
-          ),
-          { preserveSelection: true },
-        );
-        selectItem({
-          id: sourceNodeId,
-          kind: "node",
-        });
         return;
       }
 
@@ -297,20 +179,16 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
       }
 
       reconnectSucceededRef.current = true;
-      initializeGraph(
-        setDecisionFallbackConnection(
-          currentGraph,
+      updateGraph((graph) => {
+        graph.setConnection({
+          sourceHandle:
+            connection.sourceHandle ?? oldEdge.sourceHandle ?? undefined,
           sourceNodeId,
-          connection.target,
-        ),
-        { preserveSelection: true },
-      );
-      selectItem({
-        id: sourceNodeId,
-        kind: "node",
+          targetNodeId: connection.target,
+        });
       });
     },
-    [currentGraph, handleConnect, initializeGraph, selectItem],
+    [updateGraph],
   );
 
   const handleReconnectStart = useCallback(() => {
@@ -320,7 +198,7 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
   const handleReconnectEnd = useCallback(
     (
       _event: MouseEvent | TouchEvent,
-      edge: BuilderFlowEdge,
+      edge: FlowGraphEdge,
       _handleType: HandleType,
       connectionState: FinalConnectionState,
     ) => {
@@ -332,12 +210,11 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
         return;
       }
 
-      initializeGraph(removeEditableEdgeFromGraph(currentGraph, edge.id), {
-        preserveSelection: true,
+      updateGraph((graph) => {
+        graph.removeEdgeById(edge.id);
       });
-      selectItem(null);
     },
-    [currentGraph, initializeGraph, selectItem],
+    [updateGraph],
   );
 
   return (
@@ -366,6 +243,7 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
             nodes={builderNodes}
             nodesConnectable
             nodesDraggable
+            onNodesChange={applyNodeChanges}
             onConnect={handleConnect}
             onDragOver={(event) => {
               event.preventDefault();
@@ -417,7 +295,6 @@ const FlowCanvas = ({ flowName, flowSlug, isDirty }: FlowCanvasProps) => {
                 kind: "node",
               });
             }}
-            onNodesChange={applyNodeChanges}
             onNodesDelete={handleNodesDelete}
             onPaneClick={() => {
               selectItem(null);

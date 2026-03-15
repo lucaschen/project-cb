@@ -1,22 +1,27 @@
 import { Card } from "@app/components/ui/Card";
-import type { NodeTypes } from "@xyflow/react";
+import { NodeType } from "@packages/shared/types/enums";
 
 export const BUILDER_NODE_KIND = "application/project-cb-builder-node";
+
+type BuilderNodeKind = "decision" | "step";
 
 const paletteItems: {
   description: string;
   title: string;
-  nodeType: keyof NodeTypes;
+  graphNodeType: BuilderNodeKind;
+  nodeType: NodeType;
 }[] = [
   {
     description: "Drag into the canvas to add a new step and wire it later.",
-    nodeType: "step",
+    graphNodeType: "step",
+    nodeType: NodeType.STEP,
     title: "Step",
   },
   {
     description:
       "Drag into the canvas to add a decision once a valid fallback target exists.",
-    nodeType: "decision",
+    graphNodeType: "decision",
+    nodeType: NodeType.DECISION,
     title: "Decision",
   },
 ];
@@ -46,7 +51,7 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
                 className={`rounded-[20px] border border-dashed px-3 py-3 ${
                   isDisabled
                     ? "cursor-not-allowed border-white/10 bg-white/5 opacity-60"
-                    : item.nodeType === "decision"
+                    : item.nodeType === NodeType.DECISION
                       ? "cursor-grab border-fuchsia-300/30 bg-fuchsia-300/8"
                       : "cursor-grab border-sky-300/30 bg-sky-300/8"
                 }`}
@@ -59,7 +64,10 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
                   }
 
                   event.dataTransfer.effectAllowed = "move";
-                  event.dataTransfer.setData(BUILDER_NODE_KIND, item.nodeType);
+                  event.dataTransfer.setData(
+                    BUILDER_NODE_KIND,
+                    item.graphNodeType,
+                  );
                 }}
               >
                 <div className="flex items-center justify-between gap-3">

@@ -21,7 +21,7 @@ Deliver a stakeholder-ready MVP frontend for Project CB as both an internal auth
 - [FE 05 Flow creation and metadata](./frontend-tickets/FE%2005%20Flow%20creation%20and%20metadata.md): implemented
 - [FE 06 Flow builder shell](./frontend-tickets/FE%2006%20Flow%20builder%20shell.md): partially implemented
 - [FE 07 Builder graph interactions and node management](./frontend-tickets/FE%2007%20Step%20list%20management.md): partially implemented
-- [FE 08 Step properties sidebar](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md): not started
+- [FE 08 Builder sidebar UX refresh](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md): not started
 - [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md): not started
 - [FE 10 Flow branching and logic](./frontend-tickets/FE%2010%20Flow%20branching%20and%20logic.md): partially implemented
 - [FE 11 Step preview in editor](./frontend-tickets/FE%2011%20Step%20preview%20in%20editor.md): not started
@@ -48,7 +48,7 @@ Deliver a stakeholder-ready MVP frontend for Project CB as both an internal auth
   - [FE 06 Flow builder shell](./frontend-tickets/FE%2006%20Flow%20builder%20shell.md)
 - Step list management
   - [FE 07 Step list management](./frontend-tickets/FE%2007%20Step%20list%20management.md)
-- Step property editing
+- Builder sidebar UX refresh
   - [FE 08 Step properties sidebar](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md)
 - Advanced step editing UX
   - [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md)
@@ -72,8 +72,7 @@ Deliver a stakeholder-ready MVP frontend for Project CB as both an internal auth
 - [FE 05 Flow creation and metadata](./frontend-tickets/FE%2005%20Flow%20creation%20and%20metadata.md) is partially blocked by [BE 02 Flow metadata read and update APIs](./backend-tickets/BE%2002%20Flow%20metadata%20read%20and%20update%20APIs.md)
 - [FE 06 Flow builder shell](./frontend-tickets/FE%2006%20Flow%20builder%20shell.md) is blocked by [BE 01 Flow listing and builder read APIs](./backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md)
 - [FE 07 Step list management](./frontend-tickets/FE%2007%20Step%20list%20management.md) is blocked by [BE 03 Step CRUD and ordering APIs](./backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md) for ordered step reads and depends on [BE 05 Unified builder graph save and decision logic APIs](./backend-tickets/BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md) for the canonical flow-graph write path
-- [FE 08 Step properties sidebar](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md) is blocked by [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
-- [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md) is partially blocked by [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md); modal scope still needs FE and product clarification
+- [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md) depends on [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
 - [FE 10 Flow branching and logic](./frontend-tickets/FE%2010%20Flow%20branching%20and%20logic.md) is blocked by [BE 05 Unified builder graph save and decision logic APIs](./backend-tickets/BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md)
 - [FE 12 Flow preview and playthrough](./frontend-tickets/FE%2012%20Flow%20preview%20and%20playthrough.md) has no concrete backend blocker ticket yet and still needs product/API clarification
 - [FE 13 Preview submission flow](./frontend-tickets/FE%2013%20Preview%20submission%20flow.md) has no concrete backend blocker ticket yet and still needs product/API clarification

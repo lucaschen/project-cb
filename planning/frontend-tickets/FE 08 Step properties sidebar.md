@@ -1,39 +1,42 @@
-# FE 08 Step properties sidebar
+# FE 08 Builder sidebar UX refresh
 
 ## Status
 Not started.
 
 Current state:
-- The current selection panel supports node-level edits such as step name, next-node connection, decision fallback, and decision rules
-- Step-element property editing itself is not implemented yet
+- The current builder sidebar supports flow metadata editing, builder save/discard, and node-level graph edits
+- The selection panel works functionally, but it is visually bulky, unevenly spaced, and too form-like for quick builder interactions
+- Real step-internal editing is not implemented yet and should not be forced into the sidebar
 
 ## Goal
-Provide the primary editing surface for common step properties.
+Make the builder sidebar feel compact, responsive, and modern while keeping it focused on quick graph-level editing.
 
 ## Scope
-- Edit labels, help text, placeholders, required state
-- Edit supported validation settings
-- Edit basic display and behavior settings
-- Persist changes for the selected step
+- Tighten the sidebar shell, spacing, hierarchy, and responsiveness
+- Improve the `Flow` / `Selection` tab treatment and action grouping
+- Refine step, decision, edge, and empty-selection states into compact control surfaces
+- Improve nearby builder chrome that visually interacts with the sidebar, such as inspector toggle controls
+- Keep the sidebar limited to fast graph-level edits only
 
 ## Technical Notes
-- Keep fast, high-frequency edits in a sidebar or equivalent always-available panel
-- Validation config should be represented in a backend-friendly shape early
-- Use controlled state carefully so the editor remains responsive during frequent edits
+- The sidebar should support quick edits and navigation, not deep step configuration
+- Decision rule controls should remain usable in a narrow drawer without feeling like mini pages
+- The sidebar should remain compatible with the current builder graph and save/discard flow
+- Avoid introducing step-element/property persistence work in this ticket
 
 ## Acceptance Criteria
-- User can edit common step properties for the selected step
-- Changes are reflected in the builder state immediately
-- Persisted step configuration matches backend expectations
-- Invalid property input is surfaced clearly
+- Flow tab is denser, easier to scan, and keeps primary builder actions prominent
+- Selection states for step, decision, edge, and empty selection feel compact and intentional
+- Decision rule controls remain usable with multiple rules in the narrower control surface
+- Sidebar remains responsive without obvious clipping or awkward wrapping
+- Existing graph-level edits, validation behavior, and save/discard behavior continue to work unchanged
 
 ## Dependencies
 - [FE 07 Step list management](./FE%2007%20Step%20list%20management.md)
 
 ## Backend Dependencies
-- Blocked by [BE 04 Step element and property editing APIs](../backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md)
-- Requires read/update persistence for existing step element properties, not only create-time element payloads
+None for FE 08.
 
 ## Open Questions
-- Exact validation types required for MVP
-- Whether all step types share one sidebar schema or require per-type panels
+- How far to push nearby builder chrome polish without turning FE 08 into a full builder-shell redesign
+- Which compact sidebar patterns should be reused later by FE 09 modal entry points

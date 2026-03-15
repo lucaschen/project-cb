@@ -3,12 +3,12 @@ import { NodeType } from "~shared/types/enums";
 type GraphDecisionCondition = {
   id: string;
   order?: number;
-  toNodeId: string;
+  toNodeId: string | null;
 };
 
 type GraphDecisionNode = {
   conditions: GraphDecisionCondition[];
-  fallbackNextNodeId: string;
+  fallbackNextNodeId: string | null;
   nodeId: string;
   type: NodeType.DECISION;
 };
@@ -37,21 +37,21 @@ const getNodeTargets = (node: GraphNode) => {
 
   return [
     node.fallbackNextNodeId,
-    ...sortDecisionConditions(node.conditions).map((condition) => condition.toNodeId),
+    ...sortDecisionConditions(node.conditions).map(
+      (condition) => condition.toNodeId,
+    ),
   ];
 };
 
 export const getOrderedStepNodeIds = (nodes: GraphNode[]) => {
   const nodeById = new Map(nodes.map((node) => [node.nodeId, node]));
-  const inboundReferenceCounts = new Map(
-    nodes.map((node) => [node.nodeId, 0]),
-  );
+  const inboundReferenceCounts = new Map(nodes.map((node) => [node.nodeId, 0]));
   const orderedStepNodeIds: string[] = [];
   const visitedNodeIds = new Set<string>();
 
   for (const node of nodes) {
     for (const targetNodeId of getNodeTargets(node)) {
-      if (!inboundReferenceCounts.has(targetNodeId)) {
+      if (!targetNodeId || !inboundReferenceCounts.has(targetNodeId)) {
         continue;
       }
 
@@ -80,7 +80,9 @@ export const getOrderedStepNodeIds = (nodes: GraphNode[]) => {
     }
 
     for (const targetNodeId of getNodeTargets(node)) {
-      visitNode(targetNodeId);
+      if (targetNodeId) {
+        visitNode(targetNodeId);
+      }
     }
   };
 
@@ -93,7 +95,9 @@ export const getOrderedStepNodeIds = (nodes: GraphNode[]) => {
     visitNode(rootNodeId);
   }
 
-  for (const nodeId of [...nodeById.keys()].sort((left, right) => left.localeCompare(right))) {
+  for (const nodeId of [...nodeById.keys()].sort((left, right) =>
+    left.localeCompare(right),
+  )) {
     visitNode(nodeId);
   }
 

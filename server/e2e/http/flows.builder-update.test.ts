@@ -178,7 +178,7 @@ describe("flow builder update routes", () => {
             nodeId: decisionNodeId,
           },
         ],
-        steps: [
+        stepNodes: [
           {
             coordinates: { x: 10, y: 20 },
             name: "A intro step",
@@ -286,7 +286,7 @@ describe("flow builder update routes", () => {
               nodeId: decisionNodeId,
             },
           ],
-          steps: [
+          stepNodes: [
             {
               coordinates: { x: 1, y: 2 },
               name: "A intro step",
@@ -391,7 +391,7 @@ describe("flow builder update routes", () => {
               nodeId: decisionNodeId,
             },
           ],
-          steps: [
+          stepNodes: [
             {
               coordinates: { x: 30, y: 40 },
               name: "C surviving step",
@@ -423,7 +423,7 @@ describe("flow builder update routes", () => {
         .put(`/flows/${flowEntity.dbModel.id}/builder`)
         .send({
           decisionNodes: [],
-          steps: [],
+          stepNodes: [],
         });
 
       expect(response.status).toBe(401);

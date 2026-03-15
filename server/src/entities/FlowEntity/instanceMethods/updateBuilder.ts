@@ -2,7 +2,6 @@ import type {
   UpdateBuilderInput,
   UpdateBuilderOutput,
 } from "@packages/shared/http/schemas/flows/builder/updateBuilder";
-import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import { NodeType } from "@packages/shared/types/enums";
 import { Op } from "sequelize";
 
@@ -13,20 +12,20 @@ import StepEntity from "~entities/StepEntity";
 import InvalidRequestError from "~src/utils/errors/InvalidRequestError";
 
 import type FlowEntity from "../FlowEntity";
+import getBuilderValidationErrors from "../utils/getBuilderValidationErrors";
 
 export default async function updateBuilder(
   this: FlowEntity,
   payload: UpdateBuilderInput,
 ): Promise<UpdateBuilderOutput> {
   await sequelize.transaction(async (transaction) => {
-    const validationErrors =
-      FlowBuilderEntity.fromUpdateBuilderInput(payload).validate();
+    const validationErrors = getBuilderValidationErrors(payload);
 
     if (validationErrors.length > 0) {
       throw new InvalidRequestError(validationErrors[0]);
     }
 
-    const submittedStepNodeIds = payload.steps.map((step) => step.nodeId);
+    const submittedStepNodeIds = payload.stepNodes.map((step) => step.nodeId);
     const submittedDecisionNodeIds = payload.decisionNodes.map(
       (decisionNode) => decisionNode.nodeId,
     );
@@ -38,25 +37,29 @@ export default async function updateBuilder(
       ...submittedStepNodeIds,
       ...submittedDecisionNodeIds,
     ];
-    const submittedNodeIdSet = new Set(submittedNodeIds);
 
-    const [existingFlowStepEntities, existingFlowDecisionNodeEntities, existingSubmittedNodes] =
-      await Promise.all([
-        StepEntity.findByFlowId(this.dbModel.id, transaction),
-        DecisionNodeEntity.findByFlowId(this.dbModel.id, transaction),
-        Node.findAll({
-          transaction,
-          where: {
-            id: { [Op.in]: submittedNodeIds },
-          },
-        }),
-      ]);
+    const [
+      existingFlowStepEntities,
+      existingFlowDecisionNodeEntities,
+      existingSubmittedNodes,
+    ] = await Promise.all([
+      StepEntity.findByFlowId(this.dbModel.id, transaction),
+      DecisionNodeEntity.findByFlowId(this.dbModel.id, transaction),
+      Node.findAll({
+        transaction,
+        where: {
+          id: { [Op.in]: submittedNodeIds },
+        },
+      }),
+    ]);
 
-    const [existingSubmittedStepEntities, existingSubmittedDecisionNodeEntities] =
-      await Promise.all([
-        StepEntity.findByNodeIds(submittedStepNodeIds, transaction),
-        DecisionNodeEntity.findByNodeIds(submittedDecisionNodeIds, transaction),
-      ]);
+    const [
+      existingSubmittedStepEntities,
+      existingSubmittedDecisionNodeEntities,
+    ] = await Promise.all([
+      StepEntity.findByNodeIds(submittedStepNodeIds, transaction),
+      DecisionNodeEntity.findByNodeIds(submittedDecisionNodeIds, transaction),
+    ]);
 
     const existingFlowStepNodeIdSet = new Set(
       existingFlowStepEntities.map((stepEntity) => stepEntity.dbModel.nodeId),
@@ -76,7 +79,7 @@ export default async function updateBuilder(
       ]),
     );
 
-    for (const step of payload.steps) {
+    for (const step of payload.stepNodes) {
       const existingNode = existingSubmittedNodesById.get(step.nodeId);
 
       if (!existingNode) {
@@ -136,10 +139,12 @@ export default async function updateBuilder(
 
     await StepEntity.syncBuilderSteps({
       existingNodeIds: new Set(
-        existingSubmittedStepEntities.map((stepEntity) => stepEntity.dbModel.nodeId),
+        existingSubmittedStepEntities.map(
+          (stepEntity) => stepEntity.dbModel.nodeId,
+        ),
       ),
       flowId: this.dbModel.id,
-      steps: payload.steps,
+      steps: payload.stepNodes,
       transaction,
     });
 
@@ -155,7 +160,10 @@ export default async function updateBuilder(
       transaction,
     });
 
-    await DecisionNodeEntity.destroyByNodeIds(removedDecisionNodeIds, transaction);
+    await DecisionNodeEntity.destroyByNodeIds(
+      removedDecisionNodeIds,
+      transaction,
+    );
     await StepEntity.destroyByNodeIds(removedStepNodeIds, transaction);
   });
 

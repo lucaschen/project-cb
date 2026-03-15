@@ -93,7 +93,7 @@ export const graphToUpdateBuilderInput = (
       name: node.name,
       nodeId: node.nodeId,
     })),
-    steps: stepNodes.map((node) => ({
+    stepNodes: stepNodes.map((node) => ({
       coordinates: node.coordinates,
       name: node.name,
       nextNodeId: node.nextNodeId,

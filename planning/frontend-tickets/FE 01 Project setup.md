@@ -1,5 +1,14 @@
 # FE 01 Project setup
 
+## Status
+Implemented.
+
+Implemented work:
+- App bootstrapped with `React`, `Vite`, `TanStack Query`, and shared root providers
+- Route structure, protected/public route handling, and shared shell patterns added
+- Shared API client, env handling, query client setup, and reusable UI primitives established
+- Lightweight builder state scaffolding and app-level utilities added
+
 ## Goal
 Establish the frontend application foundation for the MVP using `React + Vite`, `Tailwind`, `TanStack Query`, and `Zustand`.
 

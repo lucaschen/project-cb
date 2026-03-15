@@ -1,5 +1,13 @@
 # BE 01 Flow listing and builder read APIs
 
+## Status
+Implemented.
+
+Current surface:
+- `GET /organizations/:organizationId/flows`
+- `GET /flows/:flowId`
+- Builder reads return canonical flow metadata plus hydrated `flow.nodes`
+
 ## Goal
 Add the read APIs required to list flows within an organization and load an existing flow into the builder with a stable, builder-ready payload.
 

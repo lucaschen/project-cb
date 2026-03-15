@@ -1,5 +1,12 @@
 # FE 14 Organization management surfaces
 
+## Status
+Not started.
+
+Current state:
+- Active organization context is shown in the top navigation
+- Dedicated org switching and management surfaces are not implemented yet
+
 ## Goal
 Add the remaining internal organization management pages after the core builder path is working.
 
@@ -7,6 +14,7 @@ Add the remaining internal organization management pages after the core builder 
 - Switch active organization
 - Member/invite management
 - Organization settings
+- Organization API key management
 - Delete organization flow with safeguards
 
 ## Technical Notes
@@ -26,8 +34,8 @@ Add the remaining internal organization management pages after the core builder 
 
 ## Backend Dependencies
 - Mostly blocked by [BE 06 Organization management APIs](../backend-tickets/BE%2006%20Organization%20management%20APIs.md)
-- Requires backend support for member management, invites, settings updates, and guarded organization deletion
+- Requires backend support for member management, invites, settings updates, API key management, and guarded organization deletion
 
 ## Open Questions
 - Exact roles and permissions model
-- Whether invites are email-based, link-based, or both
+- Whether org switching should be lightweight nav state or a fuller workspace-switching surface

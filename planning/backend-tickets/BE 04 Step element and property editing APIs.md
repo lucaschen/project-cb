@@ -1,5 +1,13 @@
 # BE 04 Step element and property editing APIs
 
+## Status
+Implemented.
+
+Current surface:
+- `GET /flows/:flowId/steps/:stepId/elements`
+- `PUT /flows/:flowId/steps/:stepId/elements`
+- Step element writes remain intentionally separate from the unified builder graph API because they are step-internal content
+
 ## Goal
 Add the missing read and persistence surfaces for editable step elements and their common properties.
 
@@ -31,5 +39,4 @@ Add the missing read and persistence surfaces for editable step elements and the
 - Existing step element creation support
 
 ## Open Questions
-- Exact FE 08 payload shape for representing element property edits before save
 - Whether later FE 09 modal editing should reuse the same full-step save payload or introduce a separate ticket and contract

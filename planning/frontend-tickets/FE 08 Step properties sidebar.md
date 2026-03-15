@@ -1,5 +1,12 @@
 # FE 08 Step properties sidebar
 
+## Status
+Not started.
+
+Current state:
+- The current selection panel supports node-level edits such as step name, next-node connection, decision fallback, and decision rules
+- Step-element property editing itself is not implemented yet
+
 ## Goal
 Provide the primary editing surface for common step properties.
 

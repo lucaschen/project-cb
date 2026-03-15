@@ -1,5 +1,14 @@
 # FE 02 Authentication and sessions
 
+## Status
+Implemented.
+
+Implemented work:
+- Login and sign-up screens exist
+- Session bootstrap happens at app load
+- Protected and public-only route handling is in place
+- Logout clears client-side session context and cached workspace access
+
 ## Goal
 Implement email/password authentication and authenticated session handling for internal users.
 

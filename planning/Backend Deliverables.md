@@ -1,14 +1,25 @@
 # Backend Deliverables
 
+See [Product Spec](./Product%20Spec.md) for the canonical product framing, intended usage model, and MVP boundaries. Treat this file as the derived backend execution backlog.
+
 ## Goal
-Deliver the backend APIs required to unblock the Project CB MVP frontend, keeping the API surface aligned with the current internal-user-first product scope.
+Deliver the backend APIs required to support Project CB as an internal authoring platform plus embeddable guided-form runtime, keeping the API surface aligned with a React-first MVP where flows are authored inside Project CB and rendered inside a client app by API credentials plus flow identity.
 
 ## MVP Principles
 - Unblock the frontend in dependency order
 - Prefer real persisted behavior over placeholder endpoints
 - Keep contracts explicit through shared schemas
 - Reuse the existing session, organization, and flow permission model where possible
-- Avoid over-designing preview/public submission behavior before product scope is fixed
+- Treat the embedded runtime as part of MVP, not just internal preview tooling
+- Keep submission ownership with the host app unless and until the product scope changes
+
+## Implementation Status
+- [BE 01 Flow listing and builder read APIs](./backend-tickets/BE%2001%20Flow%20listing%20and%20builder%20read%20APIs.md): implemented
+- [BE 02 Flow metadata read and update APIs](./backend-tickets/BE%2002%20Flow%20metadata%20read%20and%20update%20APIs.md): implemented
+- [BE 03 Step CRUD and ordering APIs](./backend-tickets/BE%2003%20Step%20CRUD%20and%20ordering%20APIs.md): implemented for ordered step reads; the earlier step-only write path has been superseded by BE 05 and removed from public routing
+- [BE 04 Step element and property editing APIs](./backend-tickets/BE%2004%20Step%20element%20and%20property%20editing%20APIs.md): implemented
+- [BE 05 Unified builder graph save and decision logic APIs](./backend-tickets/BE%2005%20Unified%20builder%20graph%20save%20and%20decision%20logic%20APIs.md): implemented as the canonical write path for direct `Flow` children
+- [BE 06 Organization management APIs](./backend-tickets/BE%2006%20Organization%20management%20APIs.md): implemented, including member management, email invites, soft delete, and dedicated organization API key management routes backed by `organizationApiKeys`
 
 ## Delivery Sequence
 ### Flow read surfaces
@@ -29,6 +40,10 @@ Deliver the backend APIs required to unblock the Project CB MVP frontend, keepin
 - Organization management APIs
   - [BE 06 Organization management APIs](./backend-tickets/BE%2006%20Organization%20management%20APIs.md)
 
+### Backend debt follow-up
+- Backend architecture and contract cleanup
+  - [BE Debt 01 Organization admin follow-up cleanup](./backend-tickets/BE%20Debt%2001%20Organization%20admin%20follow-up%20cleanup.md)
+
 ## Deliverable Areas
 ### 1. Flow retrieval
 Provide org-scoped flow listing and a builder-ready flow read payload so the frontend can load existing flows without inventing local-only state.
@@ -42,6 +57,9 @@ Provide the missing persistence surfaces for ordered steps, step-internal conten
 ### 4. Organization management
 Add the member, invite, settings, and delete-org surfaces required after the core builder path is stable.
 
+### 5. Backend debt cleanup
+Track post-implementation follow-up work where shipped behavior is functional but still needs contract, transaction, or naming cleanup to stay aligned with the intended architecture.
+
 ## Out of Scope for This Backlog
 - Public respondent APIs
 - OAuth or external identity providers
@@ -49,8 +67,5 @@ Add the member, invite, settings, and delete-org surfaces required after the cor
 - Overly broad role systems beyond the current admin/editor/viewer model unless required by the product
 
 ## Open Planning Questions
-- Exact flow metadata fields beyond `name` and `slug` for MVP
-- Canonical builder read payload shape for flows, nodes, steps, and editable properties
-- Whether decision logic should support step-level routing only or also field-level visibility in MVP
-- Whether the transitional BE 03 step-only write path should remain available after BE 05 lands
-- Whether organization invites should remain user-based, become email-based, or support both
+- Whether organization detail should remain admin-only or gain a separate member-readable read surface beyond the current summary list
+- Whether preview/playthrough and submission APIs should stay as separate tickets or converge on a broader execution surface later

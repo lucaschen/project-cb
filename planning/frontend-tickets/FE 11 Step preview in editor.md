@@ -1,5 +1,8 @@
 # FE 11 Step preview in editor
 
+## Status
+Not started.
+
 ## Goal
 Let users preview the currently edited step during the editing process.
 
@@ -11,7 +14,7 @@ Let users preview the currently edited step during the editing process.
 
 ## Technical Notes
 - This is distinct from the full flow playthrough
-- Preview should be close enough to runtime rendering that stakeholders and builders can trust it
+- Preview should be close enough to the future embedded runtime that stakeholders and builders can trust it
 - Prefer sharing rendering primitives with the full preview/playthrough implementation where possible
 
 ## Acceptance Criteria

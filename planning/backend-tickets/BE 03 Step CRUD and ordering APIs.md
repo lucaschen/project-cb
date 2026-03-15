@@ -1,5 +1,16 @@
 # BE 03 Step CRUD and ordering APIs
 
+## Status
+Partially superseded.
+
+Implemented pieces:
+- ordered step reads
+- persisted step ordering on `Step.order`
+- builder payload support for step order
+
+Superseded pieces:
+- the earlier step-only write surface was transitional and has been removed from public routing after BE 05 introduced `PUT /flows/:flowId/builder`
+
 ## Goal
 Provide the CRUD and ordering APIs required for reliable step management inside the flow builder.
 
@@ -31,5 +42,3 @@ Provide the CRUD and ordering APIs required for reliable step management inside 
 
 ## Open Questions
 - Whether step duplication is needed in MVP
-- Whether reorder should be whole-list replacement, move-by-index, or move-by-relative-position
-- Minimum step summary fields required by the step list UI

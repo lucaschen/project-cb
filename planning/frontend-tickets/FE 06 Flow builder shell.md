@@ -1,5 +1,18 @@
 # FE 06 Flow builder shell
 
+## Status
+Partially implemented.
+
+Implemented work:
+- `/flows/:flowId` builder route exists and loads server-backed flow data
+- Left palette, center React Flow canvas, and right inspector sidebar layout are in place
+- Read-only and local-draft node rendering exists in the canvas
+- `Flow` and `Selection` inspector tabs exist
+- Flow-level metadata editing and builder save/discard controls exist in the sidebar
+
+Remaining gap:
+- The `Flow` tab still needs the stronger structure-outline experience originally envisioned for this shell ticket
+
 ## Goal
 Create the first real visual flow-builder shell for `/flows/:flowId`, with the full page layout, React Flow canvas, panel chrome, and right-panel tab switching in place.
 

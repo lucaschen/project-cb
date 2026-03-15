@@ -1,5 +1,14 @@
 # FE 04 Flow list page
 
+## Status
+Implemented.
+
+Implemented work:
+- Org-scoped flow list route exists
+- Empty, loading, retry, and populated states are present
+- Create-flow entry point exists on the page
+- Users can open an existing flow from the list
+
 ## Goal
 Provide the main internal page for viewing and entering flows within the active organization.
 

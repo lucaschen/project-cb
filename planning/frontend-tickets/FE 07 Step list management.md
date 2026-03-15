@@ -1,5 +1,20 @@
 # FE 07 Builder graph interactions and node management
 
+## Status
+Partially implemented.
+
+Implemented work:
+- Drag node types from the palette into the canvas
+- Select nodes and edges from the canvas
+- Add and remove nodes locally
+- Reconnect default, fallback, and decision-rule edges
+- Maintain local draft builder graph state with save/discard behavior
+
+Remaining gap:
+- No dedicated structure list UI yet
+- No explicit step reorder interaction yet
+- Ticket should now be read as broader graph/node management, not only a step list UI
+
 ## Goal
 Add the first real builder logic on top of the FE 06 shell so users can create, select, remove, and manage nodes directly in the builder.
 
@@ -21,7 +36,7 @@ Add the first real builder logic on top of the FE 06 shell so users can create, 
 
 ## Acceptance Criteria
 - User can spawn a new node into the canvas from the left palette
-- User can select a node from either the canvas or the structure list and see selection state stay in sync
+- User can select a node from the canvas and, once a structure list exists, keep selection state in sync there as well
 - User can remove supported nodes and see the canvas and structure list update consistently
 - User can reorder steps where supported and see the new order reflected consistently
 - Builder interaction state is clearly separated from persisted server state
@@ -35,5 +50,4 @@ Add the first real builder logic on top of the FE 06 shell so users can create, 
 - Requires ordered step reads plus a flow-graph save API that can persist step membership and ordering without splitting direct `Flow` child edits across multiple endpoints
 
 ## Open Questions
-- Whether decision-node creation lands in the same ticket or follows immediately after the first step-node flow
 - Whether newly spawned nodes persist immediately or remain local drafts until an explicit save point exists

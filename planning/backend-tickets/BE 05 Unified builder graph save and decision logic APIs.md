@@ -1,5 +1,13 @@
 # BE 05 Unified builder graph save and decision logic APIs
 
+## Status
+Implemented.
+
+Current canonical write surface:
+- `PUT /flows/:flowId/builder`
+- Returns the same canonical shape as `GET /flows/:flowId`
+- Replaced the older split write routes for step-only graph saves and decision-node creation
+
 ## Goal
 Expose the single flow-graph write API required to persist, validate, and reload step structure plus decision-based routing in one consistent transaction.
 
@@ -38,5 +46,4 @@ Expose the single flow-graph write API required to persist, validate, and reload
 - Existing decision node creation support
 
 ## Open Questions
-- Exact request/response contract for the unified builder graph save payload
-- Whether the existing BE 03 step-only write route should be deprecated immediately or kept temporarily for backwards compatibility
+- Whether later preview or execution APIs should consume this builder graph shape directly or introduce a separate execution-oriented read model

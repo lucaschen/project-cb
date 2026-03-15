@@ -1,5 +1,8 @@
 # FE 09 Step modal editor
 
+## Status
+Not started.
+
 ## Goal
 Support richer editing flows for complex step configuration that should not be forced into the sidebar.
 

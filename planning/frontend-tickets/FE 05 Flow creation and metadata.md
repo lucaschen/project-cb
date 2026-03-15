@@ -1,12 +1,21 @@
 # FE 05 Flow creation and metadata
 
+## Status
+Implemented.
+
+Implemented work:
+- Flows can be created from the list page
+- Creation routes directly into the builder
+- Flow metadata editing for `name` and `description` exists in the builder sidebar
+- Save/update state is surfaced to the user through button state and toasts
+
 ## Goal
 Allow internal users to create a new flow and manage its top-level metadata.
 
 ## Scope
 - Create flow action from list page
 - Flow metadata form or panel
-- Edit name, description, and status fields if supported
+- Edit supported metadata fields such as `name` and `description`
 - Persist flow creation and metadata updates
 
 ## Technical Notes
@@ -28,5 +37,4 @@ Allow internal users to create a new flow and manage its top-level metadata.
 - Initial flow creation exists, but metadata reads and updates for fields beyond the current create payload still need backend support
 
 ## Open Questions
-- Exact metadata fields supported by backend
-- Whether status transitions exist in MVP
+- Whether any additional flow metadata beyond `name` and `description` should enter MVP

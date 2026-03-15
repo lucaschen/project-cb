@@ -1,14 +1,33 @@
 # Frontend Deliverables
 
+See [Product Spec](./Product%20Spec.md) for the canonical product framing, intended usage model, and MVP boundaries. Treat this file as the derived frontend execution backlog.
+
 ## Goal
-Deliver a stakeholder-ready MVP frontend for Project CB using `React + Vite`, `Tailwind`, `TanStack Query`, and `Zustand`, with API-backed state treated as the source of truth wherever possible.
+Deliver a stakeholder-ready MVP frontend for Project CB as both an internal authoring surface and a showcase-ready embedded runtime for guided multi-step forms with branching, using `React + Vite`, `Tailwind`, `TanStack Query`, and `Zustand`, with API-backed state treated as the source of truth wherever possible.
 
 ## MVP Principles
 - Working over mocked
-- Internal-user only for MVP
+- Internal authoring plus client-facing embedded runtime in MVP
 - Presentable to stakeholders
 - Granular delivery so each ticket can be implemented and verified before moving forward
 - `TanStack Query` for server state, `Zustand` for local editor and UI state only
+- React-first embedded runtime in MVP, with host-app theming expected
+
+## Implementation Status
+- [FE 01 Project setup](./frontend-tickets/FE%2001%20Project%20setup.md): implemented
+- [FE 02 Authentication and sessions](./frontend-tickets/FE%2002%20Authentication%20and%20sessions.md): implemented
+- [FE 03 Organization creation and onboarding](./frontend-tickets/FE%2003%20Organization%20creation%20and%20onboarding.md): implemented
+- [FE 04 Flow list page](./frontend-tickets/FE%2004%20Flow%20list%20page.md): implemented
+- [FE 05 Flow creation and metadata](./frontend-tickets/FE%2005%20Flow%20creation%20and%20metadata.md): implemented
+- [FE 06 Flow builder shell](./frontend-tickets/FE%2006%20Flow%20builder%20shell.md): partially implemented
+- [FE 07 Builder graph interactions and node management](./frontend-tickets/FE%2007%20Step%20list%20management.md): partially implemented
+- [FE 08 Step properties sidebar](./frontend-tickets/FE%2008%20Step%20properties%20sidebar.md): not started
+- [FE 09 Step modal editor](./frontend-tickets/FE%2009%20Step%20modal%20editor.md): not started
+- [FE 10 Flow branching and logic](./frontend-tickets/FE%2010%20Flow%20branching%20and%20logic.md): partially implemented
+- [FE 11 Step preview in editor](./frontend-tickets/FE%2011%20Step%20preview%20in%20editor.md): not started
+- [FE 12 Flow preview and playthrough](./frontend-tickets/FE%2012%20Flow%20preview%20and%20playthrough.md): not started and now framed as embedded-runtime work rather than internal-only preview
+- [FE 13 Preview submission flow](./frontend-tickets/FE%2013%20Preview%20submission%20flow.md): not started and now framed around host-app-owned submission handoff rather than Project CB-owned response storage
+- [FE 14 Organization management surfaces](./frontend-tickets/FE%2014%20Organization%20management%20surfaces.md): not started
 
 ## Delivery Sequence
 ### Foundation and access
@@ -39,9 +58,9 @@ Deliver a stakeholder-ready MVP frontend for Project CB using `React + Vite`, `T
   - [FE 11 Step preview in editor](./frontend-tickets/FE%2011%20Step%20preview%20in%20editor.md)
 
 ### Preview and execution
-- Full flow preview and playthrough for internal users
+- Embedded runtime preview and playthrough
   - [FE 12 Flow preview and playthrough](./frontend-tickets/FE%2012%20Flow%20preview%20and%20playthrough.md)
-- Submission handling and completion states
+- Submission handoff and completion states
   - [FE 13 Preview submission flow](./frontend-tickets/FE%2013%20Preview%20submission%20flow.md)
 
 ### Later-stage org management
@@ -74,7 +93,7 @@ Provide list and create flows experiences, flow metadata editing, and the top-le
 Provide the main builder experience for composing multi-step flows, including node/step graph editing, property editing, richer modal editing for complex step types, and local editing state.
 
 ### 5. Logic and preview
-Provide meaningful conditional logic and stakeholder-ready preview behavior. This includes step preview while editing, real playthrough navigation, validation, branching, and submission handling.
+Provide meaningful conditional logic and an embedded-runtime-ready preview experience. This includes step preview while editing, real playthrough navigation, validation, branching, and host-app-oriented submission handoff behavior.
 
 ### 6. Organization management
 After the core builder and preview flows are stable, add the remaining org-management surfaces such as switching orgs, member/invite management, org settings, and delete org.

@@ -1,5 +1,14 @@
 # BE 02 Flow metadata read and update APIs
 
+## Status
+Implemented.
+
+Current MVP contract:
+- `description` is optional and nullable
+- `slug` remains immutable after create
+- `status` remains out of scope
+- `PATCH /flows/:flowId` updates `name` and `description`
+
 ## Goal
 Expand flow metadata support beyond initial creation so the frontend can load and persist the MVP flow-level fields.
 
@@ -28,6 +37,4 @@ Expand flow metadata support beyond initial creation so the frontend can load an
 - Existing flow permission checks
 
 ## Open Questions
-- Whether `description` is required for MVP or optional
-- Whether status transitions exist in MVP and, if so, which states are valid
-- Whether `slug` remains editable after creation
+- Whether additional flow metadata beyond `name` and `description` should enter MVP before preview work starts

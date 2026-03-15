@@ -1,5 +1,14 @@
 # FE 03 Organization creation and onboarding
 
+## Status
+Implemented.
+
+Implemented work:
+- Users without an org are routed into onboarding
+- Organization creation form exists
+- Successful create sets active organization context and routes into the flows workspace
+- Existing-org users bypass onboarding through the root app flow
+
 ## Goal
 Allow a newly authenticated internal user to create an organization as the first meaningful action in the product.
 

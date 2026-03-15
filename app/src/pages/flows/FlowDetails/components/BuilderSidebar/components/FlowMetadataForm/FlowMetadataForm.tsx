@@ -131,11 +131,19 @@ const FlowMetadataForm = ({
 
   return (
     <form className="space-y-3" onSubmit={handleSave}>
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-white">Metadata</h3>
-        <p className="text-sm leading-5 text-slate-400">
-          Top-level flow details for this builder.
+      <div className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          Metadata
         </p>
+        <p className="text-sm leading-5 text-slate-400">
+          Flow name and description.
+        </p>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Slug
+          </p>
+          <p className="mt-1 text-sm text-slate-200">{flow.slug}</p>
+        </div>
       </div>
       <FormField
         error={nameError}
@@ -151,18 +159,19 @@ const FlowMetadataForm = ({
         label="Description"
         onChange={(event) => setFlowDescription(event.target.value)}
         placeholder="Capture the purpose of this flow and who it serves."
+        rows={4}
         value={flowDescription}
       />
-      <div className="flex flex-col gap-2">
+      <div className="space-y-2">
         <Button
-          className="h-10 px-3 text-sm"
+          className="h-9 w-full px-3 text-sm"
           disabled={!isDirty}
           isBusy={updateFlowMetadataMutation.isPending}
           type="submit"
         >
           Save metadata
         </Button>
-        <p className="text-sm leading-5 text-slate-500">
+        <p className="text-xs leading-5 text-slate-500">
           {isDirty
             ? "Unsaved metadata changes are ready to save."
             : "No metadata changes to save."}

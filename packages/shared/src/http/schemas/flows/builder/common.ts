@@ -26,7 +26,7 @@ export const builderDecisionConditionInputSchema = z
   .object({
     id: z.string().uuid(),
     statement: conditionStatementSchema,
-    toNodeId: z.string().uuid(),
+    toNodeId: z.string().uuid().nullable(),
   })
   .strict();
 
@@ -38,7 +38,7 @@ export const builderDecisionNodeInputSchema = z
   .object({
     conditions: z.array(builderDecisionConditionInputSchema),
     coordinates: builderNodeCoordinatesSchema,
-    fallbackNextNodeId: z.string().uuid(),
+    fallbackNextNodeId: z.string().uuid().nullable(),
     name: z.string().min(1),
     nodeId: z.string().uuid(),
   })

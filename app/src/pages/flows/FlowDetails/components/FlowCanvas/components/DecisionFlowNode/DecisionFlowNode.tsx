@@ -1,13 +1,13 @@
+import type { GraphDecisionNode } from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
+import {
+  DECISION_FALLBACK_SOURCE_HANDLE_ID,
+  getDecisionRuleSourceHandleId,
+} from "@packages/shared/entities/FlowGraphEntity/utils/graph";
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position, useUpdateNodeInternals } from "@xyflow/react";
 import { useEffect } from "react";
 
-import {
-  type BuilderDecisionNode,
-  DECISION_FALLBACK_SOURCE_HANDLE_ID,
-  formatComparisonStatement,
-  getDecisionRuleSourceHandleId,
-} from "../../../../utils/builderFlowToReactFlow";
+import { formatComparisonStatement } from "../../../../utils/builderFlowToReactFlow";
 
 const handleStyle = {
   height: 18,
@@ -20,7 +20,7 @@ const DecisionFlowNode = ({
   id,
   data,
   selected,
-}: NodeProps<BuilderDecisionNode>) => {
+}: NodeProps<GraphDecisionNode>) => {
   const updateNodeInternals = useUpdateNodeInternals();
 
   useEffect(() => {

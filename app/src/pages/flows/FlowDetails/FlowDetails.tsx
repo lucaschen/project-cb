@@ -5,11 +5,13 @@ import { queryKeys } from "@app/api/queryKeys";
 import { Button } from "@app/components/ui/Button";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import useDebouncedMemo from "@app/hooks/useDebouncedMemo";
+import useRootContext from "@app/hooks/useRootContext";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
-import useRootContext from "@app/hooks/useRootContext";
+import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import type { FlowWithNodesType } from "@packages/shared/http/schemas/flows/common";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, PanelsLeftBottom, PanelsTopLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -19,7 +21,6 @@ import FlowCanvas from "./components/FlowCanvas";
 import useBuilderLeaveConfirmation from "./hooks/useBuilderLeaveConfirmation";
 import useBuilderStore from "./store/builderStore";
 import { flowToReactFlow } from "./utils/builderFlowToReactFlow";
-import { getBuilderValidationErrors, isGraphDirty } from "./utils/builderGraph";
 
 const Wrapper = () => {
   const { flowId } = useParams<{ flowId: string }>();
@@ -68,7 +69,8 @@ const Wrapper = () => {
           byStatus: {
             404: "Project CB could not find this flow. It may have been removed or you may no longer have access to it.",
           },
-          default: "Project CB could not load this flow right now. Retry the request or return to the flows workspace.",
+          default:
+            "Project CB could not load this flow right now. Retry the request or return to the flows workspace.",
         })}
         eyebrow="Flow Unavailable"
         title="Unable to load flow"
@@ -86,6 +88,10 @@ type Props = {
 const FlowDetails = ({ flow }: Props) => {
   const { activeOrganization } = useRootContext();
   const baseReactFlowGraph = useMemo(() => flowToReactFlow(flow), [flow]);
+  const baseBuilderPayload = useMemo(
+    () => FlowBuilderEntity.fromFlow(flow).getPayload(),
+    [flow],
+  );
 
   const initializeGraph = useBuilderStore((state) => state.initializeGraph);
   const edges = useBuilderStore((state) => state.edges);
@@ -97,15 +103,17 @@ const FlowDetails = ({ flow }: Props) => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(true);
 
   const isDirty = useDebouncedMemo(
-    () => isGraphDirty(currentGraph, baseReactFlowGraph),
-    [currentGraph, baseReactFlowGraph],
-    500,
+    () =>
+      JSON.stringify(FlowBuilderEntity.fromGraph(currentGraph).getPayload()) !==
+      JSON.stringify(baseBuilderPayload),
+    [baseBuilderPayload, currentGraph],
+    200,
   );
 
   const validationErrors = useDebouncedMemo(
-    () => getBuilderValidationErrors(baseReactFlowGraph ? currentGraph : null),
-    [baseReactFlowGraph, currentGraph],
-    500,
+    () => FlowBuilderEntity.fromGraph(currentGraph).getValidationErrors(),
+    [currentGraph],
+    200,
   );
 
   useEffect(() => {
@@ -119,46 +127,35 @@ const FlowDetails = ({ flow }: Props) => {
   if (!activeOrganization) return null;
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col overflow-hidden px-2 py-2 sm:px-3 sm:py-3">
-      <div className="relative flex min-h-0 flex-1 items-stretch gap-2 overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-3 top-3 z-30 flex items-start justify-between">
-          <button
-            className={`pointer-events-auto rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur ${
-              isPaletteOpen
-                ? "border-sky-300/30 bg-sky-300/10 text-sky-100"
-                : "border-white/10 bg-slate-950/85 text-slate-300"
-            }`}
-            onClick={() => setIsPaletteOpen((currentValue) => !currentValue)}
-            type="button"
-          >
-            {isPaletteOpen ? "Hide palette" : "Show palette"}
-          </button>
-          <button
-            className={`pointer-events-auto rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_12px_30px_rgba(2,6,23,0.32)] backdrop-blur ${
-              isInspectorOpen
-                ? "border-fuchsia-300/30 bg-fuchsia-300/10 text-fuchsia-100"
-                : "border-white/10 bg-slate-950/85 text-slate-300"
-            }`}
-            onClick={() => setIsInspectorOpen((currentValue) => !currentValue)}
-            type="button"
-          >
-            {isInspectorOpen ? "Hide inspector" : "Show inspector"}
-          </button>
-        </div>
+    <main className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-950">
+      <div className="relative flex min-h-0 flex-1 items-stretch overflow-hidden">
         {isPaletteOpen ? (
-          <div className="flex h-full min-h-0 w-[216px] shrink-0 pt-16">
+          <div className="relative flex h-full min-h-0 w-[216px] shrink-0">
             <BuilderPalette isOpen={isPaletteOpen} />
+            <button
+              aria-label="Collapse palette"
+              className="absolute right-0 top-1/4 z-30 flex h-10 w-10 translate-x-1/2 items-center justify-center rounded-full border border-white/10 bg-slate-950/72 text-slate-300 shadow-[0_12px_32px_rgba(2,6,23,0.32)] backdrop-blur transition hover:border-sky-300/35 hover:bg-slate-900/88 hover:text-sky-100"
+              onClick={() => setIsPaletteOpen(false)}
+              type="button"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
           </div>
-        ) : null}
+        ) : (
+          <button
+            aria-label="Expand palette"
+            className="absolute left-3 top-1/4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-950/72 text-slate-300 shadow-[0_12px_32px_rgba(2,6,23,0.32)] backdrop-blur transition hover:border-sky-300/35 hover:bg-slate-900/88 hover:text-sky-100"
+            onClick={() => setIsPaletteOpen(true)}
+            type="button"
+          >
+            <PanelsLeftBottom className="h-4 w-4" />
+          </button>
+        )}
         <div className="flex h-full min-h-0 min-w-0 flex-1">
-          <FlowCanvas
-            flowName={flow.name}
-            flowSlug={flow.slug}
-            isDirty={isDirty}
-          />
+          <FlowCanvas />
         </div>
         {isInspectorOpen ? (
-          <div className="flex h-full min-h-0 w-[404px] shrink-0 pt-16">
+          <div className="relative flex h-full min-h-0 w-[392px] shrink-0 xl:w-[404px]">
             <BuilderSidebar
               activeOrganizationId={activeOrganization.id}
               flow={flow}
@@ -166,8 +163,25 @@ const FlowDetails = ({ flow }: Props) => {
               isOpen={isInspectorOpen}
               validationErrors={validationErrors}
             />
+            <button
+              aria-label="Collapse inspector"
+              className="absolute left-0 top-1/4 z-30 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-white/10 bg-slate-950/72 text-slate-300 shadow-[0_12px_32px_rgba(2,6,23,0.32)] backdrop-blur transition hover:border-fuchsia-300/35 hover:bg-slate-900/88 hover:text-fuchsia-100"
+              onClick={() => setIsInspectorOpen(false)}
+              type="button"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
-        ) : null}
+        ) : (
+          <button
+            aria-label="Expand inspector"
+            className="absolute right-3 top-1/4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-950/72 text-slate-300 shadow-[0_12px_32px_rgba(2,6,23,0.32)] backdrop-blur transition hover:border-fuchsia-300/35 hover:bg-slate-900/88 hover:text-fuchsia-100"
+            onClick={() => setIsInspectorOpen(true)}
+            type="button"
+          >
+            <PanelsTopLeft className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </main>
   );

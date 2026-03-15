@@ -1,22 +1,18 @@
+import type {
+  FlowGraphEdge,
+  GraphDecisionRuleEdgeData,
+} from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
 import type { EdgeProps } from "@xyflow/react";
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from "@xyflow/react";
-
-import type {
-  BuilderDecisionEdge,
-  BuilderFlowEdge as BuilderFlowEdgeType,
-  BuilderFlowEdgeData,
-} from "../../../../utils/builderFlowToReactFlow";
 
 const DECISION_RULE_COLORS = ["#22d3ee", "#a855f7", "#f97316", "#84cc16"];
 
 const getDecisionRuleColor = (
-  edgeData: BuilderDecisionEdge["data"],
+  edgeData: GraphDecisionRuleEdgeData,
   selected: boolean,
 ) => {
   const baseColor =
-    DECISION_RULE_COLORS[
-      edgeData.conditionOrder % DECISION_RULE_COLORS.length
-    ];
+    DECISION_RULE_COLORS[edgeData.conditionOrder % DECISION_RULE_COLORS.length];
 
   if (!selected) {
     return baseColor;
@@ -25,15 +21,12 @@ const getDecisionRuleColor = (
   return "#ffffff";
 };
 
-const getStrokeColor = (
-  edgeData: BuilderFlowEdgeData,
-  selected: boolean,
-) => {
-  if (edgeData.kind === "fallback") {
+const getStrokeColor = (edgeData: FlowGraphEdge["data"], selected: boolean) => {
+  if (edgeData.type === "fallback") {
     return selected ? "#fbbf24" : "#f59e0b";
   }
 
-  if (edgeData.kind === "decision") {
+  if (edgeData.type === "decision") {
     return getDecisionRuleColor(edgeData, selected);
   }
 
@@ -52,7 +45,7 @@ const BuilderGraphEdge = ({
   targetPosition,
   targetX,
   targetY,
-}: EdgeProps<BuilderFlowEdgeType>) => {
+}: EdgeProps<FlowGraphEdge>) => {
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     borderRadius: 18,
     offset: 28,
@@ -79,10 +72,10 @@ const BuilderGraphEdge = ({
           strokeWidth: selected ? 4.5 : 3.25,
         }}
       />
-      {data.kind === "decision" && label ? (
+      {data.type === "decision" && label ? (
         <EdgeLabelRenderer>
           <div
-            className="pointer-events-none absolute rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] shadow-[0_12px_30px_rgba(15,23,42,0.35)] animate-[pulse_2.8s_ease-in-out_infinite]"
+            className="pointer-events-none absolute max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.01em] shadow-[0_12px_30px_rgba(15,23,42,0.35)] animate-[pulse_2.8s_ease-in-out_infinite]"
             style={{
               backgroundColor: "rgba(2, 6, 23, 0.92)",
               borderColor: `${stroke}55`,

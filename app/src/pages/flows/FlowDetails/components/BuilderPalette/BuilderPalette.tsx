@@ -1,22 +1,26 @@
-import { Card } from "@app/components/ui/Card";
-import type { NodeTypes } from "@xyflow/react";
+import { NodeType } from "@packages/shared/types/enums";
 
 export const BUILDER_NODE_KIND = "application/project-cb-builder-node";
+
+type BuilderNodeKind = "decision" | "step";
 
 const paletteItems: {
   description: string;
   title: string;
-  nodeType: keyof NodeTypes;
+  graphNodeType: BuilderNodeKind;
+  nodeType: NodeType;
 }[] = [
   {
     description: "Drag into the canvas to add a new step and wire it later.",
-    nodeType: "step",
+    graphNodeType: "step",
+    nodeType: NodeType.STEP,
     title: "Step",
   },
   {
     description:
       "Drag into the canvas to add a decision once a valid fallback target exists.",
-    nodeType: "decision",
+    graphNodeType: "decision",
+    nodeType: NodeType.DECISION,
     title: "Decision",
   },
 ];
@@ -28,7 +32,7 @@ type BuilderPaletteProps = {
 const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
   return (
     <aside className={`h-full min-h-0 w-full ${isOpen ? "block" : "hidden"}`}>
-      <Card className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto rounded-[24px] border-white/10 bg-slate-950/85 p-3">
+      <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto border-r border-white/8 bg-slate-950/94 px-4 py-5">
         <div className="space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Palette
@@ -43,10 +47,10 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
 
             return (
               <div
-                className={`rounded-[20px] border border-dashed px-3 py-3 ${
+                className={`rounded-[18px] border border-dashed px-3 py-3 ${
                   isDisabled
                     ? "cursor-not-allowed border-white/10 bg-white/5 opacity-60"
-                    : item.nodeType === "decision"
+                    : item.nodeType === NodeType.DECISION
                       ? "cursor-grab border-fuchsia-300/30 bg-fuchsia-300/8"
                       : "cursor-grab border-sky-300/30 bg-sky-300/8"
                 }`}
@@ -59,7 +63,10 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
                   }
 
                   event.dataTransfer.effectAllowed = "move";
-                  event.dataTransfer.setData(BUILDER_NODE_KIND, item.nodeType);
+                  event.dataTransfer.setData(
+                    BUILDER_NODE_KIND,
+                    item.graphNodeType,
+                  );
                 }}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -79,7 +86,7 @@ const BuilderPalette = ({ isOpen }: BuilderPaletteProps) => {
             );
           })}
         </div>
-      </Card>
+      </div>
     </aside>
   );
 };

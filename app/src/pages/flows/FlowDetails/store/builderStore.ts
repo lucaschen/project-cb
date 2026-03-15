@@ -1,106 +1,117 @@
+import FlowGraphEntity from "@packages/shared/entities/FlowGraphEntity/FlowGraphEntity";
+import type {
+  FlowGraph,
+  FlowGraphEdge,
+  FlowGraphNode,
+} from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
 import type { NodeChange } from "@xyflow/react";
 import { applyNodeChanges } from "@xyflow/react";
 import { create } from "zustand";
-
-import type {
-  BuilderCanvasGraph,
-  BuilderFlowEdge,
-  BuilderFlowNode,
-} from "../utils/builderFlowToReactFlow";
-import { sanitizeSelectionAfterGraphReplace } from "../utils/builderGraph";
 
 export type SelectedItem = {
   id: string;
   kind: "edge" | "node";
 } | null;
 
+export type InspectorTab = "flow" | "selection";
+
 type ReactFlowStore = {
-  edges: BuilderFlowEdge[];
-  nodes: BuilderFlowNode[];
+  graphEntity: FlowGraphEntity;
+  edges: FlowGraphEdge[];
+  nodes: FlowGraphNode[];
+  inspectorTab: InspectorTab;
   selectedItem: SelectedItem;
-  applyNodeChanges: (changes: NodeChange<BuilderFlowNode>[]) => void;
+  applyNodeChanges: (changes: NodeChange<FlowGraphNode>[]) => void;
   initializeGraph: (
-    graph: BuilderCanvasGraph,
+    graph: FlowGraph,
     options?: { preserveSelection?: boolean },
   ) => void;
-  resetGraph: () => void;
+  setInspectorTab: (tab: InspectorTab) => void;
+  updateGraph: (mutateGraphCallback: (graph: FlowGraphEntity) => void) => void;
   selectItem: (item: SelectedItem) => void;
 };
 
 const useBuilderStore = create<ReactFlowStore>((set) => ({
+  graphEntity: new FlowGraphEntity({
+    edges: [],
+    nodes: [],
+  }),
   edges: [],
   nodes: [],
+  inspectorTab: "flow",
   selectedItem: null,
   applyNodeChanges: (changes) =>
     set((state) => {
-      const semanticChanges = changes.filter(
-        (change) => change.type !== "select",
-      );
-
-      if (semanticChanges.length === 0) {
+      if (changes.length === 0) {
         return state;
       }
 
-      const nextNodes = applyNodeChanges(semanticChanges, state.nodes);
+      const nextNodes = applyNodeChanges(changes, state.nodes);
+      const positionChanges = changes.filter(
+        (change) => change.type === "position",
+      ) as Array<Extract<NodeChange<FlowGraphNode>, { type: "position" }>>;
 
-      if (
-        nextNodes.length === state.nodes.length &&
-        nextNodes.every((node, index) => node === state.nodes[index])
-      ) {
-        return state;
+      for (const change of positionChanges) {
+        const node = state.graphEntity.getNodeById(change.id);
+
+        if (!node || !change.position) {
+          continue;
+        }
+
+        node.position = change.position;
       }
 
       return {
         nodes: nextNodes,
       };
     }),
-  initializeGraph: (graph, options = {}) =>
-    set((state) => {
-      const nextSelectedItem = options.preserveSelection
-        ? sanitizeSelectionAfterGraphReplace(graph, state.selectedItem)
-        : null;
-
-      if (
-        state.edges === graph.edges &&
-        state.nodes === graph.nodes &&
-        state.selectedItem === nextSelectedItem
-      ) {
-        return state;
-      }
+  initializeGraph: (graph) =>
+    set(() => {
+      const flowGraphEntity = new FlowGraphEntity(graph);
+      const { edges, nodes } = flowGraphEntity.getGraph();
 
       return {
-        edges: graph.edges,
-        nodes: graph.nodes,
-        selectedItem: nextSelectedItem,
+        graphEntity: flowGraphEntity,
+        edges,
+        nodes,
       };
     }),
-  resetGraph: () =>
+  setInspectorTab: (tab) =>
     set((state) => {
-      if (
-        state.edges.length === 0 &&
-        state.nodes.length === 0 &&
-        state.selectedItem === null
-      ) {
+      if (state.inspectorTab === tab) {
         return state;
       }
 
       return {
-        edges: [],
-        nodes: [],
-        selectedItem: null,
+        inspectorTab: tab,
       };
     }),
   selectItem: (item) =>
     set((state) => {
+      const nextInspectorTab = item === null ? "flow" : "selection";
+
       if (
         state.selectedItem?.id === item?.id &&
-        state.selectedItem?.kind === item?.kind
+        state.selectedItem?.kind === item?.kind &&
+        state.inspectorTab === nextInspectorTab
       ) {
         return state;
       }
 
       return {
+        inspectorTab: nextInspectorTab,
         selectedItem: item,
+      };
+    }),
+  updateGraph: (mutateGraphCallback) =>
+    set((state) => {
+      mutateGraphCallback(state.graphEntity);
+
+      const nextGraph = state.graphEntity.getGraph();
+
+      return {
+        edges: nextGraph.edges,
+        nodes: nextGraph.nodes,
       };
     }),
 }));

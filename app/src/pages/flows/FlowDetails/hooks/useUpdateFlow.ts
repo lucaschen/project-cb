@@ -2,9 +2,9 @@ import { updateFlowBuilder } from "@app/api/flows";
 import { queryKeys } from "@app/api/queryKeys";
 import { useToast } from "@app/components/ui/ToastProvider";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
+import type { FlowGraph } from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { BuilderCanvasGraph } from "../utils/builderFlowToReactFlow";
 import { graphToUpdateBuilderInput } from "../utils/builderGraph";
 
 const useUpdateFlow = (flowId: string) => {
@@ -17,7 +17,7 @@ const useUpdateFlow = (flowId: string) => {
     },
   });
 
-  const updateFlow = async (currentGraph: BuilderCanvasGraph) => {
+  const updateFlow = async (currentGraph: FlowGraph) => {
     try {
       await mutateAsync({
         flowId,

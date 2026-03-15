@@ -1,14 +1,13 @@
+import type { GraphStepNode } from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
-
-import type { BuilderStepNode } from "../../../../utils/builderFlowToReactFlow";
 
 const handleStyle = {
   height: 18,
   width: 18,
 };
 
-const StepFlowNode = ({ data, selected }: NodeProps<BuilderStepNode>) => {
+const StepFlowNode = ({ data, selected }: NodeProps<GraphStepNode>) => {
   return (
     <div
       className={`min-w-44 rounded-2xl border px-3 py-2.5 shadow-[0_20px_40px_rgba(15,23,42,0.18)] ${

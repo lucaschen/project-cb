@@ -42,7 +42,7 @@ export const decisionConditionSchema = z.object({
   id: z.string().min(1),
   order: z.number(),
   statement: conditionStatementSchema,
-  toNodeId: z.string().min(1),
+  toNodeId: z.string().min(1).nullable(),
 });
 
 export type DecisionConditionType = z.infer<typeof decisionConditionSchema>;
@@ -61,7 +61,7 @@ export type StepNodeType = z.infer<typeof stepNodeSchema>;
 export const decisionNodeSchema = z.object({
   conditions: z.array(decisionConditionSchema),
   coordinates: nodeCoordinatesSchema,
-  fallbackNextNodeId: z.string().min(1),
+  fallbackNextNodeId: z.string().min(1).nullable(),
   name: z.string().min(1),
   nodeId: z.string().min(1),
   type: z.literal(NodeType.DECISION),

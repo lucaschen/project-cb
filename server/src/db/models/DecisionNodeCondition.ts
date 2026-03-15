@@ -13,7 +13,7 @@ export class DecisionNodeCondition extends Model<
 > {
   declare id: string;
   declare nodeId: string;
-  declare toNodeId: string;
+  declare toNodeId: string | null;
   declare statement: ConditionStatement;
   declare order: number;
 
@@ -22,7 +22,7 @@ export class DecisionNodeCondition extends Model<
       {
         id: { type: DataTypes.UUID, primaryKey: true },
         nodeId: { type: DataTypes.UUID, allowNull: false },
-        toNodeId: { type: DataTypes.UUID, allowNull: false },
+        toNodeId: { type: DataTypes.UUID, allowNull: true },
         statement: { type: DataTypes.JSONB, allowNull: false },
         order: { type: DataTypes.SMALLINT, allowNull: false },
       },
@@ -30,7 +30,7 @@ export class DecisionNodeCondition extends Model<
         sequelize,
         tableName: "decisionNodeConditions",
         indexes: [{ fields: ["nodeId"] }, { fields: ["toNodeId"] }],
-      }
+      },
     );
     return DecisionNodeCondition;
   }

@@ -2,6 +2,12 @@ import { z } from "zod";
 
 import { conditionStatementSchema } from "~shared/db/schemas/conditionStatement";
 
+import {
+  decisionConditionSchema,
+  decisionNodeSchema,
+  stepNodeSchema,
+} from "../common";
+
 export const builderNodeCoordinatesSchema = z.object({
   x: z.number(),
   y: z.number(),
@@ -11,38 +17,36 @@ export type BuilderNodeCoordinatesType = z.infer<
   typeof builderNodeCoordinatesSchema
 >;
 
-export const builderStepInputSchema = z
-  .object({
-    coordinates: builderNodeCoordinatesSchema,
-    name: z.string().min(1),
-    nextNodeId: z.string().uuid().nullable(),
-    nodeId: z.string().uuid(),
+export const builderStepInputSchema = stepNodeSchema
+  .omit({
+    coordinates: true,
+    elements: true,
   })
-  .strict();
+  .extend({
+    coordinates: builderNodeCoordinatesSchema,
+  });
 
 export type BuilderStepInputType = z.infer<typeof builderStepInputSchema>;
 
-export const builderDecisionConditionInputSchema = z
-  .object({
-    id: z.string().uuid(),
-    statement: conditionStatementSchema,
-    toNodeId: z.string().uuid().nullable(),
-  })
-  .strict();
+export const builderDecisionConditionInputSchema = decisionConditionSchema.omit(
+  {
+    order: true,
+  },
+);
 
 export type BuilderDecisionConditionInputType = z.infer<
   typeof builderDecisionConditionInputSchema
 >;
 
-export const builderDecisionNodeInputSchema = z
-  .object({
+export const builderDecisionNodeInputSchema = decisionNodeSchema
+  .omit({
+    conditions: true,
+    coordinates: true,
+  })
+  .extend({
     conditions: z.array(builderDecisionConditionInputSchema),
     coordinates: builderNodeCoordinatesSchema,
-    fallbackNextNodeId: z.string().uuid().nullable(),
-    name: z.string().min(1),
-    nodeId: z.string().uuid(),
-  })
-  .strict();
+  });
 
 export type BuilderDecisionNodeInputType = z.infer<
   typeof builderDecisionNodeInputSchema

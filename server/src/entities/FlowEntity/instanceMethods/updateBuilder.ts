@@ -1,5 +1,9 @@
 import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import type {
+  BuilderDecisionNodeInputType,
+  BuilderStepInputType,
+} from "@packages/shared/http/schemas/flows/builder/common";
+import type {
   UpdateBuilderInput,
   UpdateBuilderOutput,
 } from "@packages/shared/http/schemas/flows/builder/updateBuilder";
@@ -19,6 +23,13 @@ export default async function updateBuilder(
   payload: UpdateBuilderInput,
 ): Promise<UpdateBuilderOutput> {
   await sequelize.transaction(async (transaction) => {
+    const submittedStepNodes = payload.filter(
+      (node): node is BuilderStepInputType => node.type === NodeType.STEP,
+    );
+    const submittedDecisionNodes = payload.filter(
+      (node): node is BuilderDecisionNodeInputType =>
+        node.type === NodeType.DECISION,
+    );
     const validationErrors = new FlowBuilderEntity(
       payload,
     ).getValidationErrors();
@@ -27,8 +38,8 @@ export default async function updateBuilder(
       throw new InvalidRequestError(validationErrors[0]);
     }
 
-    const submittedStepNodeIds = payload.stepNodes.map((step) => step.nodeId);
-    const submittedDecisionNodeIds = payload.decisionNodes.map(
+    const submittedStepNodeIds = submittedStepNodes.map((step) => step.nodeId);
+    const submittedDecisionNodeIds = submittedDecisionNodes.map(
       (decisionNode) => decisionNode.nodeId,
     );
 
@@ -81,7 +92,7 @@ export default async function updateBuilder(
       ]),
     );
 
-    for (const step of payload.stepNodes) {
+    for (const step of submittedStepNodes) {
       const existingNode = existingSubmittedNodesById.get(step.nodeId);
 
       if (!existingNode) {
@@ -101,7 +112,7 @@ export default async function updateBuilder(
       );
     }
 
-    for (const decisionNode of payload.decisionNodes) {
+    for (const decisionNode of submittedDecisionNodes) {
       const existingNode = existingSubmittedNodesById.get(decisionNode.nodeId);
 
       if (!existingNode) {
@@ -122,12 +133,12 @@ export default async function updateBuilder(
     }
 
     await DecisionNodeEntity.validateSubmittedConditionOwnership(
-      payload.decisionNodes,
+      submittedDecisionNodes,
       transaction,
     );
 
     await StepEntity.validateSurvivingStepElementReferences({
-      decisionNodes: payload.decisionNodes,
+      decisionNodes: submittedDecisionNodes,
       stepNodeIds: submittedStepNodeIds,
       transaction,
     });
@@ -146,12 +157,12 @@ export default async function updateBuilder(
         ),
       ),
       flowId: this.dbModel.id,
-      steps: payload.stepNodes,
+      steps: submittedStepNodes,
       transaction,
     });
 
     await DecisionNodeEntity.syncBuilderDecisionNodes({
-      decisionNodes: payload.decisionNodes,
+      decisionNodes: submittedDecisionNodes,
       existingByNodeId: existingSubmittedDecisionNodesById,
       existingNodeIds: new Set(
         existingSubmittedDecisionNodeEntities.map(

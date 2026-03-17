@@ -11,16 +11,24 @@ import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import FlowBuilderEntity from "@packages/shared/entities/FlowBuilderEntity/FlowBuilderEntity";
 import type { FlowWithNodesType } from "@packages/shared/http/schemas/flows/common";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, PanelsLeftBottom, PanelsTopLeft } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  PanelsLeftBottom,
+  PanelsTopLeft,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import BuilderPalette from "./components/BuilderPalette";
 import BuilderSidebar from "./components/BuilderSidebar";
 import FlowCanvas from "./components/FlowCanvas";
+import DecisionNodeModal from "./components/NodeEditorModal/DecisionNodeModal";
+import StepNodeModal from "./components/NodeEditorModal/StepNodeModal";
 import useBuilderLeaveConfirmation from "./hooks/useBuilderLeaveConfirmation";
 import useBuilderStore from "./store/builderStore";
-import { flowToReactFlow } from "./utils/builderFlowToReactFlow";
+import useFlowNodeContentStore from "./store/flowNodeContentStore";
+import FlowGraphEntity from "@packages/shared/entities/FlowGraphEntity/FlowGraphEntity";
 
 const Wrapper = () => {
   const { flowId } = useParams<{ flowId: string }>();
@@ -87,20 +95,38 @@ type Props = {
 
 const FlowDetails = ({ flow }: Props) => {
   const { activeOrganization } = useRootContext();
-  const baseReactFlowGraph = useMemo(() => flowToReactFlow(flow), [flow]);
-  const baseBuilderPayload = useMemo(
-    () => FlowBuilderEntity.fromFlow(flow).getPayload(),
+  const baseReactFlowGraph = useMemo(
+    () => FlowGraphEntity.fromFlowNodes(flow.nodes).getGraph(),
     [flow],
+  );
+  const baseBuilderPayload = useMemo(
+    () => FlowBuilderEntity.fromGraph(baseReactFlowGraph).getPayload(),
+    [baseReactFlowGraph],
   );
 
   const initializeGraph = useBuilderStore((state) => state.initializeGraph);
   const edges = useBuilderStore((state) => state.edges);
   const nodes = useBuilderStore((state) => state.nodes);
+  const initializeFlowNodeContent = useFlowNodeContentStore(
+    (state) => state.initializeFromFlow,
+  );
 
   const currentGraph = useMemo(() => ({ edges, nodes }), [edges, nodes]);
 
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
   const [isPaletteOpen, setIsPaletteOpen] = useState(true);
+  const [modalState, setModalState] = useState<
+    | {
+        initialRuleConditionId?: string | null;
+        nodeId: string;
+        type: "decision";
+      }
+    | {
+        nodeId: string;
+        type: "step";
+      }
+    | null
+  >(null);
 
   const isDirty = useDebouncedMemo(
     () =>
@@ -120,7 +146,8 @@ const FlowDetails = ({ flow }: Props) => {
     if (!baseReactFlowGraph) return;
 
     initializeGraph(baseReactFlowGraph);
-  }, [baseReactFlowGraph, initializeGraph]);
+    initializeFlowNodeContent(flow);
+  }, [baseReactFlowGraph, flow, initializeFlowNodeContent, initializeGraph]);
 
   useBuilderLeaveConfirmation(isDirty);
 
@@ -152,7 +179,22 @@ const FlowDetails = ({ flow }: Props) => {
           </button>
         )}
         <div className="flex h-full min-h-0 min-w-0 flex-1">
-          <FlowCanvas />
+          <FlowCanvas
+            isNodeEditorOpen={modalState !== null}
+            onOpenNodeEditor={(nodeId, nodeType) =>
+              setModalState(
+                nodeType === "decision"
+                  ? {
+                      nodeId,
+                      type: "decision",
+                    }
+                  : {
+                      nodeId,
+                      type: "step",
+                    },
+              )
+            }
+          />
         </div>
         {isInspectorOpen ? (
           <div className="relative flex h-full min-h-0 w-[392px] shrink-0 xl:w-[404px]">
@@ -161,6 +203,19 @@ const FlowDetails = ({ flow }: Props) => {
               flow={flow}
               isDirty={isDirty}
               isOpen={isInspectorOpen}
+              onOpenDecisionEditor={(nodeId, conditionId) =>
+                setModalState({
+                  initialRuleConditionId: conditionId,
+                  nodeId,
+                  type: "decision",
+                })
+              }
+              onOpenStepEditor={(nodeId) =>
+                setModalState({
+                  nodeId,
+                  type: "step",
+                })
+              }
               validationErrors={validationErrors}
             />
             <button
@@ -183,6 +238,23 @@ const FlowDetails = ({ flow }: Props) => {
           </button>
         )}
       </div>
+      <DecisionNodeModal
+        initialRuleConditionId={
+          modalState?.type === "decision"
+            ? modalState.initialRuleConditionId
+            : null
+        }
+        isOpen={modalState?.type === "decision"}
+        nodeId={modalState?.type === "decision" ? modalState.nodeId : null}
+        onClose={() => setModalState(null)}
+      />
+      <StepNodeModal
+        flowId={flow.id}
+        isOpen={modalState?.type === "step"}
+        nodeId={modalState?.type === "step" ? modalState.nodeId : null}
+        onClose={() => setModalState(null)}
+        organizationId={activeOrganization.id}
+      />
     </main>
   );
 };

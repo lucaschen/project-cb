@@ -157,42 +157,41 @@ describe("flow builder update routes", () => {
       const decisionNodeId = randomUUID();
       const conditionId = randomUUID();
 
-      const payload = {
-        decisionNodes: [
-          {
-            conditions: [
-              {
-                id: conditionId,
-                statement: {
-                  leftValue: "left",
-                  operator: ComparisonOperation.EQ,
-                  rightValue: "right",
-                  type: "comparison",
-                },
-                toNodeId: finishStepNodeId,
+      const payload = [
+        {
+          coordinates: { x: 10, y: 20 },
+          name: "A intro step",
+          nextNodeId: decisionNodeId,
+          nodeId: introStepNodeId,
+          type: NodeType.STEP,
+        },
+        {
+          conditions: [
+            {
+              id: conditionId,
+              statement: {
+                leftValue: "left",
+                operator: ComparisonOperation.EQ,
+                rightValue: "right",
+                type: "comparison",
               },
-            ],
-            coordinates: { x: 50, y: 60 },
-            fallbackNextNodeId: finishStepNodeId,
-            name: "B decision",
-            nodeId: decisionNodeId,
-          },
-        ],
-        stepNodes: [
-          {
-            coordinates: { x: 10, y: 20 },
-            name: "A intro step",
-            nextNodeId: decisionNodeId,
-            nodeId: introStepNodeId,
-          },
-          {
-            coordinates: { x: 70, y: 80 },
-            name: "C finish step",
-            nextNodeId: null,
-            nodeId: finishStepNodeId,
-          },
-        ],
-      };
+              toNodeId: finishStepNodeId,
+            },
+          ],
+          coordinates: { x: 50, y: 60 },
+          fallbackNextNodeId: finishStepNodeId,
+          name: "B decision",
+          nodeId: decisionNodeId,
+          type: NodeType.DECISION,
+        },
+        {
+          coordinates: { x: 70, y: 80 },
+          name: "C finish step",
+          nextNodeId: null,
+          nodeId: finishStepNodeId,
+          type: NodeType.STEP,
+        },
+      ];
 
       const response = await agent
         .put(`/flows/${flowEntity.dbModel.id}/builder`)
@@ -265,42 +264,41 @@ describe("flow builder update routes", () => {
 
       const response = await agent
         .put(`/flows/${flowEntity.dbModel.id}/builder`)
-        .send({
-          decisionNodes: [
-            {
-              conditions: [
-                {
-                  id: conditionId,
-                  statement: {
-                    leftValue: "updated-left",
-                    operator: ComparisonOperation.EQ,
-                    rightValue: "updated-right",
-                    type: "comparison",
-                  },
-                  toNodeId: stepNodeId,
+        .send([
+          {
+            coordinates: { x: 1, y: 2 },
+            name: "A intro step",
+            nextNodeId: decisionNodeId,
+            nodeId: introStepNodeId,
+            type: NodeType.STEP,
+          },
+          {
+            conditions: [
+              {
+                id: conditionId,
+                statement: {
+                  leftValue: "updated-left",
+                  operator: ComparisonOperation.EQ,
+                  rightValue: "updated-right",
+                  type: "comparison",
                 },
-              ],
-              coordinates: { x: 100, y: 200 },
-              fallbackNextNodeId: stepNodeId,
-              name: "B decision updated",
-              nodeId: decisionNodeId,
-            },
-          ],
-          stepNodes: [
-            {
-              coordinates: { x: 1, y: 2 },
-              name: "A intro step",
-              nextNodeId: decisionNodeId,
-              nodeId: introStepNodeId,
-            },
-            {
-              coordinates: { x: 300, y: 400 },
-              name: "C step updated",
-              nextNodeId: null,
-              nodeId: stepNodeId,
-            },
-          ],
-        });
+                toNodeId: stepNodeId,
+              },
+            ],
+            coordinates: { x: 100, y: 200 },
+            fallbackNextNodeId: stepNodeId,
+            name: "B decision updated",
+            nodeId: decisionNodeId,
+            type: NodeType.DECISION,
+          },
+          {
+            coordinates: { x: 300, y: 400 },
+            name: "C step updated",
+            nextNodeId: null,
+            nodeId: stepNodeId,
+            type: NodeType.STEP,
+          },
+        ]);
 
       expect(response.status).toBe(200);
       expect(updateBuilderOutput.parse(response.body)).toEqual({
@@ -367,39 +365,37 @@ describe("flow builder update routes", () => {
 
       const response = await agent
         .put(`/flows/${flowEntity.dbModel.id}/builder`)
-        .send({
-          decisionNodes: [
-            {
-              conditions: [
-                {
-                  id: decisionConditionId,
-                  statement: {
-                    leftValue: {
-                      stepElementId: "be05ReferencedStepElement",
-                      type: "stepElementValue",
-                    },
-                    operator: ComparisonOperation.EQ,
-                    rightValue: "yes",
-                    type: "comparison",
+        .send([
+          {
+            conditions: [
+              {
+                id: decisionConditionId,
+                statement: {
+                  leftValue: {
+                    stepElementId: "be05ReferencedStepElement",
+                    type: "stepElementValue",
                   },
-                  toNodeId: survivingStepNodeId,
+                  operator: ComparisonOperation.EQ,
+                  rightValue: "yes",
+                  type: "comparison",
                 },
-              ],
-              coordinates: { x: 50, y: 60 },
-              fallbackNextNodeId: survivingStepNodeId,
-              name: "B decision",
-              nodeId: decisionNodeId,
-            },
-          ],
-          stepNodes: [
-            {
-              coordinates: { x: 30, y: 40 },
-              name: "C surviving step",
-              nextNodeId: null,
-              nodeId: survivingStepNodeId,
-            },
-          ],
-        });
+                toNodeId: survivingStepNodeId,
+              },
+            ],
+            coordinates: { x: 50, y: 60 },
+            fallbackNextNodeId: survivingStepNodeId,
+            name: "B decision",
+            nodeId: decisionNodeId,
+            type: NodeType.DECISION,
+          },
+          {
+            coordinates: { x: 30, y: 40 },
+            name: "C surviving step",
+            nextNodeId: null,
+            nodeId: survivingStepNodeId,
+            type: NodeType.STEP,
+          },
+        ]);
 
       expect(response.status).toBe(400);
 
@@ -421,10 +417,7 @@ describe("flow builder update routes", () => {
 
       const response = await request(createTestApp())
         .put(`/flows/${flowEntity.dbModel.id}/builder`)
-        .send({
-          decisionNodes: [],
-          stepNodes: [],
-        });
+        .send([]);
 
       expect(response.status).toBe(401);
     });

@@ -1,3 +1,4 @@
+import { formatComparisonStatement } from "@packages/shared/entities/FlowGraphDecisionNodeEntity/utils/graphDecisionNode";
 import type { GraphDecisionNode } from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
 import {
   DECISION_FALLBACK_SOURCE_HANDLE_ID,
@@ -6,8 +7,6 @@ import {
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position, useUpdateNodeInternals } from "@xyflow/react";
 import { useEffect } from "react";
-
-import { formatComparisonStatement } from "../../../../utils/builderFlowToReactFlow";
 
 const handleStyle = {
   height: 18,

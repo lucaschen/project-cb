@@ -39,7 +39,7 @@ export const flowStepElementSchema = hydratedStepElementSchema;
 export type FlowStepElementType = z.infer<typeof flowStepElementSchema>;
 
 export const decisionConditionSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().uuid(),
   order: z.number(),
   statement: conditionStatementSchema,
   toNodeId: z.string().min(1).nullable(),

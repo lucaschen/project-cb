@@ -8,6 +8,7 @@ const handleStyle = {
 };
 
 const StepFlowNode = ({ data, selected }: NodeProps<GraphStepNode>) => {
+  const elementCount: number = 0; // fetch from store
   return (
     <div
       className={`min-w-44 rounded-2xl border px-3 py-2.5 shadow-[0_20px_40px_rgba(15,23,42,0.18)] ${
@@ -28,8 +29,8 @@ const StepFlowNode = ({ data, selected }: NodeProps<GraphStepNode>) => {
         </p>
         <p className="text-sm font-semibold text-white">{data.name}</p>
         <p className="text-xs text-slate-400">
-          {data.elements.length} element
-          {data.elements.length === 1 ? "" : "s"}
+          {elementCount} element
+          {elementCount === 1 ? "" : "s"}
         </p>
       </div>
       <Handle

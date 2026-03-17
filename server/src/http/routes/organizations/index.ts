@@ -10,6 +10,7 @@ import deleteOrganizationInvite from "./deleteOrganizationInvite";
 import fetchOrganization from "./fetchOrganization";
 import findFlows from "./findFlows";
 import findOrganizationApiKeys from "./findOrganizationApiKeys";
+import findOrganizationElementDefinitions from "./findOrganizationElementDefinitions";
 import findOrganizationInvites from "./findOrganizationInvites";
 import findOrganizationMembers from "./findOrganizationMembers";
 import removeOrganizationMember from "./removeOrganizationMember";
@@ -25,6 +26,10 @@ organizationsRouter.post("/", requireLogin(createOrganization));
 organizationsRouter.get("/:organizationId", requireLogin(fetchOrganization));
 organizationsRouter.patch("/:organizationId", requireLogin(updateOrganization));
 organizationsRouter.delete("/:organizationId", requireLogin(deleteOrganization));
+organizationsRouter.get(
+  "/:organizationId/element-definitions",
+  requireLogin(findOrganizationElementDefinitions),
+);
 organizationsRouter.get(
   "/:organizationId/api-keys",
   requireLogin(findOrganizationApiKeys),

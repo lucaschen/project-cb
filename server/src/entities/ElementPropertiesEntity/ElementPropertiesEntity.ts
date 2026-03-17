@@ -1,6 +1,7 @@
 import { ElementProperties } from "~db/models/ElementProperties";
 
 import { staticImplements, type StaticMethods } from "../types";
+import getPayload from "./instanceMethods/getPayload";
 import create from "./staticMethods/create";
 import findById from "./staticMethods/findById";
 
@@ -17,4 +18,7 @@ export default class ElementPropertiesEntity {
   // PARTITION: Static methods
   static create = create;
   static findById = findById;
+
+  // PARTITION: Instance methods
+  getPayload = getPayload;
 }

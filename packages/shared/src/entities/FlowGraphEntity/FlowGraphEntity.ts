@@ -1,14 +1,14 @@
 import type { XYPosition } from "@xyflow/react";
 import * as R from "ramda";
 
-import type { NodeType } from "~shared/types/enums";
+import type { NodePayloadType } from "~shared/http/schemas/flows/common";
+import { NodeType } from "~shared/types/enums";
 
 import FlowGraphDecisionNodeEntity from "../FlowGraphDecisionNodeEntity/FlowGraphDecisionNodeEntity";
 import { createDecisionEdge } from "../FlowGraphDecisionNodeEntity/utils/graphDecisionNode";
 import type {
   FlowGraph,
   FlowGraphEdge,
-  FlowGraphNode,
   GraphDecisionNode,
   GraphDecisionRuleEdge,
   GraphStepNode,
@@ -19,6 +19,8 @@ import {
   createGraphStepEdge,
   createGraphStepNode,
   getDecisionConditionIdFromSourceHandle,
+  getDecisionRuleSourceHandleId,
+  getFallbackPosition,
 } from "./utils/graph";
 
 class FlowGraphEntity {
@@ -45,6 +47,65 @@ class FlowGraphEntity {
       edges: graph.edges,
       nodes,
     };
+  }
+
+  static fromFlowNodes(nodes: NodePayloadType[]) {
+    const flowGraphEntity = new FlowGraphEntity();
+
+    // Register nodes
+    nodes.forEach((node, index) => {
+      if (node.type === NodeType.STEP) {
+        flowGraphEntity.addNode({
+          data: {
+            name: node.name,
+            type: NodeType.STEP,
+          },
+          nodeId: node.nodeId,
+          position: node.coordinates ?? getFallbackPosition(index),
+          type: "step",
+        });
+      } else {
+        flowGraphEntity.addNode({
+          data: {
+            name: node.name,
+            rules: node.conditions.map((condition) => ({
+              conditionId: condition.id,
+              statement: condition.statement,
+            })),
+            type: NodeType.DECISION,
+          },
+          nodeId: node.nodeId,
+          position: node.coordinates ?? getFallbackPosition(index),
+          type: "decision",
+        });
+      }
+    });
+
+    // Register edges
+
+    nodes.forEach((node) => {
+      if (node.type === NodeType.STEP) {
+        flowGraphEntity.setConnection({
+          sourceNodeId: node.nodeId,
+          targetNodeId: node.nextNodeId,
+        });
+      } else {
+        flowGraphEntity.setConnection({
+          sourceNodeId: node.nodeId,
+          targetNodeId: node.fallbackNextNodeId,
+        });
+
+        node.conditions.forEach((condition) => {
+          flowGraphEntity.setConnection({
+            sourceHandle: getDecisionRuleSourceHandleId(condition.id),
+            sourceNodeId: node.nodeId,
+            targetNodeId: condition.toNodeId,
+          });
+        });
+      }
+    });
+
+    return flowGraphEntity;
   }
 
   addNode({

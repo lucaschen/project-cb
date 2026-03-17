@@ -3,10 +3,7 @@ import type {
   Node as ReactFlowNode,
 } from "@xyflow/react";
 
-import type {
-  DecisionConditionType,
-  FlowStepElementType,
-} from "~shared/http/schemas/flows/common";
+import type { DecisionConditionType } from "~shared/http/schemas/flows/common";
 import type { NodeType } from "~shared/types/enums";
 
 type EdgeWithRequiredData<T extends Record<string, unknown>> = {
@@ -63,7 +60,6 @@ export type GraphStepEdgeData = {
 export type GraphStepNode = ReactFlowNode<GraphStepNodeData, "step">;
 
 export type GraphStepNodeData = {
-  elements: FlowStepElementType[];
   name: string;
   type: NodeType.STEP;
 };

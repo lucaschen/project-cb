@@ -4,7 +4,7 @@ import { Button } from "@app/components/ui/Button";
 import { Card } from "@app/components/ui/Card";
 import { FormField } from "@app/components/ui/FormField";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
-import { useToast } from "@app/components/ui/ToastProvider";
+import useToast from "@app/components/ui/useToast";
 import { path as flowsListPath } from "@app/pages/flows/FlowsList";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { syncActiveOrganizationId } from "@app/utils/organizations";

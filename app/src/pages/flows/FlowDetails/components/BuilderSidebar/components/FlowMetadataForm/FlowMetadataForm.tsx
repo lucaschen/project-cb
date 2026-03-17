@@ -3,7 +3,7 @@ import { queryKeys } from "@app/api/queryKeys";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
 import { TextAreaField } from "@app/components/ui/TextAreaField";
-import { useToast } from "@app/components/ui/ToastProvider";
+import useToast from "@app/components/ui/useToast";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { trimAndNullOnEmpty } from "@app/utils/string";
 import type {

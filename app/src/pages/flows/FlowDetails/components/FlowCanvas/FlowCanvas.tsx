@@ -10,13 +10,15 @@ import type {
   NodeTypes,
   ReactFlowInstance,
 } from "@xyflow/react";
-import { Background, Controls, MarkerType, ReactFlow } from "@xyflow/react";
+import { Background, MarkerType, ReactFlow } from "@xyflow/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import useBuilderStore from "../../store/builderStore";
 import {
   isDecisionFallbackEdge,
   isDecisionRuleEdge,
+  isGraphDecisionNode,
+  isGraphStepNode,
 } from "../../utils/builderFlowToReactFlow";
 import { BUILDER_NODE_KIND } from "../BuilderPalette/BuilderPalette";
 import BuilderFlowEdgeRenderer from "./components/BuilderFlowEdge";
@@ -50,7 +52,15 @@ const getEdgeColor = (edge: FlowGraphEdge, selected: boolean) => {
   return selected ? "#7dd3fc" : "#38bdf8";
 };
 
-const FlowCanvas = () => {
+type FlowCanvasProps = {
+  isNodeEditorOpen: boolean;
+  onOpenNodeEditor: (nodeId: string, nodeType: "decision" | "step") => void;
+};
+
+const FlowCanvas = ({
+  isNodeEditorOpen,
+  onOpenNodeEditor,
+}: FlowCanvasProps) => {
   const applyNodeChanges = useBuilderStore((state) => state.applyNodeChanges);
   const edges = useBuilderStore((state) => state.edges);
   const nodes = useBuilderStore((state) => state.nodes);
@@ -214,7 +224,10 @@ const FlowCanvas = () => {
     <section className="min-h-0 min-w-0 grow">
       <div className="h-full min-h-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.99))]">
         <ReactFlow
-          deleteKeyCode={["Delete", "Backspace"]}
+          proOptions={{
+            hideAttribution: true,
+          }}
+          deleteKeyCode={isNodeEditorOpen ? null : ["Delete", "Backspace"]}
           edges={builderEdges}
           edgesReconnectable
           edgeTypes={edgeTypes}
@@ -269,6 +282,11 @@ const FlowCanvas = () => {
               id: node.id,
               kind: "node",
             });
+            if (isGraphStepNode(node)) {
+              onOpenNodeEditor(node.id, "step");
+            } else if (isGraphDecisionNode(node)) {
+              onOpenNodeEditor(node.id, "decision");
+            }
           }}
           onNodeDragStart={(_, node) => {
             selectItem({
@@ -285,7 +303,6 @@ const FlowCanvas = () => {
           onReconnectStart={handleReconnectStart}
         >
           <Background color="rgba(148, 163, 184, 0.22)" gap={24} />
-          <Controls showInteractive={false} />
         </ReactFlow>
       </div>
     </section>

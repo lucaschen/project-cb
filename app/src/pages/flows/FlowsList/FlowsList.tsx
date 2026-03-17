@@ -7,7 +7,7 @@ import { FormField } from "@app/components/ui/FormField";
 import { PageMessage } from "@app/components/ui/PageMessage";
 import { SectionLabel } from "@app/components/ui/SectionLabel";
 import { TextAreaField } from "@app/components/ui/TextAreaField";
-import { useToast } from "@app/components/ui/ToastProvider";
+import useToast from "@app/components/ui/useToast";
 import useRootContext from "@app/hooks/useRootContext";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { toSlug } from "@app/utils/slug";

@@ -19,6 +19,15 @@ export const DEFAULT_DECISION_RULE_STATEMENT: ComparisonStatement = {
   type: "comparison",
 };
 
+const FALLBACK_NODE_X = 120;
+const FALLBACK_NODE_Y = 120;
+const FALLBACK_NODE_X_GAP = 280;
+
+export const getFallbackPosition = (index: number) => ({
+  x: FALLBACK_NODE_X + index * FALLBACK_NODE_X_GAP,
+  y: FALLBACK_NODE_Y,
+});
+
 export const getDecisionConditionIdFromSourceHandle = (
   sourceHandle: string | null | undefined,
 ) => {
@@ -42,7 +51,6 @@ export const createGraphStepNode = ({
   position: XYPosition;
 }): GraphStepNode => ({
   data: {
-    elements: [],
     name: "Untitled step",
     type: NodeType.STEP,
     ...data,

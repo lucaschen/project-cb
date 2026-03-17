@@ -1,19 +1,21 @@
 import { Button } from "@app/components/ui/Button";
-import { useToast } from "@app/components/ui/ToastProvider";
+import useToast from "@app/components/ui/useToast";
 import type { FlowWithNodesType } from "@packages/shared/http/schemas/flows/common";
 import { useMemo } from "react";
 
 import useUpdateFlow from "../../hooks/useUpdateFlow";
 import useBuilderStore from "../../store/builderStore";
-import { flowToReactFlow } from "../../utils/builderFlowToReactFlow";
 import BuilderSelectionPanel from "./components/BuilderSelectionPanel";
 import FlowMetadataForm from "./components/FlowMetadataForm";
+import FlowGraphEntity from "@packages/shared/entities/FlowGraphEntity/FlowGraphEntity";
 
 type BuilderSidebarProps = {
   activeOrganizationId: string;
   flow: FlowWithNodesType;
   isDirty: boolean;
   isOpen: boolean;
+  onOpenDecisionEditor: (nodeId: string, conditionId?: string | null) => void;
+  onOpenStepEditor: (nodeId: string) => void;
   validationErrors: string[];
 };
 
@@ -22,6 +24,8 @@ const BuilderSidebar = ({
   flow,
   isDirty,
   isOpen,
+  onOpenDecisionEditor,
+  onOpenStepEditor,
   validationErrors,
 }: BuilderSidebarProps) => {
   const toast = useToast();
@@ -42,7 +46,7 @@ const BuilderSidebar = ({
   );
 
   const handleDiscard = () => {
-    initializeGraph(flowToReactFlow(flow));
+    initializeGraph(FlowGraphEntity.fromFlowNodes(flow.nodes).getGraph());
   };
 
   const handleSave = async () => {
@@ -144,7 +148,10 @@ const BuilderSidebar = ({
 
         {inspectorTab === "selection" ? (
           <div className="mt-4 border-t border-white/8 pt-4">
-            <BuilderSelectionPanel />
+            <BuilderSelectionPanel
+              onOpenDecisionEditor={onOpenDecisionEditor}
+              onOpenStepEditor={onOpenStepEditor}
+            />
           </div>
         ) : null}
       </div>

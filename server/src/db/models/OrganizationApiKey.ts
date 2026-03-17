@@ -77,7 +77,6 @@ export class OrganizationApiKey extends Model<
         revokedByUserId: {
           type: DataTypes.UUID,
           allowNull: true,
-          defaultValue: null,
         },
       },
       {

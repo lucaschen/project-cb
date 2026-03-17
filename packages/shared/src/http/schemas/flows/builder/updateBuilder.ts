@@ -12,12 +12,12 @@ export const updateBuilderParams = z.object({
 
 export type UpdateBuilderParams = z.infer<typeof updateBuilderParams>;
 
-export const updateBuilderInput = z
-  .object({
-    decisionNodes: z.array(builderDecisionNodeInputSchema),
-    stepNodes: z.array(builderStepInputSchema),
-  })
-  .strict();
+export const updateBuilderInput = z.array(
+  z.discriminatedUnion("type", [
+    builderDecisionNodeInputSchema,
+    builderStepInputSchema,
+  ]),
+);
 
 export type UpdateBuilderInput = z.infer<typeof updateBuilderInput>;
 

@@ -13,10 +13,25 @@ import {
   fetchFlowParams,
 } from "@packages/shared/http/schemas/flows/fetchFlow";
 import {
+  findStepElementsOutput,
+  findStepElementsParams,
+} from "@packages/shared/http/schemas/flows/steps/elements/findStepElements";
+import {
+  updateStepElementsInput,
+  updateStepElementsOutput,
+  updateStepElementsParams,
+} from "@packages/shared/http/schemas/flows/steps/elements/updateStepElements";
+import {
   updateFlowMetadataInput,
   updateFlowMetadataOutput,
   updateFlowMetadataParams,
 } from "@packages/shared/http/schemas/flows/updateFlowMetadata";
+import {
+  findOrganizationElementDefinitionsOutput,
+  findOrganizationElementDefinitionsParams,
+  type OrganizationElementDefinitionPropertyType,
+  type OrganizationElementDefinitionType,
+} from "@packages/shared/http/schemas/organizations/findOrganizationElementDefinitions";
 import { z } from "zod";
 
 import { apiRequest } from "../client";
@@ -27,6 +42,10 @@ const findFlowsParams = z.object({
 });
 
 const findFlowsOutput = z.array(flowSchema);
+
+export type StepElementDefinitionType = OrganizationElementDefinitionType;
+export type StepElementDefinitionPropertyType =
+  OrganizationElementDefinitionPropertyType;
 
 export const getOrganizationFlows = enforceStrictSchema({
   handler: ({ organizationId }) =>
@@ -71,6 +90,41 @@ export const updateFlowBuilder = enforceStrictSchema({
     input: updateBuilderInput,
   }),
   outputSchema: updateBuilderOutput,
+});
+
+export const fetchStepElements = enforceStrictSchema({
+  handler: ({ flowId, stepId }) =>
+    apiRequest({
+      method: "GET",
+      path: `/flows/${flowId}/steps/${stepId}/elements`,
+    }),
+  inputSchema: findStepElementsParams,
+  outputSchema: findStepElementsOutput,
+});
+
+export const fetchStepElementDefinitions = enforceStrictSchema({
+  handler: ({ organizationId }) =>
+    apiRequest({
+      method: "GET",
+      path: `/organizations/${organizationId}/element-definitions`,
+    }),
+  inputSchema: findOrganizationElementDefinitionsParams,
+  outputSchema: findOrganizationElementDefinitionsOutput,
+});
+
+export const updateStepElements = enforceStrictSchema({
+  handler: ({ flowId, input, stepId }) =>
+    apiRequest({
+      body: input,
+      method: "PUT",
+      path: `/flows/${flowId}/steps/${stepId}/elements`,
+    }),
+  inputSchema: z.object({
+    flowId: updateStepElementsParams.shape.flowId,
+    input: updateStepElementsInput,
+    stepId: updateStepElementsParams.shape.stepId,
+  }),
+  outputSchema: updateStepElementsOutput,
 });
 
 export const updateFlowMetadata = enforceStrictSchema({

@@ -4,7 +4,7 @@ import { createSession, createUser } from "@app/api/session";
 import { AuthShell } from "@app/components/AuthShell";
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
-import { useToast } from "@app/components/ui/ToastProvider";
+import useToast from "@app/components/ui/useToast";
 import { path as homePath } from "@app/pages/Home";
 import { getApiErrorMessage } from "@app/utils/getApiErrorMessage";
 import { clearStoredActiveOrganizationId } from "@app/utils/localStorage";

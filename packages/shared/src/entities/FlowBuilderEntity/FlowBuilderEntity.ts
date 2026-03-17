@@ -1,16 +1,7 @@
-import * as R from "ramda";
-
-import FlowGraphEntity from "~shared/entities/FlowGraphEntity/FlowGraphEntity";
 import type {
   FlowGraph,
   GraphDecisionNode,
-  GraphStepNode,
 } from "~shared/entities/FlowGraphEntity/types/flowGraph";
-import { getDecisionRuleSourceHandleId } from "~shared/entities/FlowGraphEntity/utils/graph";
-import type {
-  FlowStepElementType,
-  FlowWithNodesType,
-} from "~shared/http/schemas/flows/common";
 import type {
   BuilderDecisionNodeInputType,
   BuilderStepInputType,
@@ -18,75 +9,15 @@ import type {
 import type { UpdateBuilderInput } from "~shared/http/schemas/flows/builder/updateBuilder";
 import { NodeType } from "~shared/types/enums";
 
-const FALLBACK_NODE_X = 120;
-const FALLBACK_NODE_Y = 120;
-const FALLBACK_NODE_X_GAP = 280;
-
-const getFallbackPosition = (index: number) => ({
-  x: FALLBACK_NODE_X + index * FALLBACK_NODE_X_GAP,
-  y: FALLBACK_NODE_Y,
-});
-
 class FlowBuilderEntity {
-  private payload: UpdateBuilderInput;
+  private nodes: UpdateBuilderInput;
 
-  private stepElementsByNodeId = new Map<string, FlowStepElementType[]>();
-
-  constructor(payload: UpdateBuilderInput) {
-    this.payload = R.clone(payload);
-  }
-
-  static fromFlow(flow: FlowWithNodesType) {
-    const payload: UpdateBuilderInput = {
-      decisionNodes: [],
-      stepNodes: [],
-    };
-    const stepElementsByNodeId = new Map<string, FlowStepElementType[]>();
-
-    flow.nodes.forEach((node, index) => {
-      const coordinates = node.coordinates ?? getFallbackPosition(index);
-
-      if (node.type === NodeType.STEP) {
-        payload.stepNodes.push({
-          coordinates,
-          name: node.name,
-          nextNodeId: node.nextNodeId,
-          nodeId: node.nodeId,
-        });
-        stepElementsByNodeId.set(node.nodeId, node.elements);
-
-        return;
-      }
-
-      payload.decisionNodes.push({
-        conditions: [...node.conditions]
-          .sort(
-            (left, right) => left.order - right.order || left.id.localeCompare(right.id),
-          )
-          .map((condition) => ({
-            id: condition.id,
-            statement: condition.statement,
-            toNodeId: condition.toNodeId,
-          })),
-        coordinates,
-        fallbackNextNodeId: node.fallbackNextNodeId,
-        name: node.name,
-        nodeId: node.nodeId,
-      });
-    });
-
-    const entity = new FlowBuilderEntity(payload);
-    entity.stepElementsByNodeId = stepElementsByNodeId;
-
-    return entity;
+  constructor(nodes: UpdateBuilderInput) {
+    this.nodes = nodes;
   }
 
   static fromGraph(graph: FlowGraph) {
-    const payload: UpdateBuilderInput = {
-      decisionNodes: [],
-      stepNodes: [],
-    };
-    const stepElementsByNodeId = new Map<string, FlowStepElementType[]>();
+    const nodes: UpdateBuilderInput = [];
 
     graph.nodes.forEach((node) => {
       if (node.type === "decision") {
@@ -96,7 +27,8 @@ class FlowBuilderEntity {
             edge.source === decisionNode.id && edge.data.type === "fallback",
         );
 
-        payload.decisionNodes.push({
+        nodes.push({
+          // Refactor into flatter structure with generateConditionEdges for runtime edge injection instead of managing everything
           conditions: decisionNode.data.rules.map((rule) => {
             const decisionEdge = graph.edges.find(
               (edge) =>
@@ -115,100 +47,45 @@ class FlowBuilderEntity {
           fallbackNextNodeId: fallbackEdge?.target ?? null,
           name: decisionNode.data.name,
           nodeId: decisionNode.id,
+          type: NodeType.DECISION,
         });
+      } else {
+        const stepEdge = graph.edges.find(
+          (edge) => edge.source === node.id && edge.data.type === "step",
+        );
 
-        return;
+        nodes.push({
+          coordinates: node.position,
+          name: node.data.name,
+          nextNodeId: stepEdge?.target ?? null,
+          nodeId: node.id,
+          type: NodeType.STEP,
+        });
       }
-
-      const stepNode = node as GraphStepNode;
-      const stepEdge = graph.edges.find(
-        (edge) => edge.source === stepNode.id && edge.data.type === "step",
-      );
-
-      payload.stepNodes.push({
-        coordinates: stepNode.position,
-        name: stepNode.data.name,
-        nextNodeId: stepEdge?.target ?? null,
-        nodeId: stepNode.id,
-      });
-      stepElementsByNodeId.set(stepNode.id, stepNode.data.elements);
     });
 
-    const entity = new FlowBuilderEntity(payload);
-    entity.stepElementsByNodeId = stepElementsByNodeId;
-
-    return entity;
+    return new FlowBuilderEntity(nodes);
   }
 
   getPayload() {
-    return R.clone(this.payload);
-  }
-
-  getGraph(): FlowGraph {
-    const flowGraphEntity = new FlowGraphEntity();
-
-    this.payload.stepNodes.forEach((stepNode) => {
-      flowGraphEntity.addNode({
-        data: {
-          elements: this.stepElementsByNodeId.get(stepNode.nodeId) ?? [],
-          name: stepNode.name,
-          type: NodeType.STEP,
-        },
-        nodeId: stepNode.nodeId,
-        position: stepNode.coordinates,
-        type: "step",
-      });
-    });
-
-    this.payload.decisionNodes.forEach((decisionNode) => {
-      flowGraphEntity.addNode({
-        data: {
-          name: decisionNode.name,
-          rules: decisionNode.conditions.map((condition) => ({
-            conditionId: condition.id,
-            statement: condition.statement,
-          })),
-          type: NodeType.DECISION,
-        },
-        nodeId: decisionNode.nodeId,
-        position: decisionNode.coordinates,
-        type: "decision",
-      });
-    });
-
-    this.payload.stepNodes.forEach((stepNode) => {
-      flowGraphEntity.setConnection({
-        sourceNodeId: stepNode.nodeId,
-        targetNodeId: stepNode.nextNodeId,
-      });
-    });
-
-    this.payload.decisionNodes.forEach((decisionNode) => {
-      flowGraphEntity.setConnection({
-        sourceNodeId: decisionNode.nodeId,
-        targetNodeId: decisionNode.fallbackNextNodeId,
-      });
-
-      decisionNode.conditions.forEach((condition) => {
-        flowGraphEntity.setConnection({
-          sourceHandle: getDecisionRuleSourceHandleId(condition.id),
-          sourceNodeId: decisionNode.nodeId,
-          targetNodeId: condition.toNodeId,
-        });
-      });
-    });
-
-    return flowGraphEntity.getGraph();
+    return this.nodes;
   }
 
   getValidationErrors() {
+    const stepNodes = this.nodes.filter(
+      (node): node is BuilderStepInputType => node.type === NodeType.STEP,
+    );
+    const decisionNodes = this.nodes.filter(
+      (node): node is BuilderDecisionNodeInputType =>
+        node.type === NodeType.DECISION,
+    );
     const submittedStepNodeIds = new Set<string>();
     const submittedDecisionNodeIds = new Set<string>();
     const submittedConditionIds = new Set<string>();
     const submittedNodeIds = new Set<string>();
     const errors: string[] = [];
 
-    for (const step of this.payload.stepNodes) {
+    for (const step of stepNodes) {
       if (!step.name.trim()) {
         errors.push(`Step "${step.nodeId}" needs a name.`);
       }
@@ -221,7 +98,7 @@ class FlowBuilderEntity {
       submittedNodeIds.add(step.nodeId);
     }
 
-    for (const decisionNode of this.payload.decisionNodes) {
+    for (const decisionNode of decisionNodes) {
       if (!decisionNode.name.trim()) {
         errors.push(`Decision "${decisionNode.nodeId}" needs a name.`);
       }
@@ -248,13 +125,13 @@ class FlowBuilderEntity {
       }
     }
 
-    for (const step of this.payload.stepNodes) {
+    for (const step of stepNodes) {
       if (step.nextNodeId !== null && !submittedNodeIds.has(step.nextNodeId)) {
         errors.push(`Step "${step.name}" points at a missing next node.`);
       }
     }
 
-    for (const decisionNode of this.payload.decisionNodes) {
+    for (const decisionNode of decisionNodes) {
       if (
         decisionNode.fallbackNextNodeId === null ||
         !submittedNodeIds.has(decisionNode.fallbackNextNodeId)
@@ -266,7 +143,7 @@ class FlowBuilderEntity {
 
       for (const condition of decisionNode.conditions) {
         if (
-          condition.toNodeId === null ||
+          condition.toNodeId !== null &&
           !submittedNodeIds.has(condition.toNodeId)
         ) {
           errors.push(
@@ -278,13 +155,13 @@ class FlowBuilderEntity {
 
     const entryNodes = new Set<string>(submittedNodeIds);
 
-    for (const step of this.payload.stepNodes) {
+    for (const step of stepNodes) {
       if (step.nextNodeId) {
         entryNodes.delete(step.nextNodeId);
       }
     }
 
-    for (const decisionNode of this.payload.decisionNodes) {
+    for (const decisionNode of decisionNodes) {
       if (decisionNode.fallbackNextNodeId) {
         entryNodes.delete(decisionNode.fallbackNextNodeId);
       }
@@ -304,8 +181,8 @@ class FlowBuilderEntity {
       string,
       BuilderDecisionNodeInputType | BuilderStepInputType
     >([
-      ...this.payload.stepNodes.map((step) => [step.nodeId, step] as const),
-      ...this.payload.decisionNodes.map(
+      ...stepNodes.map((step) => [step.nodeId, step] as const),
+      ...decisionNodes.map(
         (decisionNode) => [decisionNode.nodeId, decisionNode] as const,
       ),
     ]);
@@ -324,19 +201,18 @@ class FlowBuilderEntity {
       visitingNodeIds.add(nodeId);
 
       const node = nodesById.get(nodeId);
-      const adjacentNodeIds =
-        !node
-          ? []
-          : "nextNodeId" in node
-            ? node.nextNodeId
-              ? [node.nextNodeId]
-              : []
-            : [
-                node.fallbackNextNodeId,
-                ...node.conditions.map((condition) => condition.toNodeId),
-              ].filter((adjacentNodeId): adjacentNodeId is string =>
-                Boolean(adjacentNodeId),
-              );
+      const adjacentNodeIds = !node
+        ? []
+        : "nextNodeId" in node
+          ? node.nextNodeId
+            ? [node.nextNodeId]
+            : []
+          : [
+              node.fallbackNextNodeId,
+              ...node.conditions.map((condition) => condition.toNodeId),
+            ].filter((adjacentNodeId): adjacentNodeId is string =>
+              Boolean(adjacentNodeId),
+            );
 
       for (const adjacentNodeId of adjacentNodeIds) {
         const nestedErrors = visit(adjacentNodeId);

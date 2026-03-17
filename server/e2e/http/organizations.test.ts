@@ -4,6 +4,7 @@ import { createOrganizationApiKeyOutput } from "@packages/shared/http/schemas/or
 import { createOrganizationInviteOutput } from "@packages/shared/http/schemas/organizations/createOrganizationInvite";
 import { fetchOrganizationOutput } from "@packages/shared/http/schemas/organizations/fetchOrganization";
 import { findOrganizationApiKeysOutput } from "@packages/shared/http/schemas/organizations/findOrganizationApiKeys";
+import { findOrganizationElementDefinitionsOutput } from "@packages/shared/http/schemas/organizations/findOrganizationElementDefinitions";
 import { findOrganizationInvitesOutput } from "@packages/shared/http/schemas/organizations/findOrganizationInvites";
 import { findOrganizationMembersOutput } from "@packages/shared/http/schemas/organizations/findOrganizationMembers";
 import { findOrganizationsForCurrentUserOutput } from "@packages/shared/http/schemas/organizations/findOrganizationsForCurrentUser";
@@ -21,6 +22,8 @@ import {
 } from "~db/backfillLegacyOrganizationApiKeys";
 import { OrganizationApiKey } from "~db/models/OrganizationApiKey";
 import { OrganizationUserInvitation } from "~db/models/OrganizationUserInvitation";
+import { seedElementProperties } from "~db/seeds/elementProperties.seed";
+import { seedElements } from "~db/seeds/elements.seed";
 import { sequelize } from "~db/sequelize";
 import { models } from "~src/db/setup";
 
@@ -649,6 +652,147 @@ describe("organization routes", () => {
 
       const response = await agent.get(
         `/organizations/${organization.dbModel.id}/flows`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("GET /organizations/:organizationId/element-definitions", () => {
+    it("returns the built-in step element definitions for accessible organizations", async () => {
+      const { agent, userEntity, loginResponse } =
+        await createAuthenticatedUser();
+      expect(loginResponse.status).toBe(201);
+
+      const organization = await seedOrganizationForUser({
+        permissions: OrganizationUserPermission.VIEWER,
+        slug: "element-definitions-org",
+        userId: userEntity.dbModel.id,
+      });
+      await seedElements(models);
+      await seedElementProperties(models);
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/element-definitions`,
+      );
+      const definitions = findOrganizationElementDefinitionsOutput.parse(
+        response.body,
+      );
+
+      expect(response.status).toBe(200);
+      expect(definitions.map((definition) => definition.elementId)).toEqual([
+        "header",
+        "subtitle",
+        "label",
+        "textInput",
+        "textarea",
+        "numberInput",
+        "select",
+        "button",
+        "tooltip",
+        "datePicker",
+      ]);
+      expect(
+        definitions.map((definition) => ({
+          elementId: definition.elementId,
+          propertyIds: definition.properties.map((property) => property.propertyId),
+        })),
+      ).toEqual([
+        { elementId: "header", propertyIds: ["headerText", "headerAlign"] },
+        { elementId: "subtitle", propertyIds: ["subtitleText", "subtitleAlign"] },
+        { elementId: "label", propertyIds: ["labelText", "labelFor"] },
+        {
+          elementId: "textInput",
+          propertyIds: [
+            "textInputPlaceholder",
+            "textInputName",
+            "textInputRequired",
+          ],
+        },
+        { elementId: "textarea", propertyIds: ["textareaLabel"] },
+        {
+          elementId: "numberInput",
+          propertyIds: [
+            "numberInputLabel",
+            "numberInputName",
+            "numberInputRequired",
+            "numberInputMin",
+            "numberInputMax",
+            "numberInputFormat",
+          ],
+        },
+        {
+          elementId: "select",
+          propertyIds: [
+            "selectName",
+            "selectOptions",
+            "selectRequired",
+            "selectMultiple",
+          ],
+        },
+        {
+          elementId: "button",
+          propertyIds: [
+            "buttonText",
+            "buttonVariant",
+            "buttonDisableWhenIncomplete",
+            "buttonOnClick",
+          ],
+        },
+        {
+          elementId: "tooltip",
+          propertyIds: ["tooltipTriggerText", "tooltipHoverText"],
+        },
+        {
+          elementId: "datePicker",
+          propertyIds: [
+            "datePickerName",
+            "datePickerFormat",
+            "datePickerRequired",
+          ],
+        },
+      ]);
+      expect(definitions[0]).toEqual({
+        description: "Header of the form",
+        elementId: "header",
+        name: "Header",
+        properties: [
+          {
+            defaultValue: "Header",
+            propertyId: "headerText",
+            propertyName: "text",
+            propertyType: "STRING",
+            required: true,
+          },
+          {
+            defaultValue: "center",
+            propertyId: "headerAlign",
+            propertyName: "align",
+            propertyType: "STRING",
+            required: true,
+          },
+        ],
+      });
+    });
+
+    it("rejects unauthenticated requests", async () => {
+      const organization = await seedOrganization();
+
+      const response = await request(createTestApp()).get(
+        `/organizations/${organization.dbModel.id}/element-definitions`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+
+    it("rejects authenticated users without access to the organization", async () => {
+      const { agent, loginResponse } = await createAuthenticatedUser();
+      expect(loginResponse.status).toBe(201);
+
+      const organization = await seedOrganization();
+
+      const response = await agent.get(
+        `/organizations/${organization.dbModel.id}/element-definitions`,
       );
 
       expect(response.status).toBe(401);

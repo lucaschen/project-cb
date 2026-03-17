@@ -1,12 +1,14 @@
 import "./global.css";
 
+import { ToastProvider } from "./components/ui/ToastProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { ToastProvider } from "./components/ui/ToastProvider";
-import FlowDetails, { path as flowDetailsPath } from "./pages/flows/FlowDetails";
+import FlowDetails, {
+  path as flowDetailsPath,
+} from "./pages/flows/FlowDetails";
 import FlowsList, { path as flowsListPath } from "./pages/flows/FlowsList";
 import Home, { path as homePath } from "./pages/Home";
 import Login, { path as loginPath } from "./pages/Login";

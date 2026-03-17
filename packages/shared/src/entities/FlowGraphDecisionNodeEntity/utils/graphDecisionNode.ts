@@ -1,9 +1,9 @@
+import type { ComparisonStatement } from "~shared/db/schemas/conditionStatement";
 import type { GraphDecisionRuleEdge } from "~shared/entities/FlowGraphEntity/types/flowGraph";
 import { getDecisionRuleSourceHandleId } from "~shared/entities/FlowGraphEntity/utils/graph";
-import type { ComparisonStatement } from "~shared/db/schemas/conditionStatement";
 import type { DecisionConditionType } from "~shared/http/schemas/flows/common";
 
-const formatComparisonOperand = (
+export const formatComparisonOperand = (
   operand: ComparisonStatement["leftValue"] | ComparisonStatement["rightValue"],
 ) => {
   if (typeof operand === "string") {
@@ -21,7 +21,7 @@ const formatComparisonOperand = (
   return "Step value";
 };
 
-const formatComparisonStatement = (
+export const formatComparisonStatement = (
   statement: DecisionConditionType["statement"],
 ) => {
   if (statement.type !== "comparison") {

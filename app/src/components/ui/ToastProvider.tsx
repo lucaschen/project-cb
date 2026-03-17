@@ -1,20 +1,13 @@
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
-type ToastTone = "error" | "info" | "success";
-
-type ToastOptions = {
-  duration?: number;
-};
+  type ToastApi,
+  ToastContext,
+  type ToastOptions,
+  type ToastTone,
+} from "./toastContext";
 
 type ToastRecord = {
   id: number;
@@ -22,16 +15,7 @@ type ToastRecord = {
   tone: ToastTone;
 };
 
-type ToastApi = {
-  dismiss: (id: number) => void;
-  error: (message: string, options?: ToastOptions) => number;
-  info: (message: string, options?: ToastOptions) => number;
-  success: (message: string, options?: ToastOptions) => number;
-};
-
 const DEFAULT_DURATION_MS = 4000;
-
-const ToastContext = createContext<ToastApi | null>(null);
 
 const toneConfig: Record<
   ToastTone,
@@ -102,8 +86,10 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
   );
 
   useEffect(() => {
+    const timeouts = timeoutRefs.current;
+
     return () => {
-      timeoutRefs.current.forEach((timeout) => clearTimeout(timeout));
+      timeouts.forEach((timeout) => clearTimeout(timeout));
     };
   }, []);
 
@@ -149,14 +135,4 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
       </div>
     </ToastContext.Provider>
   );
-};
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider.");
-  }
-
-  return context;
 };

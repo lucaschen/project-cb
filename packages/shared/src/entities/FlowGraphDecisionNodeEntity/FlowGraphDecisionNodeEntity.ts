@@ -71,12 +71,41 @@ class FlowGraphDecisionNodeEntity {
     this.onRulesChanged();
   }
 
+  moveRuleToIndex(ruleConditionId: string, targetIndex: number) {
+    const currentIndex = this.data.rules.findIndex(
+      (rule) => rule.conditionId === ruleConditionId,
+    );
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    if (targetIndex < 0 || targetIndex >= this.data.rules.length) {
+      return;
+    }
+
+    if (currentIndex === targetIndex) {
+      return;
+    }
+
+    const reorderedRules = [...this.data.rules];
+    const [movedRule] = reorderedRules.splice(currentIndex, 1);
+    reorderedRules.splice(targetIndex, 0, movedRule);
+    this.data.rules = reorderedRules;
+    this.onRulesChanged();
+  }
+
   onRulesChanged: () => void = () => {};
 
   removeRule(ruleConditionId: string) {
     this.data.rules = this.data.rules.filter(
       (rule) => rule.conditionId !== ruleConditionId,
     );
+    this.onRulesChanged();
+  }
+
+  replaceRules(rules: GraphDecisionNodeData["rules"]) {
+    this.data.rules = [...rules];
     this.onRulesChanged();
   }
 }

@@ -1,387 +1,133 @@
 import { Button } from "@app/components/ui/Button";
 import { FormField } from "@app/components/ui/FormField";
-import useBuilderStore from "@app/pages/flows/FlowDetails/store/builderStore";
-import type { ComparisonStatement } from "@packages/shared/db/schemas/conditionStatement";
-import FlowGraphDecisionNodeEntity from "@packages/shared/entities/FlowGraphDecisionNodeEntity/FlowGraphDecisionNodeEntity";
-import type {
-  FlowGraphNode,
-  GraphDecisionNode,
-} from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
-import { getDecisionRuleSourceHandleId } from "@packages/shared/entities/FlowGraphEntity/utils/graph";
-import { ComparisonOperation } from "@packages/shared/types/enums";
-
 import {
-  formatComparisonStatement,
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import FlowGraphDecisionNodeEntity from "@packages/shared/entities/FlowGraphDecisionNodeEntity/FlowGraphDecisionNodeEntity";
+import type { GraphDecisionNode } from "@packages/shared/entities/FlowGraphEntity/types/flowGraph";
+import { useMemo } from "react";
+
+import useBuilderStore from "../../../../store/builderStore";
+import {
   isDecisionFallbackEdge,
   isDecisionRuleEdge,
   isDefaultEdge,
   isGraphDecisionNode,
   isGraphStepNode,
 } from "../../../../utils/builderFlowToReactFlow";
+import { formatComparisonStatement } from "@packages/shared/entities/FlowGraphDecisionNodeEntity/utils/graphDecisionNode";
 
-type OperandKind = "number" | "string";
+type BuilderSelectionPanelProps = {
+  onOpenDecisionEditor: (nodeId: string, conditionId?: string | null) => void;
+  onOpenStepEditor: (nodeId: string) => void;
+};
 
-const COMPARISON_OPTIONS = Object.values(ComparisonOperation).map(
-  (operator) => ({
-    id: operator,
-    label: operator,
-  }),
+const SectionEyebrow = ({ children }: { children: string }) => (
+  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+    {children}
+  </p>
 );
 
-const getNodeLabel = (
-  nodes: FlowGraphNode[],
-  nodeId: string,
-  fallbackLabel = "Target node",
-) => {
-  return nodes.find((node) => node.id === nodeId)?.data.name ?? fallbackLabel;
-};
+const PanelHeader = ({ title, detail }: { title: string; detail?: string }) => (
+  <div className="space-y-1">
+    <SectionEyebrow>{title}</SectionEyebrow>
+    {detail ? (
+      <p className="text-sm leading-5 text-slate-400">{detail}</p>
+    ) : null}
+  </div>
+);
 
-const SelectField = ({
-  id,
-  label,
-  onChange,
-  options,
-  value,
-}: {
-  id: string;
-  label: string;
-  onChange: (value: string) => void;
-  options: Array<{ id: string; label: string }>;
-  value: string;
-}) => {
-  return (
-    <label className="block space-y-1.5" htmlFor={id}>
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </span>
-      <select
-        className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-sky-300"
-        id={id}
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-      >
-        {options.map((option) => (
-          <option
-            className="bg-slate-950 text-white"
-            key={option.id}
-            value={option.id}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-};
-
-const SectionEyebrow = ({ children }: { children: string }) => {
-  return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-      {children}
-    </p>
-  );
-};
-
-const PanelHeader = ({ title, detail }: { title: string; detail?: string }) => {
-  return (
-    <div className="space-y-1">
-      <SectionEyebrow>{title}</SectionEyebrow>
-      {detail ? (
-        <p className="text-sm leading-5 text-slate-400">{detail}</p>
-      ) : null}
-    </div>
-  );
-};
-
-const getOperandKind = (
-  value: ComparisonStatement["leftValue"] | ComparisonStatement["rightValue"],
-): OperandKind => {
-  return typeof value === "number" ? "number" : "string";
-};
-
-const toLiteralOperand = (kind: OperandKind, rawValue: string) => {
-  if (kind === "number") {
-    return rawValue === "" ? 0 : Number(rawValue);
-  }
-
-  return rawValue;
-};
-
-const DecisionRuleEditor = ({
-  canMoveDown,
-  canMoveUp,
-  nodeId,
-  nodes,
-  onDelete,
-  onMove,
-  onSelectNode,
-  onUpdate,
+const RulePreviewRow = ({
+  color,
+  isDragging,
+  onClick,
   rule,
-  ruleIndex,
-  targetNodeId,
-  targetOptions,
 }: {
-  canMoveDown: boolean;
-  canMoveUp: boolean;
-  nodeId: string;
-  nodes: FlowGraphNode[];
-  onDelete: (conditionId: string) => void;
-  onMove: (conditionId: string, direction: "down" | "up") => void;
-  onSelectNode: (nodeId: string) => void;
-  onUpdate: (
-    conditionId: string,
-    updates: {
-      statement?: ComparisonStatement;
-      toNodeId?: string | null;
-    },
-  ) => void;
+  color: string;
+  isDragging?: boolean;
+  onClick: () => void;
   rule: GraphDecisionNode["data"]["rules"][number];
-  ruleIndex: number;
-  targetNodeId: string | null;
-  targetOptions: Array<{ id: string; label: string }>;
+}) => (
+  <button
+    className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left ${
+      isDragging
+        ? "border-fuchsia-300/40 bg-fuchsia-300/12"
+        : "border-white/10 bg-white/5 hover:border-fuchsia-300/20 hover:bg-white/[0.08]"
+    }`}
+    onClick={onClick}
+    type="button"
+  >
+    <span
+      className="mt-1 inline-flex h-2.5 w-2.5 shrink-0 rounded-full"
+      style={{ backgroundColor: color }}
+    />
+    <span className="min-w-0 text-sm text-slate-200">
+      {formatComparisonStatement(rule.statement)}
+    </span>
+  </button>
+);
+
+const SortableRulePreviewRow = ({
+  color,
+  onClick,
+  rule,
+}: {
+  color: string;
+  onClick: () => void;
+  rule: GraphDecisionNode["data"]["rules"][number];
 }) => {
-  const statement = rule.statement;
-  const targetLabel = targetNodeId
-    ? getNodeLabel(nodes, targetNodeId)
-    : "Not connected";
-  const targetSelectOptions = [
-    { id: "", label: "Not connected" },
-    ...targetOptions,
-  ];
-  const isEditable =
-    statement.type === "comparison" &&
-    (typeof statement.leftValue === "string" ||
-      typeof statement.leftValue === "number") &&
-    (typeof statement.rightValue === "string" ||
-      typeof statement.rightValue === "number");
-
-  if (!isEditable) {
-    return (
-      <div className="space-y-3 rounded-2xl border border-fuchsia-300/20 bg-fuchsia-300/5 p-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
-              Rule {ruleIndex + 1}
-            </p>
-            <p className="mt-1 text-sm text-slate-200">
-              {formatComparisonStatement(statement)}
-            </p>
-            <p className="mt-1 text-xs text-slate-400">Target: {targetLabel}</p>
-          </div>
-          <div className="flex gap-1">
-            <Button
-              className="h-8 px-2 text-xs"
-              disabled={!canMoveUp}
-              onClick={() => onMove(rule.conditionId, "up")}
-              variant="secondary"
-            >
-              Up
-            </Button>
-            <Button
-              className="h-8 px-2 text-xs"
-              disabled={!canMoveDown}
-              onClick={() => onMove(rule.conditionId, "down")}
-              variant="secondary"
-            >
-              Down
-            </Button>
-          </div>
-        </div>
-        <p className="text-xs leading-5 text-slate-400">
-          Advanced rule content is preserved but not editable in this panel yet.
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            className="h-8 px-3 text-xs"
-            disabled={!targetNodeId}
-            onClick={() => targetNodeId && onSelectNode(targetNodeId)}
-            variant="secondary"
-          >
-            Jump to target
-          </Button>
-          <Button
-            className="h-8 px-3 text-xs"
-            onClick={() => onDelete(rule.conditionId)}
-            variant="secondary"
-          >
-            Delete
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const leftKind = getOperandKind(statement.leftValue);
-  const rightKind = getOperandKind(statement.rightValue);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: rule.conditionId });
 
   return (
-    <div className="space-y-3 rounded-2xl border border-fuchsia-300/20 bg-slate-950/70 p-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
-            Rule {ruleIndex + 1}
-          </p>
-          <p className="mt-1 text-xs text-slate-400">Target: {targetLabel}</p>
-        </div>
-        <div className="flex gap-1">
-          <Button
-            className="h-8 px-2 text-xs"
-            disabled={!canMoveUp}
-            onClick={() => onMove(rule.conditionId, "up")}
-            variant="secondary"
-          >
-            Up
-          </Button>
-          <Button
-            className="h-8 px-2 text-xs"
-            disabled={!canMoveDown}
-            onClick={() => onMove(rule.conditionId, "down")}
-            variant="secondary"
-          >
-            Down
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <SelectField
-          id={`${nodeId}-${rule.conditionId}-left-kind`}
-          label="Left type"
-          onChange={(value) =>
-            onUpdate(rule.conditionId, {
-              statement: {
-                ...statement,
-                leftValue: toLiteralOperand(
-                  value as OperandKind,
-                  String(statement.leftValue),
-                ),
-              },
-            })
-          }
-          options={[
-            { id: "string", label: "String" },
-            { id: "number", label: "Number" },
-          ]}
-          value={leftKind}
-        />
-        <label className="block space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Left value
-          </span>
-          <input
-            className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-sky-300"
-            onChange={(event) =>
-              onUpdate(rule.conditionId, {
-                statement: {
-                  ...statement,
-                  leftValue: toLiteralOperand(leftKind, event.target.value),
-                },
-              })
-            }
-            type={leftKind === "number" ? "number" : "text"}
-            value={String(statement.leftValue)}
-          />
-        </label>
-      </div>
-
-      <div className="space-y-2">
-        <SelectField
-          id={`${nodeId}-${rule.conditionId}-operator`}
-          label="Operator"
-          onChange={(value) =>
-            onUpdate(rule.conditionId, {
-              statement: {
-                ...statement,
-                operator: value as ComparisonOperation,
-              },
-            })
-          }
-          options={COMPARISON_OPTIONS}
-          value={statement.operator}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <SelectField
-          id={`${nodeId}-${rule.conditionId}-right-kind`}
-          label="Right type"
-          onChange={(value) =>
-            onUpdate(rule.conditionId, {
-              statement: {
-                ...statement,
-                rightValue: toLiteralOperand(
-                  value as OperandKind,
-                  String(statement.rightValue),
-                ),
-              },
-            })
-          }
-          options={[
-            { id: "string", label: "String" },
-            { id: "number", label: "Number" },
-          ]}
-          value={rightKind}
-        />
-        <label className="block space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Right value
-          </span>
-          <input
-            className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-sky-300"
-            onChange={(event) =>
-              onUpdate(rule.conditionId, {
-                statement: {
-                  ...statement,
-                  rightValue: toLiteralOperand(rightKind, event.target.value),
-                },
-              })
-            }
-            type={rightKind === "number" ? "number" : "text"}
-            value={String(statement.rightValue)}
-          />
-        </label>
-      </div>
-
-      <div className="space-y-2">
-        <SelectField
-          id={`${nodeId}-${rule.conditionId}-target`}
-          label="Target node"
-          onChange={(value) =>
-            onUpdate(rule.conditionId, {
-              toNodeId: value.length > 0 ? value : null,
-            })
-          }
-          options={targetSelectOptions}
-          value={targetNodeId ?? ""}
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            className="h-10 px-3 text-xs"
-            disabled={!targetNodeId}
-            onClick={() => targetNodeId && onSelectNode(targetNodeId)}
-            variant="secondary"
-          >
-            Jump
-          </Button>
-          <Button
-            className="h-10 px-3 text-xs"
-            onClick={() => onDelete(rule.conditionId)}
-            variant="secondary"
-          >
-            Delete
-          </Button>
-        </div>
-      </div>
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <RulePreviewRow
+        color={color}
+        isDragging={isDragging}
+        onClick={onClick}
+        rule={rule}
+      />
     </div>
   );
 };
 
-const BuilderSelectionPanel = () => {
+const RULE_COLORS = ["#22d3ee", "#a855f7", "#f97316", "#84cc16"];
+
+const BuilderSelectionPanel = ({
+  onOpenDecisionEditor,
+  onOpenStepEditor,
+}: BuilderSelectionPanelProps) => {
   const edges = useBuilderStore((state) => state.edges);
   const nodes = useBuilderStore((state) => state.nodes);
   const selectedItem = useBuilderStore((state) => state.selectedItem);
   const selectItem = useBuilderStore((state) => state.selectItem);
   const updateGraph = useBuilderStore((state) => state.updateGraph);
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const selectedNode =
     selectedItem?.kind === "node"
@@ -392,18 +138,18 @@ const BuilderSelectionPanel = () => {
       ? (edges.find((edge) => edge.id === selectedItem.id) ?? null)
       : null;
 
+  const targetOptions = useMemo(
+    () =>
+      nodes.map((node) => ({
+        id: node.id,
+        label: `${node.data.name} (${node.type === "step" ? "Step" : "Decision"})`,
+      })),
+    [nodes],
+  );
+
   if (selectedNode) {
+    const elementCount: number = 0; // fetch from store
     if (isGraphStepNode(selectedNode)) {
-      const targetOptions = [
-        { id: "__NONE__", label: "Not connected" },
-        ...nodes
-          .filter((node) => node.id !== selectedNode.id)
-          .map((node) => ({
-            id: node.id,
-            label: `${node.data.name} (${node.type === "step" ? "Step" : "Decision"})`,
-          }))
-          .sort((left, right) => left.label.localeCompare(right.label)),
-      ];
       const nextEdge = edges.find(
         (candidate) =>
           candidate.source === selectedNode.id && isDefaultEdge(candidate),
@@ -412,8 +158,8 @@ const BuilderSelectionPanel = () => {
       return (
         <div className="space-y-3">
           <PanelHeader
-            detail={`${selectedNode.data.elements.length} step element${
-              selectedNode.data.elements.length === 1 ? "" : "s"
+            detail={`${elementCount} step element${
+              elementCount === 1 ? "" : "s"
             }`}
             title="Step"
           />
@@ -424,7 +170,7 @@ const BuilderSelectionPanel = () => {
               updateGraph((graph) => {
                 const node = graph.getNodeById(selectedNode.id);
 
-                if (!node) {
+                if (!node || !isGraphStepNode(node)) {
                   return;
                 }
 
@@ -433,25 +179,43 @@ const BuilderSelectionPanel = () => {
             }
             value={selectedNode.data.name}
           />
-          <SelectField
-            id="selected-step-next-node"
-            label="Next node"
-            onChange={(value) =>
-              updateGraph((graph) => {
-                graph.setConnection({
-                  sourceNodeId: selectedNode.id,
-                  targetNodeId: value === "__NONE__" ? null : value,
-                });
-              })
-            }
-            options={targetOptions}
-            value={nextEdge?.target ?? "__NONE__"}
-          />
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs uppercase tracking-[0.18em] text-slate-400">
-            FE 09 owns deep step editing
-          </div>
+          <label className="block space-y-1.5">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Next node
+            </span>
+            <select
+              className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-sky-300"
+              onChange={(event) =>
+                updateGraph((graph) => {
+                  graph.setConnection({
+                    sourceNodeId: selectedNode.id,
+                    targetNodeId:
+                      event.target.value === "__NONE__"
+                        ? null
+                        : event.target.value,
+                  });
+                })
+              }
+              value={nextEdge?.target ?? "__NONE__"}
+            >
+              <option value="__NONE__">Not connected</option>
+              {targetOptions
+                .filter((option) => option.id !== selectedNode.id)
+                .map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+            </select>
+          </label>
           <Button
-            className="h-9 w-full px-3 text-sm"
+            className="w-full"
+            onClick={() => onOpenStepEditor(selectedNode.id)}
+          >
+            Open step editor
+          </Button>
+          <Button
+            className="w-full"
             onClick={() => {
               updateGraph((graph) => {
                 graph.removeNodeById(selectedNode.id);
@@ -466,191 +230,151 @@ const BuilderSelectionPanel = () => {
       );
     }
 
-    if (!isGraphDecisionNode(selectedNode)) {
-      return null;
-    }
+    if (isGraphDecisionNode(selectedNode)) {
+      const fallbackEdge = edges.find(
+        (candidate) =>
+          candidate.source === selectedNode.id &&
+          isDecisionFallbackEdge(candidate),
+      );
+      const decisionRuleIds = selectedNode.data.rules.map(
+        (rule) => rule.conditionId,
+      );
 
-    const ruleTargetOptions = nodes
-      .filter((node) => node.id !== selectedNode.id)
-      .map((node) => ({
-        id: node.id,
-        label: `${node.data.name} (${node.type === "step" ? "Step" : "Decision"})`,
-      }))
-      .sort((left, right) => left.label.localeCompare(right.label));
-    const fallbackOptions = [
-      { id: "", label: "No fallback selected" },
-      ...ruleTargetOptions,
-    ];
-    const fallbackEdge = edges.find(
-      (candidate) =>
-        candidate.source === selectedNode.id &&
-        isDecisionFallbackEdge(candidate),
-    );
-    const decisionRules = selectedNode.data.rules;
+      return (
+        <div className="space-y-3">
+          <PanelHeader
+            detail={`${selectedNode.data.rules.length} preview rule${
+              selectedNode.data.rules.length === 1 ? "" : "s"
+            }`}
+            title="Decision"
+          />
+          <FormField
+            id="selected-decision-name"
+            label="Name"
+            onChange={(event) =>
+              updateGraph((graph) => {
+                const node = graph.getNodeById(selectedNode.id);
 
-    return (
-      <div className="space-y-3">
-        <PanelHeader
-          detail={`${decisionRules.length} branch rule${
-            decisionRules.length === 1 ? "" : "s"
-          }`}
-          title="Decision"
-        />
-        <FormField
-          id="selected-decision-name"
-          label="Name"
-          onChange={(event) =>
-            updateGraph((graph) => {
-              const node = graph.getNodeById(selectedNode.id);
+                if (!node || !isGraphDecisionNode(node)) {
+                  return;
+                }
 
-              if (!node) {
-                return;
-              }
-
-              node.data.name = event.target.value;
-            })
-          }
-          value={selectedNode.data.name}
-        />
-        <SelectField
-          id="selected-decision-fallback"
-          label="Fallback target"
-          onChange={(value) =>
-            updateGraph((graph) => {
-              const node = graph.getNodeById(selectedNode.id);
-
-              if (!node) return;
-
-              graph.setConnection({
-                sourceNodeId: node.id,
-                targetNodeId: value,
-              });
-            })
-          }
-          options={fallbackOptions}
-          value={fallbackEdge?.target ?? ""}
-        />
-        <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-1">
-              <SectionEyebrow>Rules</SectionEyebrow>
-              <p className="text-sm leading-5 text-slate-400">
-                Ordered branches for this decision.
-              </p>
-            </div>
-            <Button
-              className="h-8 px-3 text-xs"
-              onClick={() =>
+                node.data.name = event.target.value;
+              })
+            }
+            value={selectedNode.data.name}
+          />
+          <label className="block space-y-1.5">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Fallback target
+            </span>
+            <select
+              className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-amber-300"
+              onChange={(event) =>
                 updateGraph((graph) => {
-                  const node = graph.getNodeById(selectedNode.id);
+                  graph.setConnection({
+                    sourceNodeId: selectedNode.id,
+                    targetNodeId:
+                      event.target.value.length > 0 ? event.target.value : null,
+                  });
+                })
+              }
+              value={fallbackEdge?.target ?? ""}
+            >
+              <option value="">No fallback selected</option>
+              {targetOptions
+                .filter((option) => option.id !== selectedNode.id)
+                .map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <SectionEyebrow>Rules</SectionEyebrow>
+                <p className="text-sm text-slate-400">
+                  Drag to reorder. Click to edit in the decision modal.
+                </p>
+              </div>
+              <Button
+                className="h-8 px-3 text-xs"
+                onClick={() => onOpenDecisionEditor(selectedNode.id)}
+                variant="secondary"
+              >
+                Open editor
+              </Button>
+            </div>
+            {selectedNode.data.rules.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-3 py-3 text-sm text-slate-400">
+                No rules yet. Open the editor to add one.
+              </div>
+            ) : (
+              <DndContext
+                collisionDetection={closestCenter}
+                onDragEnd={(event: DragEndEvent) => {
+                  const { active, over } = event;
 
-                  if (!(node instanceof FlowGraphDecisionNodeEntity)) {
+                  if (!over || active.id === over.id) {
                     return;
                   }
 
-                  node.addRule();
-                })
-              }
-              variant="secondary"
-            >
-              Add rule
-            </Button>
+                  updateGraph((graph) => {
+                    const node = graph.getNodeById(selectedNode.id);
+
+                    if (!(node instanceof FlowGraphDecisionNodeEntity)) {
+                      return;
+                    }
+
+                    const targetIndex = selectedNode.data.rules.findIndex(
+                      (rule) => rule.conditionId === over.id,
+                    );
+
+                    node.moveRuleToIndex(String(active.id), targetIndex);
+                  });
+                }}
+                sensors={sensors}
+              >
+                <SortableContext
+                  items={decisionRuleIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2">
+                    {selectedNode.data.rules.map((rule, index) => (
+                      <SortableRulePreviewRow
+                        color={RULE_COLORS[index % RULE_COLORS.length]}
+                        key={rule.conditionId}
+                        onClick={() =>
+                          onOpenDecisionEditor(
+                            selectedNode.id,
+                            rule.conditionId,
+                          )
+                        }
+                        rule={rule}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
           </div>
-          {decisionRules.length === 0 ? (
-            <p className="text-sm leading-5 text-slate-500">
-              No rules yet. Add one to create another branch.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {decisionRules.map((decisionRule, index) => (
-                <DecisionRuleEditor
-                  canMoveDown={index < decisionRules.length - 1}
-                  canMoveUp={index > 0}
-                  key={decisionRule.conditionId}
-                  nodeId={selectedNode.id}
-                  nodes={nodes}
-                  onDelete={(conditionId) =>
-                    updateGraph((graph) => {
-                      const node = graph.getNodeById(selectedNode.id);
-
-                      if (!(node instanceof FlowGraphDecisionNodeEntity)) {
-                        return;
-                      }
-
-                      node.removeRule(conditionId);
-                    })
-                  }
-                  onMove={(conditionId, direction) =>
-                    updateGraph((graph) => {
-                      const node = graph.getNodeById(selectedNode.id);
-
-                      if (!(node instanceof FlowGraphDecisionNodeEntity)) {
-                        return;
-                      }
-
-                      node.moveRule(conditionId, direction);
-                    })
-                  }
-                  onSelectNode={(nodeId) =>
-                    selectItem({
-                      id: nodeId,
-                      kind: "node",
-                    })
-                  }
-                  onUpdate={(conditionId, updates) =>
-                    updateGraph((graph) => {
-                      const node = graph.getNodeById(selectedNode.id);
-
-                      if (!(node instanceof FlowGraphDecisionNodeEntity)) {
-                        return;
-                      }
-
-                      if ("toNodeId" in updates) {
-                        graph.setConnection({
-                          sourceNodeId: node.id,
-                          targetNodeId: updates.toNodeId ?? null,
-                          sourceHandle:
-                            getDecisionRuleSourceHandleId(conditionId),
-                        });
-                      }
-
-                      if (updates.statement !== undefined) {
-                        node.editRule(conditionId, {
-                          statement: updates.statement,
-                        });
-                      }
-                    })
-                  }
-                  rule={decisionRule}
-                  ruleIndex={index}
-                  targetNodeId={
-                    edges.find(
-                      (edge) =>
-                        edge.source === selectedNode.id &&
-                        edge.data.type === "decision" &&
-                        edge.data.conditionId === decisionRule.conditionId,
-                    )?.target ?? null
-                  }
-                  targetOptions={ruleTargetOptions}
-                />
-              ))}
-            </div>
-          )}
+          <Button
+            className="w-full"
+            onClick={() => {
+              updateGraph((graph) => {
+                graph.removeNodeById(selectedNode.id);
+              });
+              selectItem(null);
+            }}
+            variant="secondary"
+          >
+            Delete decision
+          </Button>
         </div>
-        <Button
-          className="h-9 w-full px-3 text-sm"
-          onClick={() => {
-            updateGraph((graph) => {
-              graph.removeNodeById(selectedNode.id);
-            });
-            selectItem(null);
-          }}
-          variant="secondary"
-        >
-          Delete decision
-        </Button>
-      </div>
-    );
+      );
+    }
   }
 
   if (selectedEdge) {
